@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { addLoresheets, newBuild, type Build, type HeldSkill } from './build'
-import { damageReductions, immunities, missingLoresheets, unaffectedBy, validate } from './validate'
+import { damageReductions, immunities, missingLoresheets, requirementMet, unaffectedBy, validate } from './validate'
 import { damageReductionBySkill, immunitiesBySkill, osById } from '../data'
 
 const buy = (id: string, param?: string): HeldSkill => ({ id, param, source: 'buy' })
@@ -455,5 +455,11 @@ describe('derived values', () => {
     expect(unaffectedBy(build({ loresheets: [{ id: 'paladin' }] }))).toContainEqual({ effect: 'Heal Wound', limit: 'and effects based on it', from: ['Paladin'] })
     expect(not({ pattern: 'unliving', loresheets: [{ id: 'unliving' }] })).toContain('Ritual of Peace: Unliving')
     expect(not({ race: 'drow', loresheets: [{ id: 'awakened-drow' }] })).toContain('Wasting: Awakened Drow')
+  })
+  it('tells whether a build already meets a prerequisite, counting replacing skills', () => {
+    const b = build({ cs: { 'poison-lore': 1 }, os: [buy('rally')] })
+    expect(requirementMet(b, { os: 'immune-fear' })).toBe(true) // Rally replaces Immune to Fear
+    expect(requirementMet(b, { cs: 'poison-lore' })).toBe(true)
+    expect(requirementMet(b, { all: [{ os: 'immune-mute' }, { cs: 'poison-lore' }] })).toBe(false)
   })
 })
