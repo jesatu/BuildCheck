@@ -173,9 +173,14 @@ describe('implicit replacements and covered skills (rulings C17-C19)', () => {
     expect(state(b, 'dismiss-control-4')).toMatchObject({ state: 'replaced', replacedBy: 'Dismiss/Control +8' })
   })
 
-  it('Beguile replaces Cast Mass Charms and Detect and Remove Beguile', () => {
+  it('Beguile replaces only Detect and Remove Beguile; Cast Mass Charms stays', () => {
     const b = build({ os: ['detect-remove-beguile', 'immune-charms', 'cast-mass-charms', 'beguile'].map((id) => buy(id)) })
-    expect(validate(b).skills.map((s) => s.state)).toEqual(['replaced', 'replaced', 'replaced', 'active'])
+    expect(validate(b).skills.map((s) => s.state)).toEqual(['replaced', 'replaced', 'active', 'active'])
+  })
+
+  it('Beguile makes a held Immune to Charms redundant', () => {
+    const b = build({ os: [{ id: 'immune-charms', source: 'ritual' }, { id: 'beguile', source: 'ritual' }] })
+    expect(state(b, 'immune-charms')).toMatchObject({ state: 'redundant', reason: 'Covered by Beguile' })
   })
 
   it('marks covered skills redundant without replacing them or counting them for prerequisites', () => {
