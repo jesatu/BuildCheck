@@ -57,6 +57,21 @@ describe('skill status', () => {
     expect(rules(build({ os: [buy('translate-named-script', 'Nihon'), buy('script-master', 'Myth & Magic')] }))).toEqual(['OS-4'])
   })
 
+  it('marks family TNS left over after Polyglot as redundant, but not restricted or unlisted scripts', () => {
+    const b = build({
+      cs: { 'recognise-forgery': 1 },
+      os: [
+        buy('translate-named-script', 'Elven'), buy('script-master', 'People & Race'), buy('polyglot'),
+        buy('translate-named-script', 'Nihon'),                                            // family script, no Script Master
+        { id: 'tns-runes', param: 'Grave', source: 'granted', card: 'creature' },         // restricted: not in a family
+        buy('translate-named-script', 'Atlantean'),                                        // not in any family
+      ],
+    })
+    const r = validate(b)
+    expect(r.skills.map((s) => s.state)).toEqual(['replaced', 'replaced', 'active', 'redundant', 'active', 'active'])
+    expect(r.skills[3]!.reason).toBe('Covered by Polyglot')
+  })
+
   it('matches parameters when replacing income skills', () => {
     const b = build({ os: [buy('apprentice', 'Smith'), buy('journeyman', 'Smith'), buy('apprentice', 'Baker')] })
     const r = validate(b)

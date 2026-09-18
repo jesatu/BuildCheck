@@ -1292,6 +1292,7 @@ These items were settled by the project owner on 2026-09-17. They are now rules 
 | C3 | Skills granted on a special creature or special power card don't count toward the 12-skill limit, the Tier 5 cap or mutual exclusions. Only the character card counts. | 8.4 |
 | C4 | A Warlock's extra power (Focus of the Void) is added on top of the Rule of Double cap. | 12.4 |
 | C5 | Script Master <X> is bought for one script family (for example *Script Master <Myth & Magic>*) and replaces the Translate Named Script skills in that family. | Section 10 |
+| C6 | After Polyglot, any Translate Named Script skill left over from one of the three families is **redundant**: it stays on the card but is shown as covered by Polyglot. Restricted scripts (Runes, Spiral) and scripts outside the families are not redundant. | Section 10 |
 
 ### Ambiguous rules
 

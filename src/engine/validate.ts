@@ -17,7 +17,8 @@ export interface Issue {
   skill?: number
 }
 
-export type SkillState = 'active' | 'inactive' | 'replaced'
+/** redundant: still on the card, but another held skill already covers it (shown differently from inactive). */
+export type SkillState = 'active' | 'inactive' | 'redundant' | 'replaced'
 
 export interface SkillStatus {
   index: number
@@ -28,7 +29,7 @@ export interface SkillStatus {
   side: OccupationalSkill['side']
   tier?: Tier
   state: SkillState
-  /** Why the skill is inactive: the missing use requirement. */
+  /** Why the skill is inactive (missing use requirement) or redundant (what covers it). */
   reason?: string
   /** Name of the skill that replaced this one. */
   replacedBy?: string
@@ -248,12 +249,16 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
     const via = h.source === 'loresheet' || h.source === 'granted'
     let gap = missing(s?.use, via)
     if (h.id === 'diagnose-powers' && switches.diagnosePowersNeedsLoresheet && !via) gap = 'a lammie or loresheet'
-    const reason = gap ? `Needs ${gap}` : disabled.get(h.id)
+    const inactive = gap ? `Needs ${gap}` : disabled.get(h.id)
+    // Polyglot covers every family script; TNS left over from a family without Script Master is redundant.
+    const redundant = h.id === 'translate-named-script' && scriptFamilyOf(h.param) && holds('polyglot', undefined, i)
+      ? 'Covered by Polyglot' : undefined
+    const reason = inactive ?? redundant
     const replaced = replacedBy.get(i)
     return {
       index: i, id: h.id, param: h.param, name: skillName(h.id, h.param), card: h.card ?? 'character',
       side: s?.side ?? 'right', tier: tierOf[i],
-      state: replaced ? 'replaced' : reason ? 'inactive' : 'active',
+      state: replaced ? 'replaced' : inactive ? 'inactive' : redundant ? 'redundant' : 'active',
       reason, replacedBy: replaced,
     }
   })
