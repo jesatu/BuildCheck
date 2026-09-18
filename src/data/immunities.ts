@@ -61,8 +61,8 @@ export const unaffectedBySheet: Record<string, string[]> = {
   unliving: ['Ritual of Peace', 'Alchemical Poisons and Potions|non-magical'],
   'magical-pattern': ['Ritual of Peace', 'Alchemical Poisons and Potions', 'Magical Poisons and Potions', 'Embody Unliving'],
   'alien-pattern': ['Ritual of Peace', 'Alchemical Poisons and Potions'],
-  paladin: ['Heal Wound|and effects based on it', 'Mage Armour|cast on them'], // Blind Faith
-  warlock: ["Paladin's Armour|cast on them"],
+  paladin: ['Heal Wound|and effects based on it', 'Mage Armour'], // Blind Faith
+  warlock: ["Paladin's Armour"],
   'awakened-drow': ['Wasting'],
   'awakened-human': ['Red Mist curse|Militia Guild'],
 }
