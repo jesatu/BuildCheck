@@ -368,4 +368,8 @@ describe('derived values', () => {
     expect(state('Human')).toBe('active')
     expect(state('Elf')).toBe('inactive')
   })
+  it("asks for the awakened sheet of the chosen race, or the character's own race until one is chosen", () => {
+    expect(missingLoresheets({ ...newBuild(), os: [buy('awakened', 'Elf')] })).toEqual(['awakened-elf'])
+    expect(missingLoresheets(newBuild(), [{ id: 'awakened' }])).toEqual(['awakened-human'])
+  })
 })

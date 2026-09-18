@@ -89,6 +89,13 @@ export function missingLoresheets(b: Build, targets: Array<{ id: string }> = [])
     const offeredByHeld = b.loresheets.some((l) => loresheetById.get(l.id)?.skills.some((e) => e.os === h.id))
     if (!offeredByHeld) need.add(h.loresheet)
   }
+  // Awakened <X> needs the awakened sheet for its race (the character's own race until <X> is chosen).
+  for (const h of [...b.os, ...targets] as Array<{ id: string; param?: string }>) {
+    if (h.id !== 'awakened') continue
+    const race = h.param ?? raceById.get(b.race)?.name
+    const sheet = loresheets.find((l) => l.kind === 'awakened' && l.name === `Awakened ${race}`)
+    if (sheet) need.add(sheet.id)
+  }
   for (const t of targets) {
     const s = osById.get(t.id)
     const sheets = loresheets.filter((l) => l.skills.some((e) => e.os === t.id))

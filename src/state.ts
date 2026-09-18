@@ -12,9 +12,11 @@ export interface EditorState {
   addPrereqs: boolean
   /** Book all 4 events together each season: prebook tier advancement (C20). */
   prebook: boolean
+  /** Add the loresheets the build needs as soon as they're needed. */
+  autoLoresheets: boolean
 }
 
-export const emptyState = (): EditorState => ({ build: newBuild(), targets: [], retired: false, dropped: [], addPrereqs: true, prebook: false })
+export const emptyState = (): EditorState => ({ build: newBuild(), targets: [], retired: false, dropped: [], addPrereqs: true, prebook: false, autoLoresheets: false })
 
 const PREFIX = '#b='
 
