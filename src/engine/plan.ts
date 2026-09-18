@@ -264,16 +264,23 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
   }
 
   // Jack of All Trades stands in for the training facility a restricted skill needs: one use per season,
-  // because using it removes it from the card. ponytail: re-buying JoAT between seasons isn't costed.
+  // because using it removes it from the card. The first use spends the JoAT already held; each later
+  // season's use re-buys it (20 OSP, one of that year's purchases), so only use it where a slot is free.
   const joatYears = new Set<number>()
+  const rebuyYears = new Set<number>()
   const viaJoat = new Set<string>()
+  const slotsUsed = (y: number) => items.filter((i) => year.get(i.key) === y && countsYearly(i) && !doubled.has(i.key)).length + (rebuyYears.has(y) ? 1 : 0)
   for (const i of [...items].sort((a, b) => (year.get(a.key) ?? 0) - (year.get(b.key) ?? 0) || b.cost - a.cost)) {
     const y = year.get(i.key) ?? 0
-    if (i.route === 'buy' && osById.get(i.id)?.restricted && !joatYears.has(y) && !joatBlocker(withGrants(build), i.id)) {
-      viaJoat.add(i.key)
-      joatYears.add(y)
+    if (i.route !== 'buy' || !osById.get(i.id)?.restricted || joatYears.has(y) || joatBlocker(withGrants(build), i.id)) continue
+    if (joatYears.size > 0) {
+      if (slotsUsed(y) >= RULES.purchasesPerYear) continue
+      rebuyYears.add(y)
     }
+    viaJoat.add(i.key)
+    joatYears.add(y)
   }
+  const joat = osById.get('jack-of-all-trades')!
 
   const purchases: PlannedPurchase[] = items.map((acq) => {
     const i: Acq = viaJoat.has(acq.key) ? { ...acq, route: 'joat' } : acq
@@ -288,11 +295,18 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
       loresheet: i.loresheet, cost: i.cost, tier: i.tier, countsTowardYearly: countsYearly(i) && !doubled.has(i.key),
       doubleStep: doubled.has(i.key) || undefined, notes,
     }
-  }).sort((a, b) => a.year - b.year || a.name.localeCompare(b.name))
+  })
+  for (const y of rebuyYears) {
+    purchases.push({
+      year: y, id: joat.id, name: joat.name, route: 'buy', cost: joat.cost!, tier: joat.tier, countsTowardYearly: true,
+      notes: ['Re-buy: last season\'s use removed it from the card'],
+    })
+  }
+  purchases.sort((a, b) => a.year - b.year || a.name.localeCompare(b.name))
 
   const finalBuild: Build = {
     ...build,
-    os: [...build.os, ...purchases.map((p): HeldSkill => ({ id: p.id, param: concreteParam(p.id, p.param), source: p.route, loresheet: p.loresheet }))],
+    os: [...build.os, ...purchases.filter((p) => !rebuyYears.has(p.year) || p.id !== joat.id).map((p): HeldSkill => ({ id: p.id, param: concreteParam(p.id, p.param), source: p.route, loresheet: p.loresheet }))],
   }
   return {
     purchases,

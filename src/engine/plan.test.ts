@@ -68,6 +68,19 @@ describe('planner', () => {
     expect(p.purchases[1]!.notes).toContain('Restricted: needs a training facility, tutor or forgery')
   })
 
+  it('re-buys Jack of All Trades for 20 OSP in each later season it is used', () => {
+    const b = build({
+      cs: { spellcasting: 1, 'ritual-magic': 1 },
+      os: [{ id: 'jack-of-all-trades', source: 'granted', card: 'power' }],
+      loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }],
+    })
+    const p = planRoute(b, [t('thaulmonic-alignment'), t('ritualist-master')]).cheapest!
+    expect(p.purchases.filter((x) => x.route === 'joat').map((x) => `${x.year}:${x.id}`)).toEqual(['1:thaulmonic-alignment', '4:ritualist-master'])
+    expect(p.purchases.filter((x) => x.id === 'jack-of-all-trades').map((x) => `${x.year}:${x.cost}:${x.countsTowardYearly}`)).toEqual(['4:20:true'])
+    expect(p.totalOsp).toBe(30 + 10 + 30 + 40 + 50 + 20)
+    expect(p.validation.valid).toBe(true)
+  })
+
   it('uses retirement double steps on two different trees in year 1', () => {
     const b = build({ cs: { 'poison-lore': 1, 'potion-lore': 1 } })
     const targets = [t('create-poison-master'), t('create-potion-master'), t('shield-mastery-expert')]
