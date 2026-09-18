@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  characterSkills, CS_LADDERS, csById, guildListById, guildLists, loresheetById, loresheets, occupationalSkills, osById, raceById, scriptFamilies,
+  characterSkills, CS_LADDERS, csById, guildListById, guildLists, loresheetById, loresheets, occupationalSkills, osById, raceById, researchCategories, scriptFamilies,
   type CsGroup,
 } from './data'
 import { factions } from './data/races'
@@ -156,9 +156,10 @@ function paramSuggestions(id: string): string[] {
   return []
 }
 
-/** Params with a fixed list get a drop-down instead of free text. */
-function paramChoices(id: string): string[] {
-  if (id === 'awakened') return loresheets.filter((l) => l.kind === 'awakened').map((l) => l.name.replace(/^Awakened /, ''))
+/** Params with a fixed list get a drop-down instead of free text, as option groups ('' = no group). */
+function paramChoices(id: string): Array<[string, string[]]> {
+  if (id === 'awakened') return [['', loresheets.filter((l) => l.kind === 'awakened').map((l) => l.name.replace(/^Awakened /, ''))]]
+  if (id === 'scholar' || id === 'sage') return Object.entries(researchCategories).map(([c, subjects]) => [c, subjects.map((x) => `${c} (${x})`)])
   return []
 }
 
@@ -187,7 +188,11 @@ export function SkillRows({ rows, build, onParam, onSource, onRemove }: {
             {s.param && choices.length > 0 && (
               <select className="param" aria-label={`${s.name}: ${s.param}`} value={r.param ?? ''} onChange={(e) => onParam(i, e.target.value || undefined)}>
                 <option value="">{s.param}…</option>
-                {choices.map((x) => <option key={x} value={x}>{x}</option>)}
+                {r.param && !choices.some(([, xs]) => xs.includes(r.param!)) && <option value={r.param}>{r.param}</option>}
+                {choices.map(([group, xs]) => {
+                  const options = xs.map((x) => <option key={x} value={x}>{x}</option>)
+                  return group ? <optgroup key={group} label={group}>{options}</optgroup> : options
+                })}
               </select>
             )}
             {s.param && !choices.length && (
