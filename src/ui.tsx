@@ -94,7 +94,8 @@ export function SkillPicker({ build, onAdd, addPrereqs, onAddPrereqs }: {
   const q = query.trim().toLowerCase()
   const matches = occupationalSkills
     .filter((s) => s.side !== 'none')
-    .filter((s) => list === 'all' || (list === 'sheets' ? sheetSkills.has(s.id) : list === 'special' ? s.loresheetOnly : s.lists.includes(list as never)))
+    .filter((s) => list === 'all' || (list === 'sheets' ? sheetSkills.has(s.id) : list === 'special' ? s.loresheetOnly
+      : list === 'left' ? s.side === 'left' : s.lists.includes(list as never)))
     .filter((s) => !q || s.name.toLowerCase().includes(q) || s.summary.toLowerCase().includes(q))
   const shown = matches.slice(0, 50)
   return (
@@ -113,6 +114,7 @@ export function SkillPicker({ build, onAdd, addPrereqs, onAddPrereqs }: {
           {build.loresheets.length > 0 && <option value="sheets">On my loresheets</option>}
           {guildLists.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
           <option value="special">Lammie or loresheet only</option>
+          <option value="left">Left-hand skills</option>
         </select>
       </div>
       <ul className="rows picker">
