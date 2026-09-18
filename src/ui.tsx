@@ -6,7 +6,7 @@ import {
 import { factions } from './data/races'
 import { skillKey, type Build, type CardId, type SkillSource } from './engine/build'
 import type { Plan } from './engine/plan'
-import { damageReductions, immunities, type Issue, type SkillStatus, type ValidationResult } from './engine/validate'
+import { damageReductions, immunities, unaffectedBy, type Issue, type SkillStatus, type ValidationResult } from './engine/validate'
 
 const CS_GROUPS: Array<[CsGroup, string]> = [['weapon', 'Weapon'], ['armour', 'Armour'], ['knowledge', 'Knowledge'], ['power', 'Power']]
 const ROUTE_LABEL = { buy: 'Buy', loresheet: 'Loresheet', architect: 'Architect', joat: 'Jack of All Trades' } as const
@@ -312,8 +312,11 @@ export function CardView({ build, result, onToggleDrop }: { build: Build; result
   )
 }
 
-export function Immunities({ result }: { result: ValidationResult }) {
-  const lists = [['Immune to', immunities(result)], ['Damage reduction', damageReductions(result)]] as const
+export function Immunities({ build, result }: { build: Build; result: ValidationResult }) {
+  // Something that can't affect the character at all isn't repeated as an immunity or reduction.
+  const unaffected = unaffectedBy(build)
+  const other = (list: ReturnType<typeof immunities>) => list.filter((i) => !unaffected.some((u) => u.effect === i.effect))
+  const lists = [['Not affected by', unaffected], ['Immune to', other(immunities(result))], ['Damage reduction', other(damageReductions(result))]] as const
   const shown = lists.filter(([, list]) => list.length > 0)
   if (shown.length === 0) return null
   return <div className="panel"><h2>Immunities and damage reduction</h2>{shown.map(([title, list]) => (
