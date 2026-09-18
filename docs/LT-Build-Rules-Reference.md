@@ -61,7 +61,7 @@ This is a summary for building a tool. It does not replace the source files. Bot
 A character card holds:
 
 - Identity: character name, race, faction, player name, player ID (PID), and the year and version the card was printed.
-- **Left side:** Character Skills (bought with 16 points), **plus** these OS: income skills (Apprentice, Journeyman and Master <X>), research skills (Scholar and Sage <X>), knowledge skills (General Knowledge <X> and Newsmonger) and <X> Oathsworn. Improved Research Ability goes on the right. *(Rulings, 2026-09-17/18. Newsmonger and Improved Research Ability are working assumptions still to be validated.)*
+- **Left side:** Character Skills (bought with 16 points), **plus** exactly the OS that don't count toward the 12 (LIM-4): income skills (Apprentice, Journeyman and Master <X>), research skills (Scholar and Sage <X>), General Knowledge <X> and <X> Oathsworn. (<X> Command is also exempt but never on a player card.) Newsmonger and Improved Research Ability go on the right. *(Ruling, 2026-09-18.)*
 - **Right side:** all other Occupational Skills, up to a limit of 12 (see [8.4](#84-card-limits)).
 - **Never on the card:** <X> Command. It is recorded on an unpublished NPC/DPC loresheet, not on a player character card. *(Ruling.)*
 - Optionally: at most one special creature lammie, at most one special power lammie, and loresheets.
@@ -1334,7 +1334,7 @@ These items were settled by the project owner on 2026-09-17. They are now rules 
 | C1 | Income, research and knowledge skills and Oathsworn go on the left side of the card. Command is never on a player card. | Section 2 |
 | A13 | Pattern changes: Living → Magical or Living → Unliving only. | 3.1 |
 | R6 | Architect purchases follow one step per tree per year but do **not** count toward the 4 buys per year. | 12.1 |
-| C2 | Newsmonger goes on the left side; Improved Research Ability on the right (working assumption, to be validated). | Section 2 |
+| C2 | The left side holds exactly the skills that don't count toward the 12 (LIM-4). Newsmonger and Improved Research Ability are right-side skills. | Section 2 |
 | C3 | Skills granted on a special creature or special power card don't count toward the 12-skill limit, the Tier 5 cap or mutual exclusions. Only the character card counts. | 8.4 |
 | C4 | A Warlock's extra power (Focus of the Void) is added on top of the Rule of Double cap. | 12.4 |
 | C5 | Script Master <X> is bought for one script family (for example *Script Master <Myth & Magic>*) and replaces the Translate Named Script skills in that family. | Section 10 |

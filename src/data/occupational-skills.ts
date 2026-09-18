@@ -219,8 +219,8 @@ export const occupationalSkills: OccupationalSkill[] = [
 
   // ---- Knowledge Guilds ----
   skill(1, 10, ['knowledge'], { id: 'general-knowledge', name: 'General Knowledge <X>', param: 'Guildsman, Merchant, Rumour Monger, Storyteller, Wanderer or War Scout', side: 'left', countsTowardLimit: false, summary: 'News sheets for topic X.', source: 'HB p.91' }),
-  // Card sides (owner assumption, to be validated): Newsmonger left, Improved Research Ability right.
-  skill(2, 20, ['knowledge'], { id: 'newsmonger', name: 'Newsmonger', learn: os('general-knowledge'), replaces: ['general-knowledge'], side: 'left', countsTowardLimit: false, summary: 'All news sheets.', source: 'HB p.94' }),
+  // Only the skills LIM-4 exempts from the 12 go on the left; Newsmonger and Improved Research Ability are right-side.
+  skill(2, 20, ['knowledge'], { id: 'newsmonger', name: 'Newsmonger', learn: os('general-knowledge'), replaces: ['general-knowledge'], summary: 'All news sheets.', source: 'HB p.94' }),
   skill(4, 40, ['knowledge'], { id: 'improved-research-ability', name: 'Improved Research Ability', learn: os('newsmonger'), mainEventOnly: true, summary: 'Summer research; assist others as well as own research.', source: 'HB p.92' }),
 
   // ---- Arcane Guilds ----
