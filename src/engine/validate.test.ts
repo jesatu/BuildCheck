@@ -388,6 +388,8 @@ describe('derived values', () => {
     expect(c21({ pattern: 'unliving', loresheets: [{ id: 'unliving' }, druid] })).toHaveLength(1)
     expect(c21({ pattern: 'magical', loresheets: [{ id: 'magical-pattern' }, druid] })).toHaveLength(1)
     expect(c21({ pattern: 'magical', loresheets: [{ id: 'magical-pattern' }, { id: 'awakened-human' }] })).toHaveLength(1)
+    expect(c21({ pattern: 'unliving', loresheets: [{ id: 'unliving' }, { id: 'awakened-human' }] }))
+      .toEqual(['A character can only be one special creature: this one is Awakened Human, unliving pattern.'])
   })
 
 })
