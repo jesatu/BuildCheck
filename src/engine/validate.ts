@@ -255,7 +255,7 @@ export function validate(input: Build): ValidationResult {
         const gap = missing(entry.learn, true, i)
         if (gap) err('LS-3', `${name} (${ls.name}) needs ${gap} before it can be bought.`, i)
         const creatureTier = essenceTier(b, ls.id)
-        if (entry.minType && creatureTier < entry.minType) err('LS-5', `${name} needs ${ls.name} tier ${entry.minType} or higher.`, i)
+        if (entry.minType && creatureTier < entry.minType) err('LS-5', `${name} needs ${ls.tiers?.[entry.minType - 1]?.name ?? ls.name} or higher (Min. type).`, i)
       }
     } else if (h.source === 'joat') {
       // JoAT is used up, so a skill learned with it only needs a JoAT source: held, or the Awakened Human sheet.

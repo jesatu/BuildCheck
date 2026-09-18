@@ -23,7 +23,7 @@ export interface HeldSkill {
 
 export interface HeldLoresheet {
   id: string
-  /** Essence creature tier (1–4). */
+  /** Essence creature level (1–4), for old saved builds. The level normally comes from the essence skill on the card. */
   tier?: 1 | 2 | 3 | 4
   /** <X> for loresheets held for a faction or guild (NPC/DPC). */
   param?: string

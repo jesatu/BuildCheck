@@ -1349,7 +1349,7 @@ These items were settled by the project owner on 2026-09-17. They are now rules 
 | A11 | The only skills that don't count toward the 12 are the ones LIM-4 lists. There are no other 'functional' exemptions. | 13 |
 | L4 | Voidportal bought from a loresheet uses that loresheet's tier (Tier 4 on the Elemental and Circle Watcher sheets). | 13 |
 | R5 | A retirement double step onto a restricted (@) skill still needs a training facility, tutor or forgery. | RET-3 |
-| L12 | On essence loresheets only Min. type limits purchases by creature tier; skill tier does not. | 13 |
+| L12 | On essence loresheets only Min. type limits purchases by the creature's level. The creature's level (Vampire, Mature, Elder, Ancient) and a skill's Tier are different things that the sources both call "tier"; the tool says "Tier" only for skills and names creature levels by type. | 13 |
 | L11 | Treewalker: both the handbook and loresheet requirements apply, and the tool shows a note about the mismatch. | 13 |
 | L3 | Ancestral Dismiss Rank +10 stays Tier 1 as printed, with a note that it is probably a loresheet error. | 13 |
 | E6 | Cast All Spellcasting includes Control Unliving at level 1; the printed list's omission is a mistake. | 13 |

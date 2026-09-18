@@ -111,7 +111,7 @@ export function App() {
                       <input className="param" aria-label={`${ls.name}: ${ls.param}`} placeholder={ls.param} value={l.param ?? ''} list="faction-guild"
                         onChange={(e) => setBuild((b) => ({ ...b, loresheets: b.loresheets.map((x, j) => j === i ? { ...x, param: e.target.value || undefined } : x) }))} />
                     )}
-                    {ls.tiers && <span className="meta">{ls.tiers[essenceTier(build, ls.id) - 1]?.name ?? 'No tier on the card'}</span>}
+                    {ls.tiers && <span className="meta">{ls.tiers[essenceTier(build, ls.id) - 1]?.name ?? `No ${ls.name} skill on the card`}</span>}
                     <button type="button" className="remove" aria-label={`Remove ${ls.name}`}
                       onClick={() => setBuild((b) => ({ ...b, loresheets: b.loresheets.filter((_, j) => j !== i) }))}>×</button>
                   </li>
