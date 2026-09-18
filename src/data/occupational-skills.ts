@@ -1,4 +1,5 @@
 import { anyArmourCs, anyMagicCs } from './character-skills'
+import { loresheets } from './loresheets'
 import type { GuildListId, OccupationalSkill, Requirement, Tier } from './types'
 
 // Reference doc sections 9, 10 and 11. One entry per skill; guild lists are recorded on the skill.
@@ -310,4 +311,14 @@ export const occupationalSkills: OccupationalSkill[] = [
   special({ id: 'strike-for-enchanted', name: 'Strike for Enchanted', use: ls, summary: 'Strike Enchanted with a melee weapon.', source: 'HB p.96' }),
   special({ id: 'venom-resistance', name: 'Venom Resistance', use: ls, summary: 'Purge Poison cures non-magical venoms.', source: 'HB p.98' }),
   special({ id: 'tns-runes', name: 'TNS <X> Runes', param: 'Ancestor, Daemon, Elemental or Grave', summary: 'Creature-only script. Cannot be tutored.', source: 'HB p.97' }),
+
+  // Essence creature tiers (Druid, Paladin, Vampire, Warlock, Werecreature <X>): each tier replaces the one below.
+  ...loresheets.flatMap((l) => (l.tiers ?? []).map((t): OccupationalSkill => {
+    const prev = `${l.id}-${t.tier - 1}`
+    return {
+      ...special({ id: `${l.id}-${t.tier}`, name: t.name, use: { loresheet: l.id }, summary: t.abilities.join('; ') || l.summary, source: l.source }),
+      tier: t.tier, cost: t.cost,
+      ...(t.tier > 1 ? { learn: os(prev), replaces: [prev] } : {}),
+    }
+  })),
 ]

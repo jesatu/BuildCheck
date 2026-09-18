@@ -96,6 +96,12 @@ describe('planner', () => {
     expect(p.purchases[0]!.notes).toContain('Printed as Tier 1 (other sheets say Tier 3): probably a loresheet error.')
   })
 
+  it('plans essence tiers one per year from the loresheet (Vampire → Elder Vampire)', () => {
+    const b = { ...newBuild(), pattern: 'unliving' as const, loresheets: [{ id: 'vampire' }, { id: 'unliving' }],
+      os: [{ id: 'vampire-1', source: 'loresheet' as const, loresheet: 'vampire' }] }
+    expect(summary(b, [t('vampire-3')])).toMatchObject({ years: 2, osp: 50, steps: ['1:Mature Vampire:loresheet', '2:Elder Vampire:loresheet'] })
+  })
+
   it('uses retirement double steps on two different trees in year 1', () => {
     const b = build({ cs: { 'poison-lore': 1, 'potion-lore': 1 } })
     const targets = [t('create-poison-master'), t('create-potion-master'), t('shield-mastery-expert')]

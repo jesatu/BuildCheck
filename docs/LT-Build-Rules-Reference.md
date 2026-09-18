@@ -1343,6 +1343,7 @@ These items were settled by the project owner on 2026-09-17. They are now rules 
 | C8 | Jack of All Trades costs **20 OSP every time** it is bought (Awakened Human loresheet). | 12.3 |
 | C9 | Where a loresheet row has no tier printed, use the skill's tier from the handbook, if it has one. | L14 |
 | C10 | Master Brewer (Awakened Uruk) is Tier 3 and Regeneration (Awakened Olog) is Tier 4. What matters is that neither is Tier 5. Both can only be bought from their loresheets. | L14 |
+| C11 | Essence creature tiers are Occupational Skills (Druid, Paladin, Vampire, Warlock and Werecreature <X>, HB p.90–98): Vampire → Mature → Elder → Ancient Vampire at 10/20/30/40 OSP, each replacing the one below, on the right side of the card. The creature's tier is the tier skill on the card. Each tier also needs an essence rite. Taking the skill needs its loresheet (and Vampire also needs Unliving); the tool offers to add required loresheets. | 12.4 |
 | L7 | Dropped: loresheet purchases never go through Jack of All Trades or retirement vouchers. | 13 |
 | A12 | +Base Power is allowed without a magic CS. The tool warns when Fearsome Aspect is held with no Spell Power. | 13 |
 | A11 | The only skills that don't count toward the 12 are the ones LIM-4 lists. There are no other 'functional' exemptions. | 13 |

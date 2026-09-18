@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { csById, FLAG_LABELS, loresheetById, loresheets, osById, races, raceById, type FlagId, type Pattern } from './data'
-import type { Build, CardId, HeldSkill } from './engine/build'
+import { csById, FLAG_LABELS, loresheetById, loresheets, osById, races, type FlagId, type Pattern } from './data'
+import { addLoresheets, type Build, type CardId, type HeldSkill } from './engine/build'
 import { planRoute } from './engine/plan'
-import { validate } from './engine/validate'
+import { essenceTier, missingLoresheets, validate } from './engine/validate'
 import { decodeState, emptyState, encodeState, type EditorState } from './state'
 import { CardView, CsPanel, FACTIONS_AND_GUILDS, Issues, PlanView, SkillPicker, SkillRows } from './ui'
 
@@ -19,12 +19,18 @@ export function App() {
 
   const add = (id: string, where: 'want' | 'held' | CardId) => {
     if (where === 'want') return setState((s) => ({ ...s, targets: [...s.targets, { id }] }))
-    const skill: HeldSkill = where === 'held' ? { id, source: 'buy' } : { id, source: 'granted', card: where }
+    // A loresheet-only skill is recorded as bought from a loresheet that lists it (a held one if possible).
+    const s = osById.get(id)!
+    const sheets = loresheets.filter((l) => l.skills.some((e) => e.os === id))
+    const sheet = sheets.find((l) => build.loresheets.some((h) => h.id === l.id)) ?? sheets[0]
+    const skill: HeldSkill = where !== 'held' ? { id, source: 'granted', card: where }
+      : (s.loresheetOnly || !s.lists.length) && sheet ? { id, source: 'loresheet', loresheet: sheet.id }
+        : { id, source: 'buy' }
     setBuild((b) => ({ ...b, os: [...b.os, skill] }))
   }
 
-  const race = raceById.get(build.race)
   const heldSheetIds = new Set(build.loresheets.map((l) => l.id))
+  const missing = missingLoresheets(build, targets)
 
   return (
     <div className="app">
@@ -38,6 +44,13 @@ export function App() {
           <button type="button" className="quiet" onClick={() => { if (confirm('Clear this build?')) setState(emptyState()) }}>New build</button>
         </div>
       </header>
+
+      {missing.length > 0 && (
+        <div className="prompt" role="status">
+          <span>This build needs the {missing.map((id) => loresheetById.get(id)?.name).join(', ')} {missing.length === 1 ? 'loresheet' : 'loresheets'}.</span>
+          <button type="button" onClick={() => setBuild((b) => addLoresheets(b, missing))}>Add required loresheets</button>
+        </div>
+      )}
 
       <main className="layout">
         <section className="col">
@@ -53,11 +66,6 @@ export function App() {
                 </optgroup>
               </select>
             </label>
-            {race && !race.startingRace && race.loresheet && !heldSheetIds.has(race.loresheet) && (
-              <button type="button" className="inline" onClick={() => setBuild((b) => ({ ...b, loresheets: [...b.loresheets, { id: race.loresheet! }] }))}>
-                Add the {race.name} loresheet
-              </button>
-            )}
             <label>Pattern
               <select value={build.pattern} onChange={(e) => setBuild((b) => ({ ...b, pattern: e.target.value as Pattern }))}>
                 <option value="living">Living</option>
@@ -103,12 +111,7 @@ export function App() {
                       <input className="param" aria-label={`${ls.name}: ${ls.param}`} placeholder={ls.param} value={l.param ?? ''} list="faction-guild"
                         onChange={(e) => setBuild((b) => ({ ...b, loresheets: b.loresheets.map((x, j) => j === i ? { ...x, param: e.target.value || undefined } : x) }))} />
                     )}
-                    {ls.tiers && (
-                      <select aria-label={`${ls.name} tier`} value={l.tier ?? 1}
-                        onChange={(e) => setBuild((b) => ({ ...b, loresheets: b.loresheets.map((x, j) => j === i ? { ...x, tier: Number(e.target.value) as 1 | 2 | 3 | 4 } : x) }))}>
-                        {ls.tiers.map((t) => <option key={t.tier} value={t.tier}>{t.name}</option>)}
-                      </select>
-                    )}
+                    {ls.tiers && <span className="meta">{ls.tiers[essenceTier(build, ls.id) - 1]?.name ?? 'No tier on the card'}</span>}
                     <button type="button" className="remove" aria-label={`Remove ${ls.name}`}
                       onClick={() => setBuild((b) => ({ ...b, loresheets: b.loresheets.filter((_, j) => j !== i) }))}>×</button>
                   </li>
@@ -119,7 +122,7 @@ export function App() {
             <select aria-label="Add a loresheet" value=""
               onChange={(e) => {
                 const ls = loresheetById.get(e.target.value)
-                if (ls) setBuild((b) => ({ ...b, loresheets: [...b.loresheets, { id: ls.id, tier: ls.tiers ? 1 : undefined }] }))
+                if (ls) setBuild((b) => addLoresheets(b, [ls.id]))
               }}>
               <option value="">Add a loresheet…</option>
               {loresheets.filter((l) => !heldSheetIds.has(l.id) && l.kind !== 'condition').map((l) => (

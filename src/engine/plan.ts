@@ -3,7 +3,7 @@ import {
   type LoresheetSkill, type Requirement, type Tier,
 } from '../data'
 import type { Build, HeldSkill } from './build'
-import { coveredBy, describe, joatBlocker, skillName, validate, withGrants, type ValidationResult } from './validate'
+import { coveredBy, describe, essenceTier, joatBlocker, skillName, validate, withGrants, type ValidationResult } from './validate'
 
 // Route planner (reference doc 8.2, 8.3, 8.8). Turns target skills into a year-by-year purchase plan.
 // With an unlimited OSP pool, plans differ only in route choice (buy / loresheet / Architect) and
@@ -96,7 +96,7 @@ export function planRoute(build: Build, targets: Target[], opts: PlanOptions = {
   const loresheetRoutes = (id: string, param?: string): Array<{ ls: string; entry: LoresheetSkill }> =>
     build.loresheets.flatMap((l) => {
       const entry = loresheetById.get(l.id)?.skills.find((e) => e.os === id && (e.param === undefined || paramMatches(param, e.param)))
-      return entry && (!entry.minType || (l.tier ?? 0) >= entry.minType) ? [{ ls: l.id, entry }] : []
+      return entry && (!entry.minType || essenceTier(build, l.id) >= entry.minType) ? [{ ls: l.id, entry }] : []
     })
 
   // A prerequisite with no <X> inherits the parent's <X> when both use the same kind of parameter
