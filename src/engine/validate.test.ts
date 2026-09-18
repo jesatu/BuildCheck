@@ -406,4 +406,11 @@ describe('derived values', () => {
     expect(joat(false)).toHaveLength(2)
     expect(joat(true)).toEqual([])
   })
+  it('makes Sleepless Chanting redundant with any Sleep immunity, but not Unending Voice', () => {
+    const chant = (id: string) => state(build({ os: [buy(id), buy('sleepless-chanting')] }), 'sleepless-chanting')!.state
+    expect(chant('immune-mind-effects')).toBe('redundant')
+    expect(chant('immune-sleep')).toBe('redundant')
+    expect(chant('mind-healing')).toBe('redundant')
+    expect(state(build({ os: [buy('immune-sleep'), buy('unending-voice')] }), 'unending-voice')!.state).toBe('active')
+  })
 })

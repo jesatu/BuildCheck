@@ -139,6 +139,14 @@ export function joatBlocker(os: HeldSkill[], skillId: string, hasSheet: boolean)
 const CARD_NAMES = { character: 'the character card', creature: 'the special creature card', power: 'the special power card', loresheet: 'a loresheet' } as const
 
 /** OS ids each skill counts as, through replaces and includes, transitively (REP-2b). */
+/** Skills a held skill makes redundant: what it counts as, what it covers, and what those cover (Immune to Mind Effects → Immune to Sleep → Sleepless Chanting). */
+function gives(id: string): Set<string> {
+  const direct = new Set([id, ...coveredBy(id), ...(osById.get(id)?.covers ?? [])])
+  const all = new Set([...direct].flatMap((c) => [...coveredBy(c), ...(osById.get(c)?.covers ?? [])]))
+  all.delete(id)
+  return all
+}
+
 const covers = new Map<string, Set<string>>()
 export function coveredBy(id: string): Set<string> {
   let set = covers.get(id)
@@ -361,7 +369,7 @@ export function validate(input: Build): ValidationResult {
     // Scripts use the Polyglot rule below; other skills are covered only by a skill with the same <X> (or none).
     const coverer = onCharacterCard && h.id !== 'translate-named-script'
       ? os.find((o, j) => j !== i && !o.dropped && !replacedBy.has(j)
-        && (coveredBy(o.id).has(h.id) || osById.get(o.id)?.covers?.includes(h.id))
+        && gives(o.id).has(h.id)
         && (o.param === undefined || h.param === undefined || o.param === h.param))
       : undefined
     const alsoGranted = onCharacterCard ? os.find((o) => o !== h && o.id === h.id && o.param === h.param && o.card && o.card !== 'character') : undefined

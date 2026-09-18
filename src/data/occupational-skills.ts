@@ -199,7 +199,7 @@ export const occupationalSkills: OccupationalSkill[] = [
   skill(2, 20, ['rangers'], { id: 'discern-race', name: 'Discern Race', learn: os('tracking'), summary: 'Discern the race on the target\'s card.', source: 'HB p.89' }),
   skill(4, 40, ['rangers'], { id: 'discern-race-pattern', name: 'Discern Race and Pattern', learn: os('discern-race'), replaces: ['discern-race'], summary: 'Race and pattern type.', source: 'HB p.89' }),
   skill(5, 50, ['rangers'], { id: 'ethereal-shot', name: 'Ethereal Shot', restricted: true, learn: os('discern-race-pattern'), use: all(cs('projectile-weapon'), { flag: 'bowCompetency' }), replaces: ['discern-race-pattern'], includes: ['discern-race-pattern'], summary: 'Discern, then shoot Affect <race/pattern> for 1 minute.', source: 'HB p.90' }),
-  skill(4, 40, ['rangers'], { id: 'immune-sleep', name: 'Immune to Sleep', learn: os('immune-befriend-confusion'), summary: 'Immune to Sleep.', source: 'HB p.92' }),
+  skill(4, 40, ['rangers'], { id: 'immune-sleep', name: 'Immune to Sleep', learn: os('immune-befriend-confusion'), covers: ['sleepless-chanting'], summary: 'Immune to Sleep.', source: 'HB p.92' }),
   skill(2, 20, ['rangers'], { id: 'bowyer-apprentice', name: 'Bowyer (Apprentice)', summary: 'Craft L1 projectile weapon; faster arrow checks; mend bows.', source: 'HB p.86' }),
   skill(4, 40, ['rangers'], { id: 'bowyer-master', name: 'Bowyer (Master)', learn: os('bowyer-apprentice'), replaces: ['bowyer-apprentice'], summary: 'L1 + L2; faster checks and mending.', source: 'HB p.86' }),
   skill(2, 20, ['rangers'], { id: 'hand-of-nature', name: 'Hand of Nature', use: any(cs('triage'), cs('triage-advanced')), summary: 'Triage two locations at once.', source: 'HB p.91' }),
