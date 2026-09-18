@@ -319,7 +319,13 @@ export function validate(input: Build): ValidationResult {
 
   const skills: SkillStatus[] = os.map((h, i) => {
     const s = osById.get(h.id)
-    const via = h.source === 'loresheet' || h.source === 'granted'
+    // "Lammie or loresheet": met by a skill that came from one, or by holding a sheet that offers it
+    // (Awakened <X> is bought, and its lammie is the matching awakened loresheet).
+    const via = h.source === 'loresheet' || h.source === 'granted' || b.loresheets.some((l) => {
+      const sheet = loresheetById.get(l.id)
+      if (h.id === 'awakened') return sheet?.kind === 'awakened' && (!h.param || sheet.name === `Awakened ${h.param}`)
+      return sheet?.skill === h.id || !!sheet?.skills.some((e) => e.os === h.id)
+    })
     const gap = missing(s?.use, via)
     const inactive = gap ? `Needs ${gap}` : disabled.get(h.id)
     // Polyglot covers every family script; TNS left over from a family without Script Master is redundant.

@@ -362,4 +362,10 @@ describe('derived values', () => {
     expect(w.derived.baseLhv).toBe(1)
     expect(w.issues.map((i) => i.rule)).toContain('12.4')
   })
+  it('treats the matching awakened loresheet as the lammie for a bought Awakened <X>', () => {
+    const state = (race: string) => validate({ ...newBuild(), loresheets: [{ id: 'awakened-human' }],
+      os: [{ id: 'awakened', param: race, source: 'buy' }] }).skills[0]!.state
+    expect(state('Human')).toBe('active')
+    expect(state('Elf')).toBe('inactive')
+  })
 })
