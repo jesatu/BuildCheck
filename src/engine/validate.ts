@@ -1,5 +1,5 @@
 import {
-  csById, CS_LADDERS, FLAG_LABELS, loresheets, guildOf, joatGuilds, loresheetById, MAGIC_CS_IDS, osById, immunitiesBySkill, raceById, RULES, scriptFamilies, scriptFamilyOf,
+  csById, CS_LADDERS, FLAG_LABELS, loresheets, guildOf, joatGuilds, loresheetById, MAGIC_CS_IDS, osById, damageReductionBySkill, immunitiesBySkill, raceById, RULES, scriptFamilies, scriptFamilyOf,
   type Loresheet, type LoresheetSkill, type OccupationalSkill, type Requirement, type Tier,
 } from '../data'
 import { factions } from '../data/races'
@@ -476,11 +476,11 @@ function lsEntry(ls: Loresheet, h: HeldSkill): LoresheetSkill | undefined {
  * What the character is immune to through its working skills (active or redundant, any card), with the skills
  * that give each immunity. A skill gives its own immunities and those of the skills it replaces or includes.
  */
-export function immunities(result: ValidationResult): Array<{ effect: string; limit?: string; from: string[] }> {
+export function immunities(result: ValidationResult, table = immunitiesBySkill): Array<{ effect: string; limit?: string; from: string[] }> {
   const out = new Map<string, { effect: string; limit?: string; from: string[] }>()
   for (const s of result.skills.filter((x) => x.state === 'active' || x.state === 'redundant')) {
     for (const id of [s.id, ...coveredBy(s.id)]) {
-      for (const entry of immunitiesBySkill[id] ?? []) {
+      for (const entry of table[id] ?? []) {
         const [effect, limit] = entry.split('|') as [string, string | undefined]
         const seen = out.get(effect)
         if (!seen) out.set(effect, { effect, limit, from: [s.name] })
@@ -492,4 +492,10 @@ export function immunities(result: ValidationResult): Array<{ effect: string; li
     }
   }
   return [...out.values()].sort((a, b) => a.effect.localeCompare(b.effect))
+}
+
+/** Damage Reduction the character has, leaving out effects it's already immune to. */
+export function damageReductions(result: ValidationResult) {
+  const immune = new Set(immunities(result).map((i) => i.effect))
+  return immunities(result, damageReductionBySkill).filter((d) => !immune.has(d.effect))
 }

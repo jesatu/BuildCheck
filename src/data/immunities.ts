@@ -32,3 +32,13 @@ export const immunitiesBySkill: Record<string, string[]> = {
   'immune-harm': ['Harm'],
   'immune-mage-bolt': ['Mage Bolt'],
 }
+
+/** Damage Reduction: the effect still lands, reduced (HB Damage Reduction). Not listed where the character is immune. */
+export const damageReductionBySkill: Record<string, string[]> = {
+  'damage-reduction-fatal': ['Fatal'],
+  'damage-reduction-harm': ['Harm'],
+  'damage-reduction-mage-bolt': ['Mage Bolt'],
+  'damage-reduction-crush': ['Crush'],
+  'damage-reduction-all': ['All damage effects|not Artefact or Bane'],
+  'magic-resistance': ['Harm', 'Mage Bolt'],
+}

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { addLoresheets, newBuild, type Build, type HeldSkill } from './build'
-import { immunities, missingLoresheets, validate } from './validate'
-import { immunitiesBySkill, osById } from '../data'
+import { damageReductions, immunities, missingLoresheets, validate } from './validate'
+import { damageReductionBySkill, immunitiesBySkill, osById } from '../data'
 
 const buy = (id: string, param?: string): HeldSkill => ({ id, param, source: 'buy' })
 const build = (b: Partial<Build>): Build => ({ ...newBuild(), ...b })
@@ -430,5 +430,12 @@ describe('derived values', () => {
     expect(imm([buy('mighty-blow')], { cs: { 'large-weapon': 1 } })).toEqual(['Repel: Mighty Blow', 'Strikedown: Mighty Blow'])
     expect(imm([buy('mind-healing'), buy('sleepless-chanting')], { cs: { healing: 2 } })).toContain('Sleep: Mind Healing, Sleepless Chanting')
     expect(imm([buy('mighty-blow')])).toEqual([]) // inactive without Large Melee Weapon Use
+  })
+  it('lists Damage Reduction separately, leaving out effects the character is immune to', () => {
+    expect(Object.keys(damageReductionBySkill).filter((id) => !osById.has(id))).toEqual([])
+    const lammie = (id: string): HeldSkill => ({ id, source: 'granted', card: 'creature' })
+    const dr = (os: HeldSkill[]) => damageReductions(validate(build({ os }))).map((d) => `${d.effect}: ${d.from.join(', ')}`)
+    expect(dr([buy('immune-through'), buy('magic-resistance')])).toEqual(['Harm: Magic Resistance', 'Mage Bolt: Magic Resistance'])
+    expect(dr([buy('immune-through'), buy('magic-resistance'), lammie('immune-harm')])).toEqual(['Mage Bolt: Magic Resistance'])
   })
 })
