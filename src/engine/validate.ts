@@ -1,5 +1,5 @@
 import {
-  csById, FLAG_LABELS, guildOf, joatGuilds, loresheetById, MAGIC_CS_IDS, osById, raceById, RULES, scriptFamilies, scriptFamilyOf,
+  csById, CS_LADDERS, FLAG_LABELS, guildOf, joatGuilds, loresheetById, MAGIC_CS_IDS, osById, raceById, RULES, scriptFamilies, scriptFamilyOf,
   type Loresheet, type LoresheetSkill, type OccupationalSkill, type Requirement, type Tier,
 } from '../data'
 import { factions } from '../data/races'
@@ -158,7 +158,10 @@ export function validate(input: Build): ValidationResult {
   }
   if (spent > available) err('CS-1', `Character Skills cost ${spent} points; only ${available} are available.`)
   if (MAGIC_CS_IDS.filter((id) => csLevel(id) >= 2).length > RULES.maxLevel2MagicCs) err('CS-6', 'Only one magic Character Skill can be at level 2.')
-  if (csLevel('triage') && csLevel('triage-advanced')) warn('A4', 'Triage (Advanced) already covers everything Triage does.')
+  for (const ladder of CS_LADDERS) {
+    const held = ladder.skills.filter((id) => csLevel(id))
+    if (held.length > 1) err('CS-8', `Only one ${ladder.name} skill can be held; the higher one replaces the lower: ${held.map((id) => csById.get(id)!.name).join(', ')}.`)
+  }
 
   // Children (section 5)
   if (age < 10) {

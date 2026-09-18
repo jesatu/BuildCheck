@@ -134,6 +134,7 @@ A group list (for example the Arcane Guilds list) is available through any guild
 - **CS-3** Levelled skills are *replacing* levels. The listed cost is the total cost for that level, not an extra cost. You cannot hold both Healing 1 and Healing 2, or both Body Development 1 and 2.
 - **CS-4** After creation, changing CS costs **5 OSP**. New players can usually redesign free during roughly their first year, at the organisers' discretion.
 - **CS-5** If you change a CS that an OS needs, you **lose that OS** with no refund (HB p.84).
+- **CS-8 (ruling)** Light, Medium and Heavy Armour Use form a ladder, and so do Triage and Triage (Advanced). A higher rung replaces the lower ones, so a character holds **at most one** skill from each ladder.
 
 ### 4.2 Character Skill table
 
@@ -1352,7 +1353,7 @@ These items were settled by the project owner on 2026-09-17. They are now rules 
 | L3 | Ancestral Dismiss Rank +10 stays Tier 1 as printed, with a note that it is probably a loresheet error. | 13 |
 | E6 | Cast All Spellcasting includes Control Unliving at level 1; the printed list's omission is a mistake. | 13 |
 | A10 | Revitalise Unliving and Repair Unliving (Advanced) need Corruption CS, or Incantation CS with Dark Incantation (or Cast All Incantation). | 13 |
-| A4 | A character can hold both Triage and Triage (Advanced). The tool notes that Advanced covers everything Triage does. | 13 |
+| A4 | A character holds either Triage or Triage (Advanced), not both: the higher replaces the lower (CS-8). The same applies to Light, Medium and Heavy Armour Use. | 4.1 |
 | E11 | Diagnose Powers needs no separate loresheet check: having the skill is enough. | 13 |
 | L10 | A Druid's armour gives standard AV only (Light 1, Medium 2, Heavy 3). Armour Mastery and Armour Mastery (Advanced) add nothing; Armour Mastery (Expert) still gives Crush immunity. | 13 |
 | A3 | Ritual Magic needs a magic CS (Spellcasting, Incantation, Healing or Corruption). +Base Power and Invocation don't count. | 13 |
@@ -1407,7 +1408,7 @@ These items were settled by the project owner on 2026-09-17. They are now rules 
 | L6 | **Unnamed or shortened skill names** on loresheets: "Conceal" (Conceal Item), "Regeneration (10m)" and "Regeneration" (Regenerates), "Natural Armour" as a prerequisite (+1 Natural Armour), "Magebolt Wedge" (Mage Bolt Wedge), "Fearsome Aspect 1/2/4" (Fearsome Aspect <X>). Fearsome Aspect has no level 3. | LS: Plant, Beast, Druid, Warlock, Werecreature | Treat as aliases. Fearsome Aspect 4 needs Fearsome Aspect 2 as printed. |
 | L7 | **Resolved (see Confirmed rulings).** **High Magic (Spellcasting / Healing / Incantation / Corruption)** appear on essence loresheets. In the handbook these are High Magic <X>, which cannot be gained through Jack of All Trades or retirement vouchers. | LS: Warlock, Druid, Vampire | Treat as High Magic <X> for the list named, at the loresheet cost. |
 | L8 | Some loresheet skills need a prerequisite that isn't on that loresheet. Examples: Magical Pattern *+2 Natural Armour* and *+2 Magical Armour* need the +1 versions; Vampire *Repair Unliving (Advanced)* needs Revitalise Unliving; Awakened Drow *Focused Through* needs Immune to Fumble. | LS: Magical Pattern, Vampire, Awakened Drow | The prerequisite must come from a handbook list or another loresheet. |
-| L9 | *Titans Endurance* (Warlock Price of Power) is a potion (owner, 2026-09-18); details to come from the crafting list. *Chant of Wasting* (Paladin, Awakened Drow) doesn't match any spell list, where Wasting is a rite. | LS: Warlock, Paladin, Awakened Drow | Keep as named. Flag for confirmation. |
+| L9 | **Resolved.** *Titans Endurance* is a Master-level potion from the 2026 crafting list: +2 LHV for a full day, not combinable with the Endurance spell. It affects a day's play, not the build, so the Warlock's Price of Power only lists it. *Chant of Wasting* (Paladin, Awakened Drow) is a loresheet name for the Wasting rite. | LS: Warlock; 2026 crafting list | Keep both as text. |
 | L10 | **Resolved (see Confirmed rulings).** The Druid **armour limit** ("no bonus AV from external sources") doesn't say whether Armour Mastery OS count as external. | LS: Druid | Treat Armour Mastery as bonus AV, so it doesn't apply. **Confirm.** |
 | L11 | **Resolved (see Confirmed rulings).** The Treewalker **loresheet** also excludes Necromancy and needs Spellcasting, Incantation or Healing CS. The handbook entry only needs Ritual Magic or Perform Transport Rite, and excludes Unliving and Corruption. | LS: Treewalker; HB p.97 | Apply both sets of restrictions. |
 | L12 | **Resolved (see Confirmed rulings).** On essence loresheets, skill **tier** and **Min. type** are separate columns. For example, Werecreature *Discern Race and Pattern* is Tier 3 with Min. type "All". The file doesn't say whether creature tier limits skill tier. | LS: Werecreature | Only Min. type restricts by creature tier. Skill tier drives the T5 cap and acquisition routes. |

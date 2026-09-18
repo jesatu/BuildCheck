@@ -5,6 +5,12 @@ import type { CharacterSkill, Requirement } from './types'
 export const MAGIC_CS = ['spellcasting', 'incantation', 'healing', 'corruption'] as const
 export const ARMOUR_CS = ['light-armour', 'medium-armour', 'heavy-armour'] as const
 
+/** CS where a higher rung replaces the lower ones: a character holds at most one skill from each (CS-8 ruling). */
+export const CS_LADDERS = [
+  { name: 'Armour Use', skills: ['light-armour', 'medium-armour', 'heavy-armour'] },
+  { name: 'Triage', skills: ['triage', 'triage-advanced'] },
+] as const
+
 export const anyMagicCs: Requirement = { any: MAGIC_CS.map((cs) => ({ cs })) }
 export const anyArmourCs: Requirement = { any: ARMOUR_CS.map((cs) => ({ cs })) }
 

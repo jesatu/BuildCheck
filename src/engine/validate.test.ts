@@ -22,6 +22,12 @@ describe('character skills', () => {
     expect(rules(build({ cs: { 'projectile-weapon': 1, 'ritual-magic': 1 } }))).toEqual(['CS-7', 'CS-7'])
   })
 
+  it('allows only one skill from each ladder: armour use, and triage (CS-8)', () => {
+    expect(rules(build({ cs: { 'light-armour': 1, 'heavy-armour': 1 } }))).toEqual(['CS-8'])
+    expect(rules(build({ cs: { triage: 1, 'triage-advanced': 1 } }))).toEqual(['CS-8'])
+    expect(rules(build({ cs: { 'heavy-armour': 1, 'triage-advanced': 1 } }))).toEqual([])
+  })
+
   it('applies children\'s limits', () => {
     expect(rules(build({ age: 8, cs: { 'heavy-armour': 1 } }))).toEqual(['CH'])
     expect(rules(build({ age: 8, cs: { healing: 2, 'base-power': 1 } }))).toEqual([])

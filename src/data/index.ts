@@ -9,7 +9,7 @@ import type { CharacterSkill, FlagId, GuildList, Loresheet, OccupationalSkill, R
 export * from './types'
 export { RULES } from './rules'
 export { characterSkills, occupationalSkills, loresheets, races, spellLists, guildLists }
-export { MAGIC_CS as MAGIC_CS_IDS } from './character-skills'
+export { CS_LADDERS, MAGIC_CS as MAGIC_CS_IDS } from './character-skills'
 export { scriptFamilies, scriptFamilyOf } from './scripts'
 
 export const FLAG_LABELS: Record<FlagId, string> = {

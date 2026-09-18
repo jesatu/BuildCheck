@@ -136,7 +136,7 @@ describe('planner', () => {
 
 describe('cheapest vs fastest divergence report', () => {
   const allCs = { spellcasting: 2, incantation: 1, healing: 1, corruption: 1, 'poison-lore': 1, 'potion-lore': 1,
-    'recognise-forgery': 1, 'sense-magic': 1, 'triage-advanced': 1, triage: 1, 'large-weapon': 1, shield: 1,
+    'recognise-forgery': 1, 'sense-magic': 1, 'triage-advanced': 1, 'large-weapon': 1, shield: 1,
     'projectile-weapon': 1, 'light-armour': 1, 'ritual-magic': 1, contribute: 1 }
   const profiles: Record<string, Build> = {
     standard: build({ cs: allCs, flags: ['bowCompetency', 'clawCompetency', 'factionPermission', 'researchRequest'] }),
