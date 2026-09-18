@@ -196,7 +196,10 @@ function ancestors(id: string, seen = new Set<string>()): Set<string> {
  * ponytail: greedy for DAGs with shared prerequisites; exact search if real builds show longer plans than needed.
  */
 function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
-  const items = [...alt.items.values()]
+  // An "any <X>" placeholder is already met by a specific version planned elsewhere (Polyglot's "any Script Master").
+  const all = [...alt.items.values()]
+  const items = all.filter((i) => !all.some((o) => o !== i && o.id === i.id && o.param !== ANY &&
+    (i.param === ANY || (i.param?.startsWith(`${ANY}:`) && scriptFamilyOf(o.param) === i.param.slice(ANY.length + 1)))))
   const byKey = new Map(items.map((i) => [i.key, i]))
 
   // An item must come after any planned item that satisfies its learn requirement (chosen route),
@@ -206,8 +209,10 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
     const needs = new Set([...osIdsIn(i.learn), ...ancestors(i.id)])
     const set = new Set<string>()
     for (const o of items) {
-      // A replacing skill stands in for a learn prerequisite only when that prerequisite isn't itself planned (REP-2b).
-      const standsIn = [...coveredBy(o.id)].some((c) => osIdsIn(i.learn).includes(c) && !items.some((x) => x.id === c))
+      // A replacing skill stands in for a learn prerequisite only when that prerequisite isn't itself planned (REP-2b),
+      // and never when it sits above this skill in the tree (Polyglot can't stand in for Script Master's prerequisite).
+      const standsIn = o.id !== i.id && !ancestors(o.id).has(i.id) &&
+        [...coveredBy(o.id)].some((c) => osIdsIn(i.learn).includes(c) && !items.some((x) => x.id === c))
       if (o !== i && (needs.has(o.id) || standsIn)) set.add(o.key)
     }
     preds.set(i.key, set)
@@ -216,6 +221,7 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
   const height = new Map<string, number>()
   const heightOf = (k: string): number => {
     if (height.has(k)) return height.get(k)!
+    height.set(k, 1) // guard: a cycle can't recurse forever
     const h = 1 + Math.max(0, ...items.filter((o) => preds.get(o.key)!.has(k)).map((o) => heightOf(o.key)))
     height.set(k, h)
     return h
@@ -286,8 +292,8 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
 }
 
 function displayName(id: string, param?: string) {
-  if (param === ANY) return skillName(id, 'any')
-  if (param?.startsWith(`${ANY}:`)) return skillName(id, `any ${param.slice(ANY.length + 1)} script`)
+  if (param === ANY) return skillName(id, '(your choice)')
+  if (param?.startsWith(`${ANY}:`)) return skillName(id, `(any ${param.slice(ANY.length + 1)} script)`)
   return skillName(id, param)
 }
 

@@ -67,6 +67,18 @@ describe('planner', () => {
     expect(new Set(doubles.map((d) => d.id.split('-')[1])).size).toBe(2) // poison and potion, not the same tree
   })
 
+  it('plans Polyglot from an existing script without a prerequisite cycle', () => {
+    const b = build({ cs: { 'recognise-forgery': 1 }, os: [{ id: 'translate-named-script', param: 'Elven', source: 'buy' }] })
+    expect(summary(b, [t('polyglot')]).steps).toEqual(['1:Script Master (your choice):buy', '2:Polyglot:buy'])
+  })
+
+  it('uses a planned Script Master to satisfy Polyglot instead of adding another', () => {
+    const b = build({ cs: { 'recognise-forgery': 1 }, os: [{ id: 'translate-named-script', param: 'Elven', source: 'buy' }] })
+    expect(summary(b, [t('polyglot'), t('script-master', 'People & Race')])).toEqual({
+      years: 2, osp: 100, steps: ['1:Script Master People & Race:buy', '2:Polyglot:buy'],
+    })
+  })
+
   it('validates the final build', () => {
     const p = planRoute(build({ cs: { 'poison-lore': 1 } }), [t('create-poison-master')]).cheapest!
     expect(p.validation.valid).toBe(true)
@@ -92,7 +104,7 @@ describe('cheapest vs fastest divergence report', () => {
   const target = (id: string) => t(id, id === 'script-master' ? 'Myth & Magic' : osById(id)?.param ? 'Test' : undefined)
   function osById(id: string) { return buyable.find((s) => s.id === id) }
 
-  it('cheapest is never dearer and fastest is never slower', () => {
+  it('schedules every purchase, cheapest is never dearer and fastest is never slower', () => {
     const rows: string[] = []
     for (const [name, b] of Object.entries(profiles)) {
       let runs = 0, diverged = 0
@@ -107,6 +119,7 @@ describe('cheapest vs fastest divergence report', () => {
         const r = planRoute(b, targets)
         if (!r.cheapest || !r.fastest || r.cheapest.blockers.length) continue
         runs++
+        for (const p of [r.cheapest, r.fastest]) expect(p.purchases.filter((x) => x.year < 1).map((x) => x.id), targets.map((x) => x.id).join('+')).toEqual([])
         expect(r.cheapest.totalOsp).toBeLessThanOrEqual(r.fastest.totalOsp)
         expect(r.fastest.years).toBeLessThanOrEqual(r.cheapest.years)
         if (r.diverges) {
