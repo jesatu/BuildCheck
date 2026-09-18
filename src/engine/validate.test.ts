@@ -452,5 +452,8 @@ describe('derived values', () => {
     expect(not({ pattern: 'unliving' })).toEqual(['Decay: Unliving pattern', 'Disease: Unliving pattern', 'Fatal: Unliving pattern', 'Paralysis: Unliving pattern'])
     expect(not({ pattern: 'magical' })).toHaveLength(7)
     expect(not({ loresheets: [{ id: 'npc-dpc', param: 'Lions' }] })).toContain('Beguile: NPC/DPC')
+    expect(unaffectedBy(build({ loresheets: [{ id: 'paladin' }] }))).toContainEqual({ effect: 'Heal Wound', limit: 'and effects based on it', from: ['Paladin'] })
+    expect(not({ pattern: 'unliving', loresheets: [{ id: 'unliving' }] })).toContain('Ritual of Peace: Unliving')
+    expect(not({ race: 'drow', loresheets: [{ id: 'awakened-drow' }] })).toContain('Wasting: Awakened Drow')
   })
 })

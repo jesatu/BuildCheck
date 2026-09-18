@@ -511,7 +511,10 @@ export function unaffectedBy(b: Build): Protection[] {
   const pattern = `${b.pattern[0]!.toUpperCase()}${b.pattern.slice(1)} pattern`
   const out: Protection[] = Object.entries(onlyAffects).filter(([, p]) => p !== b.pattern).map(([effect]) => ({ effect, from: [pattern] }))
   for (const l of b.loresheets) {
-    for (const effect of unaffectedBySheet[l.id] ?? []) out.push({ effect, from: [loresheetById.get(l.id)!.name] })
+    for (const entry of unaffectedBySheet[l.id] ?? []) {
+      const [effect, limit] = entry.split('|') as [string, string | undefined]
+      out.push({ effect, limit, from: [loresheetById.get(l.id)!.name] })
+    }
   }
   return out.sort((a, c) => a.effect.localeCompare(c.effect))
 }
