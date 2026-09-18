@@ -58,5 +58,11 @@ export const onlyAffects: Record<string, 'living' | 'unliving'> = {
 /** Loresheets that stop an effect working on the holder. */
 export const unaffectedBySheet: Record<string, string[]> = {
   'npc-dpc': ['Beguile'], // owner ruling, not in the published text
-  paladin: ['Heal Wound|and effects based on it'], // Blind Faith: can't be targeted by Heal Wound
+  unliving: ['Ritual of Peace', 'Alchemical Poisons and Potions|non-magical'],
+  'magical-pattern': ['Ritual of Peace', 'Alchemical Poisons and Potions', 'Magical Poisons and Potions', 'Embody Unliving'],
+  'alien-pattern': ['Ritual of Peace', 'Alchemical Poisons and Potions'],
+  paladin: ['Heal Wound|and effects based on it', 'Mage Armour|cast on them'], // Blind Faith
+  warlock: ["Paladin's Armour|cast on them"],
+  'awakened-drow': ['Wasting'],
+  'awakened-human': ['Red Mist curse|Militia Guild'],
 }
