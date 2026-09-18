@@ -246,10 +246,12 @@ export function validate(input: Build): ValidationResult {
     ...b.os.filter((h) => h.id === 'awakened').map((h) => (h.param ? `Awakened ${h.param}` : 'Awakened')),
   ])
   if (awakened.size > 1 && awakened.has('Awakened')) awakened.delete('Awakened')
+  // A changed pattern only clashes with essence and awakened: a ritual race (Plant, Daemon…) can be Magical or Unliving.
+  const changedPattern = b.pattern === 'magical' || (b.pattern === 'unliving' && !essences.includes('Vampire'))
   const creatures = [
     ...essences, ...awakened,
     ...(race && !race.startingRace ? [race.name] : []),
-    ...(b.pattern === 'magical' || (b.pattern === 'unliving' && !essences.includes('Vampire')) ? [`${b.pattern} pattern`] : []),
+    ...(changedPattern && (essences.length || awakened.size) ? [`${b.pattern} pattern`] : []),
   ]
   if (creatures.length > 1) err('C21', `A character can only be one special creature: this one is ${creatures.join(', ')}.`)
 
