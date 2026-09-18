@@ -297,7 +297,6 @@ export function CardView({ build, result, onToggleDrop }: { build: Build; result
           </div>
         </div>
       )}
-      <Immunities result={result} />
       <label className="check small">
         <input type="checkbox" checked={showReplaced} onChange={(e) => setShowReplaced(e.target.checked)} />
         Show replaced skills
@@ -310,9 +309,11 @@ export function CardView({ build, result, onToggleDrop }: { build: Build; result
   )
 }
 
-function Immunities({ result }: { result: ValidationResult }) {
+export function Immunities({ result }: { result: ValidationResult }) {
   const lists = [['Immune to', immunities(result)], ['Damage reduction', damageReductions(result)]] as const
-  return lists.filter(([, list]) => list.length > 0).map(([title, list]) => (
+  const shown = lists.filter(([, list]) => list.length > 0)
+  if (shown.length === 0) return null
+  return <div className="panel"><h2>Immunities and damage reduction</h2>{shown.map(([title, list]) => (
     <div key={title} className="immunities">
       <h3>{title}</h3>
       <ul>
@@ -321,7 +322,7 @@ function Immunities({ result }: { result: ValidationResult }) {
         ))}
       </ul>
     </div>
-  ))
+  ))}</div>
 }
 
 // ---------- Issues and plan ----------

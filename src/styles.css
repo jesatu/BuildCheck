@@ -147,5 +147,5 @@ h2 .bad { font-size: .8rem; }
 .map-arrow { fill: var(--muted); }
 .map-divider { stroke: var(--line); }
 
-.immunities { margin-top: .75rem; }
+.immunities + .immunities { margin-top: .75rem; }
 .immunities ul { list-style: none; margin: .25rem 0 0; padding: 0; display: grid; gap: .15rem; }
