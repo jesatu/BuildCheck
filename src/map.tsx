@@ -37,8 +37,12 @@ export function BuildMap({ build, result, spent, plan }: { build: Build; result:
   })
 
   // Edges run from a prerequisite to the skill it unlocks. A skipped route still shows the handbook link, dotted.
+  // Same <X> only (Journeyman (Priest) needs Apprentice (Priest)). A skill that stands in for a missing prerequisite
+  // must not sit above this one in its tree (Master counts as Apprentice, but can't come before Journeyman).
+  const sameX = (a: Node, b: Node) => !a.s.param || !b.s.param || a.s.param === b.s.param
   const find = (id: string, self: Node) =>
-    nodes.find((n) => n !== self && n.s.id === id) ?? nodes.find((n) => n !== self && coveredBy(n.s.id).has(id))
+    nodes.find((n) => n !== self && sameX(n, self) && n.s.id === id) ??
+    nodes.find((n) => n !== self && sameX(n, self) && coveredBy(n.s.id).has(id) && !coveredBy(n.s.id).has(self.s.id))
   const edges: Array<{ from: Node; to: Node; skipped: boolean }> = []
   for (const n of nodes) {
     const req = n.skipped ? osById.get(n.s.id)?.learn : n.learn
