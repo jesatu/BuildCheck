@@ -430,6 +430,7 @@ describe('derived values', () => {
     expect(imm([buy('mighty-blow')], { cs: { 'large-weapon': 1 } })).toEqual(['Repel: Mighty Blow', 'Strikedown: Mighty Blow'])
     expect(imm([buy('mind-healing'), buy('sleepless-chanting')], { cs: { healing: 2 } })).toContain('Sleep: Mind Healing, Sleepless Chanting')
     expect(imm([buy('mighty-blow')])).toEqual([]) // inactive without Large Melee Weapon Use
+    expect(imm([buy('shield-mastery'), buy('shield-mastery-expert')], { cs: { shield: 1 } })).toEqual(['Crush on shield (Normal or Enchanted): Shield Mastery (Expert)'])
   })
   it('lists Damage Reduction separately, leaving out effects the character is immune to', () => {
     expect(Object.keys(damageReductionBySkill).filter((id) => !osById.has(id))).toEqual([])

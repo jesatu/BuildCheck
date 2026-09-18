@@ -23,6 +23,9 @@ export const immunitiesBySkill: Record<string, string[]> = {
   'immune-through': ['Through'],
   'damage-reduction-all': ['Through'],
   'armour-mastery-expert': ['Crush'],
+  // Parrying with a shield: the shield isn't damaged. Expert first wins over the Shield Mastery it replaces.
+  'shield-mastery': ['Crush on shield|Normal'],
+  'shield-mastery-expert': ['Crush on shield|Normal or Enchanted'],
   'immune-immobilisation': ['Immobilisation|not Petrification'],
   'immune-paralysis': ['Paralysis'],
   'immune-disease': ['Disease'],
