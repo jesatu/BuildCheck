@@ -225,6 +225,12 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions, history = false, jo
         [...coveredBy(o.id)].some((c) => osIdsIn(i.learn).includes(c) && !items.some((x) => x.id === c))
       if (o !== i && (needs.has(o.id) || standsIn)) set.add(o.key)
     }
+    // A loresheet's skills (and Jack of All Trades uses, which need the Awakened Human sheet) come after the
+    // skill that brings the sheet: Awakened <X> for an awakened sheet, the first essence tier for an essence sheet.
+    const sheet = loresheetById.get(i.route === 'joat' ? 'awakened-human' : i.route === 'loresheet' ? i.loresheet ?? '' : '')
+    const gate = sheet && items.find((o) => o !== i &&
+      (sheet.kind === 'awakened' ? o.id === 'awakened' && `Awakened ${o.param}` === sheet.name : o.id === `${sheet.id}-1`))
+    if (gate) set.add(gate.key)
     preds.set(i.key, set)
   }
 

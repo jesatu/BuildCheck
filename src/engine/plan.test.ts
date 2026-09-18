@@ -176,6 +176,17 @@ describe('planner', () => {
     expect(Math.min(...at('jack-of-all-trades'))).toBeLessThanOrEqual(Math.min(...p.purchases.filter((x) => x.route === 'joat').map((x) => x.year)))
   })
 
+  it('buys loresheet skills and Jack of All Trades after the Awakened <X> skill that brings the sheet', () => {
+    const b = build({
+      flags: ['awakenedRite'], loresheets: [{ id: 'awakened-human' }, { id: 'npc-dpc', param: 'Mages Guild' }],
+      os: [{ id: 'awakened', param: 'Human', source: 'buy' }, { id: 'jack-of-all-trades', source: 'loresheet', loresheet: 'awakened-human' },
+        { id: 'thaulmonic-alignment', source: 'joat' }],
+    })
+    const year = (id: string) => spentSoFar(b).purchases.find((x) => x.id === id)!.year
+    expect(year('jack-of-all-trades')).toBeGreaterThan(year('awakened'))
+    expect(year('thaulmonic-alignment')).toBeGreaterThan(year('awakened'))
+  })
+
   it('does not use prebook tier advancement in a retirement double-step year (C20)', () => {
     const b = build({ os: [{ id: 'dismiss-control-2', source: 'buy' }] })
     const targets = [t('dismiss-control-6'), t('immune-fumble-shatter'), t('immune-mute'), t('tracking')]
