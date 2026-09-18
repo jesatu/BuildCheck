@@ -72,7 +72,8 @@ describe('planner', () => {
   it('re-buys Jack of All Trades from the Awakened Human sheet for 20 OSP in each later season it is used', () => {
     const b = build({
       cs: { spellcasting: 1, 'ritual-magic': 1 },
-      os: [{ id: 'jack-of-all-trades', source: 'loresheet', loresheet: 'awakened-human' }],
+      flags: ['awakenedRite'],
+      os: [{ id: 'jack-of-all-trades', source: 'loresheet', loresheet: 'awakened-human' }, { id: 'awakened', param: 'Human', source: 'buy' }],
       loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }, { id: 'awakened-human' }],
     })
     const p = planRoute(b, [t('thaulmonic-alignment'), t('ritualist-master')]).cheapest!
@@ -105,8 +106,8 @@ describe('planner', () => {
   })
 
   it('plans Crushing Blow for an awakened human Oathsworn to the Militia Guild, using Jack of All Trades for the restricted step', () => {
-    const b = { ...newBuild(), cs: { 'large-weapon': 1 }, flags: ['factionPermission' as const],
-      loresheets: [{ id: 'awakened-human' }], os: [{ id: 'oathsworn', param: 'Militia Guild', source: 'buy' as const }] }
+    const b = { ...newBuild(), cs: { 'large-weapon': 1 }, flags: ['factionPermission' as const, 'awakenedRite' as const],
+      loresheets: [{ id: 'awakened-human' }], os: [{ id: 'oathsworn', param: 'Militia Guild', source: 'buy' as const }, { id: 'awakened', param: 'Human', source: 'buy' as const }] }
     const p = planRoute(b, [{ id: 'crushing-blow' }]).cheapest!
     expect(p.purchases.map((x) => `${x.year}:${x.id}:${x.route}:${x.cost}`)).toEqual([
       '1:immune-repel:buy:20', '2:immune-repel-strikedown:buy:30', '3:mighty-blow:buy:40',

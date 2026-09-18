@@ -65,6 +65,11 @@ export function addLoresheets(b: Build, ids: string[]): Build {
     if (ls.tiers && !next.os.some((h) => new RegExp(`^${id}-[1-4]$`).test(h.id))) {
       next.os.push({ id: `${id}-1`, source: 'loresheet', loresheet: id })
     }
+    // An awakened sheet comes with the Awakened <X> skill, gained through the Rite of Creation.
+    if (ls.kind === 'awakened' && !next.os.some((h) => h.id === 'awakened')) {
+      next.os.push({ id: 'awakened', param: ls.name.replace(/^Awakened /, ''), source: 'buy' })
+      if (!next.flags.includes('awakenedRite')) next.flags = [...next.flags, 'awakenedRite']
+    }
   }
   return next
 }
