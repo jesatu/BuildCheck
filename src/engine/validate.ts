@@ -89,6 +89,13 @@ export function missingLoresheets(b: Build, targets: Array<{ id: string }> = [])
     const offeredByHeld = b.loresheets.some((l) => loresheetById.get(l.id)?.skills.some((e) => e.os === h.id))
     if (!offeredByHeld) need.add(h.loresheet)
   }
+  // Awakened <X> needs the awakened sheet for its race (the character's own race until <X> is chosen).
+  for (const h of [...b.os, ...targets] as Array<{ id: string; param?: string }>) {
+    if (h.id !== 'awakened') continue
+    const race = h.param ?? raceById.get(b.race)?.name
+    const sheet = loresheets.find((l) => l.kind === 'awakened' && l.name === `Awakened ${race}`)
+    if (sheet) need.add(sheet.id)
+  }
   for (const t of targets) {
     const s = osById.get(t.id)
     const sheets = loresheets.filter((l) => l.skills.some((e) => e.os === t.id))
@@ -218,6 +225,24 @@ export function validate(input: Build): ValidationResult {
   const patternSources = lsRestrictions.filter((r) => r.kind === 'setsPattern').map((r) => r.pattern)
   if (b.pattern !== 'living' && !patternSources.includes(b.pattern)) err('A13', `A ${b.pattern} pattern needs a pattern loresheet.`)
   if (patternSources.some((p) => p !== b.pattern)) err('A13', `A held loresheet sets the pattern to ${patternSources.find((p) => p !== b.pattern)}.`)
+
+  // One special creature at a time (C21, PR-2): essence, awakened, ritual race or changed pattern
+  // ("Becoming an Awakened/Essence Creature prevents the character becoming ... any other kind of Special Creature").
+  const an = (w: string) => `${/^[AEIOU]/i.test(w) ? 'an' : 'a'} ${w}`
+  // An awakened loresheet on the wrong race is already an error (12.3); this checks the skill's <X>.
+  for (const h of b.os) if (h.id === 'awakened' && h.param && race && h.param !== race.name) err('C21', `Awakened ${h.param} needs ${an(h.param)} character (this one is ${race.name}).`)
+  const essences = b.loresheets.map((l) => loresheetById.get(l.id)).filter((ls) => ls?.kind === 'essence').map((ls) => ls!.name)
+  const awakened = new Set([
+    ...b.loresheets.map((l) => loresheetById.get(l.id)).filter((ls) => ls?.kind === 'awakened').map((ls) => ls!.name),
+    ...b.os.filter((h) => h.id === 'awakened').map((h) => (h.param ? `Awakened ${h.param}` : 'Awakened')),
+  ])
+  if (awakened.size > 1 && awakened.has('Awakened')) awakened.delete('Awakened')
+  const creatures = [
+    ...essences, ...awakened,
+    ...(race && !race.startingRace ? [race.name] : []),
+    ...(b.pattern === 'magical' || (b.pattern === 'unliving' && !essences.includes('Vampire')) ? [`${b.pattern} pattern`] : []),
+  ]
+  if (creatures.length > 1) err('C21', `A character can only be one special creature: this one is ${creatures.join(', ')}.`)
 
   for (const l of b.loresheets) {
     const ls = loresheetById.get(l.id)

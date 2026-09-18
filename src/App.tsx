@@ -10,7 +10,7 @@ import { CardView, CsPanel, FACTIONS_AND_GUILDS, Issues, PlanView, SkillPicker, 
 export function App() {
   const [state, setState] = useState<EditorState>(() => decodeState(location.hash) ?? emptyState())
   const [showMap, setShowMap] = useState(false)
-  const { build: saved, targets, retired, dropped, addPrereqs, prebook } = state
+  const { build: saved, targets, retired, dropped, addPrereqs, prebook, autoLoresheets } = state
   useEffect(() => { history.replaceState(null, '', encodeState(state)) }, [state])
 
   const setBuild = (f: (b: Build) => Build) => setState((s) => ({ ...s, build: f(s.build) }))
@@ -45,6 +45,10 @@ export function App() {
 
   const heldSheetIds = new Set(build.loresheets.map((l) => l.id))
   const missing = missingLoresheets(build, targets)
+  // Keyed on the missing list, so a sheet that can't be added doesn't loop.
+  useEffect(() => {
+    if (autoLoresheets && missing.length) setBuild((b) => addLoresheetsAndSkills(b, missing))
+  }, [autoLoresheets, missing.join()]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="app">
@@ -126,7 +130,13 @@ export function App() {
           </div>
 
           <div className="panel">
-            <h2>Loresheets</h2>
+            <h2>
+              Loresheets
+              <label className="check h2-option" title="Add the loresheets the build needs (awakened, essence, pattern, race) as soon as it needs them">
+                <input type="checkbox" checked={autoLoresheets} onChange={(e) => setState((s) => ({ ...s, autoLoresheets: e.target.checked }))} />
+                Add automatically
+              </label>
+            </h2>
             {build.loresheets.length === 0 && <p className="muted">None. Add a creature, essence or route loresheet (such as Architect).</p>}
             <ul className="rows">
               {build.loresheets.map((l, i) => {
