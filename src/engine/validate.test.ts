@@ -439,4 +439,9 @@ describe('derived values', () => {
     expect(dr([buy('immune-through'), buy('magic-resistance')])).toEqual(['Harm: Magic Resistance', 'Mage Bolt: Magic Resistance'])
     expect(dr([buy('immune-through'), buy('magic-resistance'), lammie('immune-harm')])).toEqual(['Mage Bolt: Magic Resistance'])
   })
+  it('needs Level 2 of its own <X> to use High Magic <X>', () => {
+    const hm = (param: string) => state(build({ cs: { healing: 2 }, os: [buy('high-magic', param)] }), 'high-magic')!.state
+    expect(hm('Healing')).toBe('active')
+    expect(hm('Spellcasting')).toBe('inactive')
+  })
 })
