@@ -204,7 +204,8 @@ function ancestors(id: string, seen = new Set<string>()): Set<string> {
  * ponytail: greedy for DAGs with shared prerequisites; exact search if real builds show longer plans than needed.
  */
 /** `history`: scheduling skills already bought, so their routes are fixed and Jack of All Trades isn't added. */
-function schedule(alt: Alt, build: Build, opts: PlanOptions, history = false): Plan {
+/** `joatCovered`: skills learned with Jack of All Trades that the held (used) JoAT paid for; every other use re-bought it. */
+function schedule(alt: Alt, build: Build, opts: PlanOptions, history = false, joatCovered = 0): Plan {
   // An "any <X>" placeholder is already met by a specific version planned elsewhere (Polyglot's "any Script Master").
   const all = [...alt.items.values()]
   const items = all.filter((i) => !all.some((o) => o !== i && o.id === i.id && o.param !== ANY &&
@@ -265,6 +266,10 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions, history = false): P
   const prebooked = new Set<string>()
   const advanced = new Set<string>()
   const year = new Map<string, number>()
+  // Skills already learned with Jack of All Trades: one use per season, and each use past the ones a held JoAT
+  // paid for re-bought it that season (20 OSP, one of the 4 purchases).
+  const rebuyYears = new Set<number>()
+  let joatUses = 0
   for (let y = 1; year.size < items.length; y++) {
     if (y > items.length + 1) break // unreachable unless preds form a cycle
     const ready = items
@@ -273,7 +278,12 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions, history = false): P
         (opts.prebook ? Number(plain(b, RULES.prebookMaxTier)) - Number(plain(a, RULES.prebookMaxTier)) : 0) || a.cost - b.cost)
     let slots: number = RULES.purchasesPerYear
     for (const i of ready) {
-      if (countsYearly(i)) { if (slots === 0) continue; slots-- }
+      const joat = i.route === 'joat', rebuy = joat && joatUses >= joatCovered
+      if (joat && [...year].some(([k, v]) => v === y && byKey.get(k)?.route === 'joat')) continue
+      const need = countsYearly(i) ? (rebuy ? 2 : 1) : 0
+      if (need > slots) continue
+      slots -= need
+      if (joat) { joatUses++; if (rebuy) rebuyYears.add(y) }
       year.set(i.key, y)
       for (const [c, p] of doubled) if (p === i.key && y === 1) year.set(c, y)
     }
@@ -298,11 +308,11 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions, history = false): P
   // use buys it from the Awakened Human loresheet (20 OSP, one of that year's purchases), so only use it
   // where a slot is free.
   const held = withGrants(build)
-  const heldJoat = held.some((h) => h.id === 'jack-of-all-trades')
+  // A JoAT taken off the card has been used.
+  const heldJoat = held.some((h) => h.id === 'jack-of-all-trades' && !h.dropped)
   const joatSheet = build.loresheets.some((l) => l.id === 'awakened-human')
   const joatEntry = loresheetById.get('awakened-human')!.skills.find((e) => e.os === 'jack-of-all-trades')!
   const joatYears = new Set<number>()
-  const rebuyYears = new Set<number>()
   const viaJoat = new Set<string>()
   const slotsUsed = (y: number) => items.filter((i) => year.get(i.key) === y && countsYearly(i) && !doubled.has(i.key) && !advanced.has(i.key)).length + (rebuyYears.has(y) ? 1 : 0)
   for (const i of history ? [] : [...items].sort((a, b) => (year.get(a.key) ?? 0) - (year.get(b.key) ?? 0) || b.cost - a.cost)) {
@@ -410,7 +420,8 @@ export function spentSoFar(build: Build, opts: PlanOptions = {}): Plan {
     })
   }
   const base = { ...build, os: build.os.filter(free) }
-  return schedule({ items, blockers: new Set(), depth: 0 }, base, opts, true)
+  const usedJoat = build.os.some((h) => h.id === 'jack-of-all-trades' && h.dropped) ? 1 : 0
+  return schedule({ items, blockers: new Set(), depth: 0 }, base, opts, true, usedJoat)
 }
 
 function displayName(id: string, param?: string) {

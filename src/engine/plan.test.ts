@@ -125,6 +125,23 @@ describe('planner', () => {
     expect(new Set(doubles.map((d) => d.id.split('-')[1])).size).toBe(2) // poison and potion, not the same tree
   })
 
+  it('counts a Jack of All Trades purchase for each use in the history, one use per season', () => {
+    const b = build({
+      cs: { 'large-weapon': 1 },
+      loresheets: [{ id: 'awakened-human' }],
+      os: [
+        { id: 'oathsworn', param: 'Militia Guild', source: 'buy' },
+        { id: 'jack-of-all-trades', source: 'loresheet', loresheet: 'awakened-human', dropped: true },
+        { id: 'immune-fear', source: 'joat' }, { id: 'immune-fumble', source: 'joat' }, { id: 'tracking', source: 'joat' },
+      ],
+    })
+    const p = spentSoFar(b)
+    const uses = p.purchases.filter((x) => x.route === 'joat').map((x) => x.year)
+    expect(new Set(uses).size).toBe(3) // one per season
+    expect(p.purchases.filter((x) => x.id === 'jack-of-all-trades')).toHaveLength(3) // the held one plus 2 re-buys
+    expect(planRoute(b, [t('crushing-blow')]).cheapest!.purchases.some((x) => x.id === 'jack-of-all-trades')).toBe(true) // held one is used up
+  })
+
   it('advances one of 4 prebook purchases a second level as a 5th purchase (C20)', () => {
     const b = build({ os: [{ id: 'dismiss-control-2', source: 'buy' }] })
     const targets = [t('dismiss-control-6'), t('immune-fear'), t('immune-fumble'), t('tracking')]
