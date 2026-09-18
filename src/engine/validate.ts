@@ -411,11 +411,12 @@ export function validate(input: Build): ValidationResult {
   if (research.length > RULES.researchCap || research.filter((s) => s.id === 'sage').length > RULES.sageCap) {
     err('LIM-6', 'Research skills: at most 2 Scholar, or 1 Sage and 1 Scholar.')
   }
-  const oaths = onCard.filter((s) => s.id === 'oathsworn')
-  const factionOaths = oaths.filter((s) => factions.includes(s.param ?? '')).length
-  if (factionOaths > RULES.oathswornFactionCap || oaths.length - factionOaths > RULES.oathswornGuildCap) {
-    err('LIM-7', 'At most one faction Oathsworn and one guild Oathsworn.')
-  }
+  // Every Oathsworn counts, wherever it's held (switched off, or from an NPC/DPC loresheet); the same oath twice is one oath.
+  const oaths = [...new Set(skills.filter((s) => s.id === 'oathsworn').map((s) => s.param ?? ''))]
+  const factionOaths = oaths.filter((p) => factions.includes(p))
+  const guildOaths = [...new Set(oaths.filter((p) => !factions.includes(p)).map((p) => guildOf(p) ?? p))]
+  if (factionOaths.length > RULES.oathswornFactionCap) err('LIM-7', `Oathsworn to one faction only (this character: ${factionOaths.join(', ')}).`)
+  if (guildOaths.length > RULES.oathswornGuildCap) err('LIM-7', `Oathsworn to one guild only (this character: ${guildOaths.join(', ')}).`)
   if (holds('treewalker') || heldLs.has('treewalker')) {
     warn('L11', 'Treewalker: the handbook and the Treewalker loresheet give different requirements. Both are applied: Ritual Magic or Perform Transport Rite, and Spellcasting, Incantation or Healing CS; not Corruption, Necromancy or an Unliving pattern.')
   }
