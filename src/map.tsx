@@ -8,6 +8,7 @@ import { coveredBy, type SkillStatus, type ValidationResult } from './engine/val
 interface Node {
   s: SkillStatus
   year?: number
+  years: number[]
   planned: boolean
   route: string
   learn?: Requirement
@@ -31,7 +32,9 @@ export function BuildMap({ build, result, spent, plan }: { build: Build; result:
     const sheet = route === 'loresheet' ? loresheetById.get(held?.loresheet ?? planned?.loresheet ?? '') : undefined
     const learn = route === 'loresheet' ? sheet?.skills.find((e) => e.os === s.id)?.learn : osById.get(s.id)?.learn
     const year = held ? match(spent?.purchases, s)?.year : planned ? past + planned.year : undefined
-    return { s, year, planned: !held, route, learn, skipped: ['architect', 'ritual', 'granted'].includes(route), col: 0, row: 0 }
+    // A skill bought more than once (Jack of All Trades is re-bought for each use) lists every year.
+    const years = held ? (spent?.purchases ?? []).filter((p) => p.id === s.id && (p.param ?? '') === (s.param ?? '')).map((p) => p.year) : []
+    return { s, year, years, planned: !held, route, learn, skipped: ['architect', 'ritual', 'granted'].includes(route), col: 0, row: 0 }
   })
 
   // Edges run from a prerequisite to the skill it unlocks. A skipped route still shows the handbook link, dotted.
@@ -102,7 +105,7 @@ export function BuildMap({ build, result, spent, plan }: { build: Build; result:
           return <path key={i} d={`M${x1},${y1} C${mid},${y1} ${mid},${y2} ${x2 - 2},${y2}`} className={`map-edge${e.skipped ? ' skipped' : ''}`} markerEnd="url(#arrow)" />
         })}
         {nodes.map((n) => {
-          const sub = [n.year ? `Year ${n.year}${n.planned ? ' (planned)' : ''}` : n.planned ? 'Planned' : 'Held', ROUTE_NAMES[n.route] ?? n.route,
+          const sub = [n.years.length > 1 ? `Years ${n.years.join(', ')}` : n.year ? `Year ${n.year}${n.planned ? ' (planned)' : ''}` : n.planned ? 'Planned' : 'Held', ROUTE_NAMES[n.route] ?? n.route,
             n.s.state !== 'active' ? n.s.state === 'dropped' ? 'off card' : n.s.state : ''].filter(Boolean).join(' · ')
           return (
             <g key={n.s.index} transform={`translate(${x(n)},${top(n)})`} className={`map-node ${n.s.state}${n.planned ? ' planned' : ''}`}>

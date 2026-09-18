@@ -157,6 +157,14 @@ describe('planner', () => {
     expect(summary(b, targets.slice(0, 3), { prebook: true }).years).toBe(2)
   })
 
+  it('does not use prebook tier advancement in a retirement double-step year (C20)', () => {
+    const b = build({ os: [{ id: 'dismiss-control-2', source: 'buy' }] })
+    const targets = [t('dismiss-control-6'), t('immune-fumble-shatter'), t('immune-mute'), t('tracking')]
+    const p = planRoute(b, targets, { prebook: true, retired: true }).cheapest!
+    expect(p.purchases.some((x) => x.advanced)).toBe(false)
+    expect(p.purchases.some((x) => x.doubleStep)).toBe(true)
+  })
+
   it('plans Polyglot from an existing script without a prerequisite cycle', () => {
     const b = build({ cs: { 'recognise-forgery': 1 }, os: [{ id: 'translate-named-script', param: 'Elven', source: 'buy' }] })
     expect(summary(b, [t('polyglot')]).steps).toEqual(['1:Script Master (your choice):buy', '2:Polyglot:buy'])

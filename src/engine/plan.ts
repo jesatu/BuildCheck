@@ -289,7 +289,9 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions, history = false, jo
     }
     // ponytail: greedy — only advances when the year's normal pick happens to be 4 prebookable skills.
     const four = items.filter((i) => year.get(i.key) === y && countsYearly(i) && !doubled.has(i.key))
-    if (opts.prebook && four.length === RULES.purchasesPerYear && four.every((i) => plain(i, RULES.prebookMaxTier))) {
+    // Not in a season that uses retirement double steps (C20).
+    const retirementYear = [...doubled.keys()].some((c) => year.get(c) === y)
+    if (opts.prebook && !retirementYear && four.length === RULES.purchasesPerYear && four.every((i) => plain(i, RULES.prebookMaxTier))) {
       const step = items
         .filter((i) => !year.has(i.key) && !doubled.has(i.key) && plain(i, RULES.prebookAdvanceMaxTier) && countsYearly(i))
         .filter((i) => {
