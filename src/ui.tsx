@@ -206,7 +206,7 @@ export function SkillRows({ rows, build, onParam, onSource, onRemove }: {
                 <option value="buy">Bought</option>
                 <option value="ritual">Ritual (no prerequisites)</option>
                 {build?.loresheets.some((l) => l.id === 'architect') && <option value="architect">Architect</option>}
-                {(build?.os.some((h) => h.id === 'jack-of-all-trades') || build?.loresheets.some((l) => l.id === 'awakened-human')) && <option value="joat">Jack of All Trades</option>}
+                {build?.loresheets.some((l) => l.id === 'awakened-human') && <option value="joat">Jack of All Trades</option>}
                 {sheets.map((l) => <option key={l.id} value={`ls:${l.id}`}>{loresheetById.get(l.id)?.name} loresheet</option>)}
               </select>
             )}

@@ -58,8 +58,8 @@ describe('planner', () => {
   })
 
   it('uses Jack of All Trades for one restricted skill per season', () => {
-    const b = build({ os: [
-      { id: 'jack-of-all-trades', source: 'granted', card: 'power' },
+    const b = build({ loresheets: [{ id: 'awakened-human' }], os: [
+      { id: 'jack-of-all-trades', source: 'loresheet', loresheet: 'awakened-human' },
       { id: 'oathsworn', param: 'Mages Guild', source: 'buy' },
     ] })
     const p = planRoute(b, [t('thaulmonic-alignment'), t('impweave-expertise')]).cheapest!
@@ -72,7 +72,7 @@ describe('planner', () => {
   it('re-buys Jack of All Trades from the Awakened Human sheet for 20 OSP in each later season it is used', () => {
     const b = build({
       cs: { spellcasting: 1, 'ritual-magic': 1 },
-      os: [{ id: 'jack-of-all-trades', source: 'granted', card: 'power' }],
+      os: [{ id: 'jack-of-all-trades', source: 'loresheet', loresheet: 'awakened-human' }],
       loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }, { id: 'awakened-human' }],
     })
     const p = planRoute(b, [t('thaulmonic-alignment'), t('ritualist-master')]).cheapest!
@@ -82,11 +82,12 @@ describe('planner', () => {
     expect(p.validation.valid).toBe(true)
   })
 
-  it('buys Jack of All Trades from the Awakened Human sheet when none is held; without the sheet it only uses a held one', () => {
+  it('buys Jack of All Trades from the Awakened Human sheet when none is held; never without the sheet', () => {
     const b = build({ loresheets: [{ id: 'awakened-human' }, { id: 'npc-dpc', param: 'Mages Guild' }] })
     const p = planRoute(b, [t('thaulmonic-alignment')]).cheapest!
     expect(p.purchases.map((x) => `${x.year}:${x.id}:${x.route}:${x.cost}`)).toEqual(['1:jack-of-all-trades:loresheet:20', '1:thaulmonic-alignment:joat:30'])
-    const noSheet = planRoute(build({ loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }] }), [t('thaulmonic-alignment')]).cheapest!
+    const noSheet = planRoute(build({ loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }],
+      os: [{ id: 'jack-of-all-trades', source: 'granted', card: 'power' }] }), [t('thaulmonic-alignment')]).cheapest!
     expect(noSheet.purchases.map((x) => x.route)).toEqual(['buy'])
   })
 
