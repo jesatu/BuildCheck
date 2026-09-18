@@ -125,6 +125,18 @@ describe('planner', () => {
     expect(new Set(doubles.map((d) => d.id.split('-')[1])).size).toBe(2) // poison and potion, not the same tree
   })
 
+  it('buys the next step at an event after prebooking its prerequisite (C20)', () => {
+    const b = build({ cs: { 'poison-lore': 1 } })
+    const targets = [t('create-poison-magical')] // Novice T2, Artisan T3, Master T4 (can't be prebooked), Magical T5
+    expect(summary(b, targets).years).toBe(4)
+    const p = planRoute(b, targets, { prebook: true }).cheapest!
+    expect(p.years).toBe(3)
+    expect(p.purchases.map((x) => `${x.year}:${x.id}:${x.prebook ? 'P' : ''}${x.afterPrebook ? 'E' : ''}`)).toEqual([
+      '1:create-poison-novice:P', '1:create-poison-artisan:E', '2:create-poison-master:', '3:create-poison-magical:',
+    ])
+    expect(p.validation.valid).toBe(true)
+  })
+
   it('plans Polyglot from an existing script without a prerequisite cycle', () => {
     const b = build({ cs: { 'recognise-forgery': 1 }, os: [{ id: 'translate-named-script', param: 'Elven', source: 'buy' }] })
     expect(summary(b, [t('polyglot')]).steps).toEqual(['1:Script Master (your choice):buy', '2:Polyglot:buy'])

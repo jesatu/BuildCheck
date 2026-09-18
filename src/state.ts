@@ -10,9 +10,11 @@ export interface EditorState {
   dropped: string[]
   /** Have also adds the skill's earlier (prerequisite) skills. */
   addPrereqs: boolean
+  /** Plan with prebook each season (C20). */
+  prebook: boolean
 }
 
-export const emptyState = (): EditorState => ({ build: newBuild(), targets: [], retired: false, dropped: [], addPrereqs: true })
+export const emptyState = (): EditorState => ({ build: newBuild(), targets: [], retired: false, dropped: [], addPrereqs: true, prebook: true })
 
 const PREFIX = '#b='
 

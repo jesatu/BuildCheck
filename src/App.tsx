@@ -10,7 +10,7 @@ import { CardView, CsPanel, FACTIONS_AND_GUILDS, Issues, PlanView, SkillPicker, 
 export function App() {
   const [state, setState] = useState<EditorState>(() => decodeState(location.hash) ?? emptyState())
   const [showMap, setShowMap] = useState(false)
-  const { build: saved, targets, retired, dropped, addPrereqs } = state
+  const { build: saved, targets, retired, dropped, addPrereqs, prebook } = state
   useEffect(() => { history.replaceState(null, '', encodeState(state)) }, [state])
 
   const setBuild = (f: (b: Build) => Build) => setState((s) => ({ ...s, build: f(s.build) }))
@@ -22,11 +22,11 @@ export function App() {
 
   // A retirement's double steps happen in the character's first year: in its history if it has one, otherwise in the plan.
   const hasHistory = build.os.some((h) => h.source !== 'granted')
-  const spent = useMemo(() => (hasHistory ? spentSoFar(build, { retired }) : undefined), [build, retired, hasHistory])
+  const spent = useMemo(() => (hasHistory ? spentSoFar(build, { retired, prebook }) : undefined), [build, retired, prebook, hasHistory])
 
   // One plan: the cheapest, with years as the tiebreak (owner decision).
-  const plan = useMemo(() => (targets.length ? planRoute(build, targets, { retired: retired && !hasHistory, drop: dropped }).cheapest : undefined),
-    [build, targets, retired, hasHistory, dropped])
+  const plan = useMemo(() => (targets.length ? planRoute(build, targets, { retired: retired && !hasHistory, drop: dropped, prebook }).cheapest : undefined),
+    [build, targets, retired, hasHistory, dropped, prebook])
   const result = useMemo(() => plan?.validation ?? validate(build), [plan, build])
 
   const add = (id: string, where: 'want' | 'held' | CardId) => {
@@ -118,6 +118,10 @@ export function App() {
             <label className="check">
               <input type="checkbox" checked={retired} onChange={(e) => setState((s) => ({ ...s, retired: e.target.checked }))} />
               Created after retiring a previous character (2 double steps in year 1)
+            </label>
+            <label className="check">
+              <input type="checkbox" checked={prebook} onChange={(e) => setState((s) => ({ ...s, prebook: e.target.checked }))} />
+              Prebook each season (a T1–T3 skill self-taught at prebook lets the next step on its tree be bought at an event that season)
             </label>
           </div>
 

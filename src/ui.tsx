@@ -337,9 +337,9 @@ export function PlanView({ plan, title, note }: { plan: Plan; title: string; not
                     <span className="grow">{p.name}{p.tier && <span className="meta"> T{p.tier}</span>}</span>
                     <span className={`route ${p.route}`}>{p.route === 'loresheet' ? loresheetById.get(p.loresheet!)?.name : ROUTE_LABEL[p.route]}</span>
                     <span className="cost">{p.cost}</span>
-                    {(p.doubleStep || !p.countsTowardYearly || p.notes.length > 0) && (
+                    {(p.doubleStep || p.prebook || p.afterPrebook || !p.countsTowardYearly || p.notes.length > 0) && (
                       <span className="detail">
-                        {[p.doubleStep && 'Retirement double step', !p.countsTowardYearly && !p.doubleStep && 'Doesn\'t use a yearly purchase', ...p.notes].filter(Boolean).join(' · ')}
+                        {[p.doubleStep && 'Retirement double step', p.prebook && 'Prebook (self-taught)', p.afterPrebook && 'At an event after its prebooked prerequisite', !p.countsTowardYearly && !p.doubleStep && 'Doesn\'t use a yearly purchase', ...p.notes].filter(Boolean).join(' · ')}
                       </span>
                     )}
                   </li>
