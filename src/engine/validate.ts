@@ -1,6 +1,6 @@
 import {
-  csById, DEFAULT_SWITCHES, FLAG_LABELS, guildOf, joatGuilds, loresheetById, MAGIC_CS_IDS, osById, raceById, RULES, scriptFamilies, scriptFamilyOf,
-  type Loresheet, type LoresheetSkill, type OccupationalSkill, type Requirement, type RuleSwitches, type Tier,
+  csById, FLAG_LABELS, guildOf, joatGuilds, loresheetById, MAGIC_CS_IDS, osById, raceById, RULES, scriptFamilies, scriptFamilyOf,
+  type Loresheet, type LoresheetSkill, type OccupationalSkill, type Requirement, type Tier,
 } from '../data'
 import { factions } from '../data/races'
 import type { Build, CardId, HeldSkill } from './build'
@@ -110,7 +110,7 @@ export function coveredBy(id: string): Set<string> {
   return set
 }
 
-export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES): ValidationResult {
+export function validate(input: Build): ValidationResult {
   const issues: Issue[] = []
   const err = (rule: string, message: string, skill?: number) => issues.push({ rule, severity: 'error', message, skill })
   const warn = (rule: string, message: string, skill?: number) => issues.push({ rule, severity: 'warning', message, skill })
@@ -349,7 +349,7 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
   const prLimit = RULES.powerRatingLimit + (isActive('bonus-pr-2') ? 2 : isActive('bonus-pr-1') ? 1 : 0)
   if (essencePr > prLimit) err('PR-1', `Essence creature Power Rating ${essencePr} is over the limit of ${prLimit}.`)
 
-  if (switches.warnFearsomeAspectWithoutPower && isActive('fearsome-aspect') && spellPower.total === 0) {
+  if (isActive('fearsome-aspect') && spellPower.total === 0) {
     warn('A12', 'Fearsome Aspect needs Spell Power, and the character has none.')
   }
 

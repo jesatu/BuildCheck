@@ -1,5 +1,4 @@
-// Fixed rule constants and switches for rules that are still unconfirmed.
-// Every switch names the open question it covers in docs/LT-Build-Rules-Reference.md section 13.
+// Fixed rule constants. Rulings are recorded in docs/LT-Build-Rules-Reference.md section 13.
 
 export const RULES = {
   characterPoints: 16,               // CS-1
@@ -22,15 +21,3 @@ export const RULES = {
   basePowerPerLevel: 4,
   childPoints: { under5: 0, age5to9: 10, age10to15: 16 },
 } as const
-
-export interface RuleSwitches {
-  /** L7: High Magic bought from an essence loresheet is still blocked for Jack of All Trades and retirement vouchers. */
-  loresheetHighMagicBlocksJoat: boolean
-  /** A12: warn when Fearsome Aspect is held with no Spell Power. */
-  warnFearsomeAspectWithoutPower: boolean
-}
-
-export const DEFAULT_SWITCHES: RuleSwitches = {
-  loresheetHighMagicBlocksJoat: true,
-  warnFearsomeAspectWithoutPower: true,
-}

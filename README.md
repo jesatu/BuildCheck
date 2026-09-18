@@ -52,7 +52,7 @@ npm run divergence
 - Each Occupational Skill has a `learn` requirement (checked when buying, and defines its tree) and a `use` requirement (checked for the skill to be active).
 - `replaces` lists skills that leave the card when this one is bought. Only record it where the handbook says "replaces".
 - Loresheet skills record the loresheet's own tier, cost and prerequisites.
-- Rules that are still unconfirmed are switches in `src/data/rules.ts`.
+- Rule constants are in `src/data/rules.ts`. Rulings are recorded in the reference document.
 
 Run `npm test` after any change to the data.
 

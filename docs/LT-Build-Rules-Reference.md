@@ -1318,7 +1318,7 @@ Rules that affect a build:
 
 ## 13. Ambiguities and errata
 
-A build tool should expose each open item as a documented configuration choice. It should not hard-code an answer.
+Every item that changed the tool's answers has a ruling (below). The remaining rows record typos, naming variants and data notes; each has a stated treatment.
 
 ### Confirmed rulings
 
@@ -1342,6 +1342,10 @@ These items were settled by the project owner on 2026-09-17. They are now rules 
 | C8 | Jack of All Trades costs **20 OSP every time** it is bought (Awakened Human loresheet). | 12.3 |
 | C9 | Where a loresheet row has no tier printed, use the skill's tier from the handbook, if it has one. | L14 |
 | C10 | Master Brewer (Awakened Uruk) is Tier 3 and Regeneration (Awakened Olog) is Tier 4. What matters is that neither is Tier 5. Both can only be bought from their loresheets. | L14 |
+| L7 | Dropped: loresheet purchases never go through Jack of All Trades or retirement vouchers. | 13 |
+| A12 | +Base Power is allowed without a magic CS. The tool warns when Fearsome Aspect is held with no Spell Power. | 13 |
+| A11 | The only skills that don't count toward the 12 are the ones LIM-4 lists. There are no other 'functional' exemptions. | 13 |
+| L4 | Voidportal bought from a loresheet uses that loresheet's tier (Tier 4 on the Elemental and Circle Watcher sheets). | 13 |
 | R5 | A retirement double step onto a restricted (@) skill still needs a training facility, tutor or forgery. | RET-3 |
 | L12 | On essence loresheets only Min. type limits purchases by creature tier; skill tier does not. | 13 |
 | L11 | Treewalker: both the handbook and loresheet requirements apply, and the tool shows a note about the mismatch. | 13 |
@@ -1360,7 +1364,7 @@ These items were settled by the project owner on 2026-09-17. They are now rules 
 | ID | Issue | Source | Suggested default |
 |---|---|---|---|
 | A1 | **Resolved (see Confirmed rulings).** **Spell Power from several magic CS.** Each CS "grants +4 / +12 base Spell Power", and any mix is allowed. But the Rule of Double says "where a character has several Base values, only the highest value will have an effect". It is unclear whether Healing 1 + Spellcasting 2 gives 16 base power or 12. | HB p.55, p.62 | Add the powers together for the pool. Treat the "highest base" clause as applying to separate base-value *sources* such as lammies. **Confirm with the organisers.** |
-| A2 | **+Base Power without a magic CS.** It is allowed, but there is nothing to spend the power on except *Fearsome Aspect*, Magical Armour repair and similar. | HB p.55 | Allow it. |
+| A2 | **Resolved with A12.** **+Base Power without a magic CS.** It is allowed, but there is nothing to spend the power on except *Fearsome Aspect*, Magical Armour repair and similar. | HB p.55 | Allow it. |
 | A3 | **Resolved (see Confirmed rulings).** **"Some form of casting ability" for Ritual Magic.** Does +Base Power alone count? Does Invocation? | HB p.55 | Require at least one magic CS. |
 | A4 | **Resolved (see Confirmed rulings).** **Triage and Triage (Advanced)** are listed as separate CS. It is not stated whether you can or should hold both. | HB p.51 | Allow both, but warn that Advanced covers everything Triage does. |
 | A5 | **Resolved (see Confirmed rulings).** **Replacement not stated** for several chains: Immune to Charms (from Detect and Remove Beguile), Immune to Mute, Immune to Mind Effects, Immune to Sleep, Mighty Blow, Armour Mastery (Expert), Bank Advisor tiers, Diagnose Powers (from Identify), Perform Teleport Rite, Guarded Channelling, Mind Healing. | HB p.84–98 | Replace only where the text says so. Treat the rest as additive. For Mighty Blow and Armour Mastery (Expert) the old skill is effectively included. |
@@ -1369,8 +1373,8 @@ These items were settled by the project owner on 2026-09-17. They are now rules 
 | A8 | **Retirement example** buys "+4 AND +8 Power (counting as one slot)" and gives other one-tier skills their own slots. | HB p.20 | Two-tier jumps use one purchase slot, at most 2 of them, at post-retirement creation only. |
 | A9 | **Scholar/Sage counting.** Sage "may only be purchased once". Scholar "may be explicitly purchased twice". | HB p.74, p.96 | At most 2 Scholar/Sage skills in total, and at most 1 of them Sage. |
 | A10 | **Resolved (see Confirmed rulings).** **Revitalise Unliving and Repair Unliving (Advanced)** need the ability to cast "Repair Unliving". That spell is on the Corruption and Dark Incantation lists (and Cast All Incantation). | HB p.94–95 | Use requires Corruption CS, **or** Incantation CS + Dark Incantation (or Cast All Incantation). |
-| A11 | **Functional OS** "may not always count towards your limit of 12". No list is given. | HB p.74 | Add a per-skill `countsTowardLimit` flag. |
-| A12 | **Fearsome Aspect** uses "their own Spell Power", so it needs a power pool but no magic CS. | HB p.90 | Allow it with any Spell Power source, and warn when the power pool is 0. |
+| A11 | **Resolved (see Confirmed rulings).** **Functional OS** "may not always count towards your limit of 12". No list is given. | HB p.74 | Add a per-skill `countsTowardLimit` flag. |
+| A12 | **Resolved (see Confirmed rulings).** **Fearsome Aspect** uses "their own Spell Power", so it needs a power pool but no magic CS. | HB p.90 | Allow it with any Spell Power source, and warn when the power pool is 0. |
 | A13 | **Resolved (see Confirmed rulings).** Pattern changes go one way: Living → Magical or Living → Unliving only. | Owner ruling | — |
 
 ### Errata and naming inconsistencies
@@ -1398,10 +1402,10 @@ These items were settled by the project owner on 2026-09-17. They are now rules 
 | L1 | **Resolved (see Confirmed rulings).** **"None" prerequisites against handbook prerequisites.** The loresheet overview says handbook prerequisites still apply unless a skill explicitly says otherwise. But many loresheet rows print "None" for skills that need a prerequisite in the handbook. Examples: Mineral *Immune to Repel and Strikedown* (handbook needs Immune to Repel), Paladin *Champion* (Transcend Armour), Paladin *Last Rites (Improved)* (Last Rites), Unliving *+1 LHV* (Body Development 2 to use). | LS: Overview and creature sheets | Use the loresheet's prerequisite column for **learn** prerequisites. Keep the handbook's **use** requirements (for example Armour CS for Champion). **Confirm with the organisers.** |
 | L2 | **Loresheet tiers don't follow cost or chain order.** Examples: Warlock +8 Spell Power is T2 at 10 OSP; Warlock High Magic (Spellcasting) is T5 at 30; Druid Retractable Claws is T1 but needs Natural Claws (T3); Druid Master Countermagic is T2 at 10. | LS: Warlock, Druid | Store tier and cost exactly as printed. Use tier for the T5 cap and routing, and cost for OSP. |
 | L3 | **Resolved (see Confirmed rulings).** Ancestral *Dismiss Rank +10* is **Tier 1** at 30 OSP. On the other creature sheets it is Tier 3. | LS: Ancestral | Probably a typo for Tier 3. Keep the printed value but flag it. |
-| L4 | Voidportal # is **Tier 4** on the Elemental sheet and **Tier 5** in the handbook (both 85 OSP). | LS: Elemental; HB p.83 | Use the loresheet tier for Elementals. |
+| L4 | **Resolved (see Confirmed rulings).** Voidportal # is **Tier 4** on the Elemental sheet and **Tier 5** in the handbook (both 85 OSP). | LS: Elemental; HB p.83 | Use the loresheet tier for Elementals. |
 | L5 | Vampire *Dismiss/Control +8* needs **+4**, skipping +6. Vampire *+1 LHV (V)* "stacks with the +1 LHV OS", although OS-3 bans duplicate skills. | LS: Vampire | Allow both as printed. Model +1 LHV (V) as a separate skill ID. |
 | L6 | **Unnamed or shortened skill names** on loresheets: "Conceal" (Conceal Item), "Regeneration (10m)" and "Regeneration" (Regenerates), "Natural Armour" as a prerequisite (+1 Natural Armour), "Magebolt Wedge" (Mage Bolt Wedge), "Fearsome Aspect 1/2/4" (Fearsome Aspect <X>). Fearsome Aspect has no level 3. | LS: Plant, Beast, Druid, Warlock, Werecreature | Treat as aliases. Fearsome Aspect 4 needs Fearsome Aspect 2 as printed. |
-| L7 | **High Magic (Spellcasting / Healing / Incantation / Corruption)** appear on essence loresheets. In the handbook these are High Magic <X>, which cannot be gained through Jack of All Trades or retirement vouchers. | LS: Warlock, Druid, Vampire | Treat as High Magic <X> for the list named, at the loresheet cost. |
+| L7 | **Resolved (see Confirmed rulings).** **High Magic (Spellcasting / Healing / Incantation / Corruption)** appear on essence loresheets. In the handbook these are High Magic <X>, which cannot be gained through Jack of All Trades or retirement vouchers. | LS: Warlock, Druid, Vampire | Treat as High Magic <X> for the list named, at the loresheet cost. |
 | L8 | Some loresheet skills need a prerequisite that isn't on that loresheet. Examples: Magical Pattern *+2 Natural Armour* and *+2 Magical Armour* need the +1 versions; Vampire *Repair Unliving (Advanced)* needs Revitalise Unliving; Awakened Drow *Focused Through* needs Immune to Fumble. | LS: Magical Pattern, Vampire, Awakened Drow | The prerequisite must come from a handbook list or another loresheet. |
 | L9 | *Titans Endurance* (Warlock Price of Power) is a potion (owner, 2026-09-18); details to come from the crafting list. *Chant of Wasting* (Paladin, Awakened Drow) doesn't match any spell list, where Wasting is a rite. | LS: Warlock, Paladin, Awakened Drow | Keep as named. Flag for confirmation. |
 | L10 | **Resolved (see Confirmed rulings).** The Druid **armour limit** ("no bonus AV from external sources") doesn't say whether Armour Mastery OS count as external. | LS: Druid | Treat Armour Mastery as bonus AV, so it doesn't apply. **Confirm.** |
