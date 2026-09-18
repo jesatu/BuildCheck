@@ -372,17 +372,22 @@ describe('derived values', () => {
     expect(missingLoresheets({ ...newBuild(), os: [buy('awakened', 'Elf')] })).toEqual(['awakened-elf'])
     expect(missingLoresheets(newBuild(), [{ id: 'awakened' }])).toEqual(['awakened-human'])
   })
-  it('checks special creature combinations (C21)', () => {
+  it('allows only one special creature (C21)', () => {
     const c21 = (b: Partial<Build>) => validate({ ...newBuild(), ...b }).issues.filter((x) => x.rule === 'C21').map((x) => x.message)
     const vampire = { id: 'vampire' }, druid = { id: 'druid' }
     expect(c21({ os: [buy('awakened', 'Human')] })).toEqual([])
-    expect(c21({ race: 'elf', os: [buy('awakened', 'Human')] })).toHaveLength(1)
-    expect(c21({ race: 'elf', loresheets: [{ id: 'awakened-elf' }, { id: 'awakened-human' }] })).toContain('A character can only be one kind of awakened (Elf, Human).')
-    expect(c21({ loresheets: [{ id: 'awakened-human' }, druid] })).toHaveLength(1)
+    expect(c21({ race: 'elf', os: [buy('awakened', 'Human')] })).toEqual(['Awakened Human needs a Human character (this one is Elf).'])
+    expect(c21({ os: [buy('awakened', 'Human')], loresheets: [{ id: 'awakened-human' }] })).toEqual([])
+    expect(c21({ race: 'elf', loresheets: [{ id: 'awakened-elf' }, { id: 'awakened-human' }] })).toHaveLength(1)
+    expect(c21({ loresheets: [{ id: 'awakened-human' }, druid] })).toEqual(['A character can only be one special creature: this one is Druid, Awakened Human.'])
     expect(c21({ race: 'daemon', loresheets: [{ id: 'daemon' }, druid] })).toHaveLength(1)
+    expect(c21({ race: 'plant', loresheets: [{ id: 'plant' }, druid] })).toHaveLength(1)
     expect(c21({ race: 'umbral', loresheets: [druid] })).toEqual([])
+    expect(c21({ loresheets: [vampire, druid] })).toHaveLength(1)
     expect(c21({ pattern: 'unliving', loresheets: [{ id: 'unliving' }, vampire] })).toEqual([])
-    expect(c21({ pattern: 'unliving', loresheets: [{ id: 'unliving' }, vampire, druid] })).toHaveLength(1)
+    expect(c21({ pattern: 'unliving', loresheets: [{ id: 'unliving' }, druid] })).toHaveLength(1)
     expect(c21({ pattern: 'magical', loresheets: [{ id: 'magical-pattern' }, druid] })).toHaveLength(1)
+    expect(c21({ pattern: 'magical', loresheets: [{ id: 'magical-pattern' }, { id: 'awakened-human' }] })).toHaveLength(1)
   })
+
 })

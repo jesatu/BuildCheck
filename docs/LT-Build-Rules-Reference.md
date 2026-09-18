@@ -530,7 +530,7 @@ Restrictions on specific skills:
 | **EX-2** | Light Incantation cannot be held with Dark Incantation. Enchanting cannot be held with Shadow Magic. See MG-5. |
 | **EX-3** | Cast All Incantation # and Cast All Magecraft # can enable Elementalism **or** Necromancy, not both. |
 | **EX-4** | *Treewalker #* is not available to an Unliving-pattern character or anyone with Corruption CS. |
-| **EX-5** | *Awakened <X>* stops the character becoming an Essence Creature, Summonable Creature or other ritual-made special creature. |
+| **EX-5** | *Awakened <X>* stops the character becoming an Essence Creature, Summonable Creature or other ritual-made special creature. Becoming an Essence Creature does the same the other way round (HB Essence Creature). See C21. |
 | **EX-6** | *Improved Ritual of Peace #* only works if the character has **no** Tier 5 OS. |
 | **EX-7** | *Impweave Expertise* cannot be combined with any other Spell Reduction. |
 
@@ -1353,7 +1353,7 @@ These items were settled by the project owner on 2026-09-17. They are now rules 
 | C18 | **Covered, not replaced:** these stay on the card, marked redundant, until dropped by hand, and don't count as the covered skill for prerequisites. Immune to Mind Effects covers Immune to Fear, Immune to Befriend and Confusion, Immune to Sleep and Immune to Charms; Immune to Immobilisation covers Immune to Paralysis; Immune to Disease and Decay covers Immune to Disease; Damage Reduction (All) covers Damage Reduction (Fatal); Magic Resistance covers Damage Reduction (Harm) and (Mage Bolt); Beguile covers Immune to Charms. | Section 10 |
 | C19 | Fearsome Aspect <X> and Beguile <X>: a higher level replaces the lower levels. | Section 11 |
 | C20 | **Prebook tier advancement.** Book all 4 events at the same time and spend all 4 purchases at prebook (so all T1–T3, not `@`), and you can advance one of those skills a second level straight away, e.g. Dismiss/Control +4 then +6. Pay the OSP for both levels; you need the OSP for all 5 skills. The advancement can't be Tier 5 or restricted. | 8.2, 8.3 |
-| C21 | **Special creature combinations.** The character's race must match Awakened <X>. Only one kind of awakened at a time. Awakened and essence creature can't be combined. A summonable race (Daemon, Ancestral, Elemental) can't be an essence creature. An unliving pattern can't be an essence creature unless it's a Vampire. A magical pattern can't be an essence creature. | 3, 12.3, 12.4 |
+| C21 | **One special creature at a time.** The character's race must match Awakened <X>. A character can be only one of: an essence creature (one kind), awakened (one race), a ritual race (Daemon, Ancestral, Elemental, Beast, Plant, Mineral) or a changed pattern (Magical, or Unliving other than as a Vampire). Sources: HB Essence Creature and Awakened <X> ("prevents the character becoming ... any other kind of Special Creature"), the same line on every awakened loresheet, and PR-2 (1 special creature lammie). | 3, 8.6 EX-5, 12.3, 12.4 |
 | L7 | Dropped: loresheet purchases never go through Jack of All Trades or retirement vouchers. | 13 |
 | A12 | +Base Power is allowed without a magic CS. The tool warns when Fearsome Aspect is held with no Spell Power. | 13 |
 | A11 | The only skills that don't count toward the 12 are the ones LIM-4 lists. There are no other 'functional' exemptions. | 13 |
