@@ -226,6 +226,22 @@ export function validate(input: Build): ValidationResult {
   if (b.pattern !== 'living' && !patternSources.includes(b.pattern)) err('A13', `A ${b.pattern} pattern needs a pattern loresheet.`)
   if (patternSources.some((p) => p !== b.pattern)) err('A13', `A held loresheet sets the pattern to ${patternSources.find((p) => p !== b.pattern)}.`)
 
+  // Special creature combinations (C21).
+  const awakenedRaces = new Set([
+    ...b.loresheets.filter((l) => loresheetById.get(l.id)?.kind === 'awakened').map((l) => loresheetById.get(l.id)!.name.replace(/^Awakened /, '')),
+    ...b.os.filter((h) => h.id === 'awakened' && h.param).map((h) => h.param!),
+  ])
+  const essences = b.loresheets.map((l) => loresheetById.get(l.id)!).filter((ls) => ls?.kind === 'essence')
+  const essenceNames = essences.map((ls) => ls.name).join(' and ')
+  const an = (w: string) => `${/^[AEIOU]/i.test(w) ? 'an' : 'a'} ${w}`
+  // An awakened loresheet on the wrong race is already an error (12.3); this checks the skill's <X>.
+  for (const h of b.os) if (h.id === 'awakened' && h.param && race && h.param !== race.name) err('C21', `Awakened ${h.param} needs ${an(h.param)} character (this one is ${race.name}).`)
+  if (awakenedRaces.size > 1) err('C21', `A character can only be one kind of awakened (${[...awakenedRaces].join(', ')}).`)
+  if (essences.length && (awakenedRaces.size || b.os.some((h) => h.id === 'awakened'))) err('C21', `An awakened character can't also be an essence creature (${essenceNames}).`)
+  if (essences.length && race?.category === 'planar' && !race.startingRace) err('C21', `${an(race.name).replace(/^a/, 'A')} (summonable race) can't also be an essence creature (${essenceNames}).`)
+  if (b.pattern === 'unliving') for (const ls of essences.filter((e) => e.id !== 'vampire')) err('C21', `An unliving pattern can't be ${an(ls.name)}; only a Vampire can be unliving.`)
+  if (essences.length && b.pattern === 'magical') err('C21', `A magical pattern can't also be an essence creature (${essenceNames}).`)
+
   for (const l of b.loresheets) {
     const ls = loresheetById.get(l.id)
     if (!ls) { err('12', `Unknown loresheet "${l.id}".`); continue }
