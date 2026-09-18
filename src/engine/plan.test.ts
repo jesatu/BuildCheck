@@ -144,6 +144,15 @@ describe('planner', () => {
     expect(magical.notes).toContain('Restricted: needs a training facility, tutor or forgery')
   })
 
+  it('drops planned prerequisites from the finished card', () => {
+    const p = planRoute(newBuild(), [t('immune-mind-effects')], { drop: ['immune-mute|', 'rally|'] }).cheapest!
+    expect(p.years).toBe(4)
+    expect(p.validation.valid).toBe(true)
+    expect(p.validation.skills.map((s) => `${s.id}:${s.state}`)).toEqual([
+      'immune-fear:replaced', 'immune-mute:dropped', 'rally:dropped', 'immune-mind-effects:active',
+    ])
+  })
+
   it('validates the final build', () => {
     const p = planRoute(build({ cs: { 'poison-lore': 1 } }), [t('create-poison-master')]).cheapest!
     expect(p.validation.valid).toBe(true)

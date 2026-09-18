@@ -6,6 +6,7 @@ it('round-trips editor state through the URL hash, including non-ASCII text', ()
   s.build.cs = { healing: 2 }
   s.targets = [{ id: 'script-master', param: 'Myth & Magic' }, { id: 'apprentice', param: 'Tänzer' }]
   s.retired = true
+  s.dropped = ['immune-mute|']
   expect(decodeState(encodeState(s))).toEqual(s)
   expect(decodeState('#b=not-valid')).toBeUndefined()
   expect(decodeState('')).toBeUndefined()

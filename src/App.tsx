@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { csById, FLAG_LABELS, loresheetById, loresheets, osById, races, type FlagId, type Pattern } from './data'
-import { addLoresheets, type Build, type CardId, type HeldSkill } from './engine/build'
+import { addLoresheets, skillKey, type Build, type CardId, type HeldSkill } from './engine/build'
 import { planRoute } from './engine/plan'
 import { essenceTier, missingLoresheets, validate } from './engine/validate'
 import { decodeState, emptyState, encodeState, type EditorState } from './state'
@@ -8,13 +8,18 @@ import { CardView, CsPanel, FACTIONS_AND_GUILDS, Issues, PlanView, SkillPicker, 
 
 export function App() {
   const [state, setState] = useState<EditorState>(() => decodeState(location.hash) ?? emptyState())
-  const { build, targets, retired } = state
+  const { build: saved, targets, retired, dropped } = state
   useEffect(() => { history.replaceState(null, '', encodeState(state)) }, [state])
 
   const setBuild = (f: (b: Build) => Build) => setState((s) => ({ ...s, build: f(s.build) }))
+  const toggleDrop = (key: string) =>
+    setState((s) => ({ ...s, dropped: s.dropped.includes(key) ? s.dropped.filter((k) => k !== key) : [...s.dropped, key] }))
+
+  // Dropped skills stay in the build (they still count for prerequisites) but are marked off the card.
+  const build = useMemo(() => ({ ...saved, os: saved.os.map((h) => (dropped.includes(skillKey(h.id, h.param)) ? { ...h, dropped: true } : h)) }), [saved, dropped])
 
   // One plan: the cheapest, with years as the tiebreak (owner decision).
-  const plan = useMemo(() => (targets.length ? planRoute(build, targets, { retired }).cheapest : undefined), [build, targets, retired])
+  const plan = useMemo(() => (targets.length ? planRoute(build, targets, { retired, drop: dropped }).cheapest : undefined), [build, targets, retired, dropped])
   const result = useMemo(() => plan?.validation ?? validate(build), [plan, build])
 
   const add = (id: string, where: 'want' | 'held' | CardId) => {
@@ -161,7 +166,7 @@ export function App() {
         </section>
 
         <section className="col">
-          <CardView build={build} result={result} />
+          <CardView build={build} result={result} onToggleDrop={toggleDrop} />
           <Issues issues={result.issues} nameOf={(i) => result.skills[i]?.name} />
           {plan && <PlanView plan={plan} />}
           <p className="muted small">

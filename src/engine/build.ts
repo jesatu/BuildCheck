@@ -19,7 +19,12 @@ export interface HeldSkill {
   loresheet?: string
   /** Defaults to 'character'. Granted skills go on 'creature' or 'power'. */
   card?: CardId
+  /** Taken off the card (switched off or sacrificed, LIM-8). Still counts as held for prerequisites. */
+  dropped?: boolean
 }
+
+/** Identifies a skill (and its <X>) for dropping. */
+export const skillKey = (id: string, param?: string) => `${id}|${param ?? ''}`
 
 export interface HeldLoresheet {
   id: string

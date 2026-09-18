@@ -138,6 +138,24 @@ describe('buying routes', () => {
   })
 })
 
+describe('dropping skills', () => {
+  it('takes a dropped skill off the card but keeps it for prerequisites (LIM-8)', () => {
+    const b = build({ os: [buy('immune-fear'), { ...buy('immune-mute'), dropped: true }, { ...buy('rally'), dropped: true }, buy('immune-mind-effects')] })
+    const r = validate(b)
+    expect(r.valid).toBe(true)
+    expect(r.skills.map((s) => s.state)).toEqual(['replaced', 'dropped', 'dropped', 'active'])
+    expect(r.skills[1]!.reason).toBe('Off the card; still counts for prerequisites')
+  })
+
+  it('does not count dropped skills toward the 12 or clash with other skills', () => {
+    const right = ['immune-fear', 'immune-mute', 'immune-fumble', 'tracking', 'locate', 'escape-bonds', 'forensic-analysis',
+      'herb-lore', 'trap-lore', 'traverse-faction-wards', 'immune-repel', 'dismiss-control-2', 'detect-remove-beguile']
+    const b = build({ os: right.map((id) => buy(id)) })
+    expect(rules(b)).toEqual(['LIM-1'])
+    expect(rules({ ...b, os: b.os.map((h, i) => (i === 0 ? { ...h, dropped: true } : h)) })).toEqual([])
+  })
+})
+
 describe('card limits', () => {
   it('counts only right-side skills toward the 12', () => {
     const right = ['immune-fear', 'immune-mute', 'immune-fumble', 'tracking', 'locate', 'escape-bonds', 'forensic-analysis',

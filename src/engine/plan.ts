@@ -2,7 +2,7 @@ import {
   loresheetById, osById, osIdsIn, RULES, scriptFamilies, scriptFamilyOf,
   type LoresheetSkill, type Requirement, type Tier,
 } from '../data'
-import type { Build, HeldSkill } from './build'
+import { skillKey, type Build, type HeldSkill } from './build'
 import { coveredBy, describe, essenceTier, joatBlocker, skillName, validate, withGrants, type ValidationResult } from './validate'
 
 // Route planner (reference doc 8.2, 8.3, 8.8). Turns target skills into a year-by-year purchase plan.
@@ -16,6 +16,8 @@ export interface Target { id: string; param?: string }
 export interface PlanOptions {
   /** The character follows a retirement: 2 double steps on different trees in year 1 (RET-3, RET-3a). */
   retired?: boolean
+  /** Skills (skillKey) to take off the finished card; they still count for prerequisites. */
+  drop?: string[]
 }
 
 export interface PlannedPurchase {
@@ -316,7 +318,10 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
 
   const finalBuild: Build = {
     ...build,
-    os: [...build.os, ...purchases.filter((p) => !rebuyYears.has(p.year) || p.id !== joat.id).map((p): HeldSkill => ({ id: p.id, param: concreteParam(p.id, p.param), source: p.route, loresheet: p.loresheet }))],
+    os: [...build.os, ...purchases.filter((p) => !rebuyYears.has(p.year) || p.id !== joat.id).map((p): HeldSkill => ({
+      id: p.id, param: concreteParam(p.id, p.param), source: p.route, loresheet: p.loresheet,
+      ...(opts.drop?.includes(skillKey(p.id, p.param)) ? { dropped: true } : {}),
+    }))],
   }
   return {
     purchases,

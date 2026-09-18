@@ -4,14 +4,14 @@ import {
   type CsGroup,
 } from './data'
 import { factions } from './data/races'
-import type { Build, CardId, SkillSource } from './engine/build'
+import { skillKey, type Build, type CardId, type SkillSource } from './engine/build'
 import type { Plan } from './engine/plan'
 import type { Issue, SkillStatus, ValidationResult } from './engine/validate'
 
 const CS_GROUPS: Array<[CsGroup, string]> = [['weapon', 'Weapon'], ['armour', 'Armour'], ['knowledge', 'Knowledge'], ['power', 'Power']]
 const ROUTE_LABEL = { buy: 'Buy', loresheet: 'Loresheet', architect: 'Architect', joat: 'Jack of All Trades' } as const
 const CARD_LABEL: Record<CardId, string> = { character: 'Character card', creature: 'Special creature card', power: 'Special power card', loresheet: 'Granted by loresheets' }
-const STATE_LABEL = { active: 'Active', inactive: 'Inactive', redundant: 'Redundant', replaced: 'Replaced' } as const
+const STATE_LABEL = { active: 'Active', inactive: 'Inactive', redundant: 'Redundant', replaced: 'Replaced', dropped: 'Off card' } as const
 
 // ---------- Character Skills ----------
 
@@ -195,20 +195,28 @@ export function SkillRows({ rows, build, onParam, onSource, onRemove }: {
 
 // ---------- Character card ----------
 
-function SkillLine({ s }: { s: SkillStatus }) {
+function SkillLine({ s, onToggleDrop }: { s: SkillStatus; onToggleDrop?: (key: string) => void }) {
   const detail = s.state === 'replaced' ? `Replaced by ${s.replacedBy}` : s.reason
+  const canToggle = onToggleDrop && s.card === 'character' && s.state !== 'replaced'
   return (
     <li className={`skill ${s.state}`}>
       <span className="grow">{s.name}{s.tier && <span className="meta"> T{s.tier}</span>}</span>
       {s.state !== 'active' && <span className="state">{STATE_LABEL[s.state]}</span>}
+      {canToggle && (
+        <button type="button" className="drop" onClick={() => onToggleDrop(skillKey(s.id, s.param))}
+          title={s.state === 'dropped' ? 'Put back on the card' : 'Take off the card; it still counts for prerequisites'}>
+          {s.state === 'dropped' ? 'Restore' : 'Drop'}
+        </button>
+      )}
       {detail && <span className="detail">{detail}</span>}
     </li>
   )
 }
 
-export function CardView({ build, result }: { build: Build; result: ValidationResult }) {
+export function CardView({ build, result, onToggleDrop }: { build: Build; result: ValidationResult; onToggleDrop: (key: string) => void }) {
   const [showReplaced, setShowReplaced] = useState(false)
-  const onCard = (card: CardId) => result.skills.filter((s) => s.card === card && (showReplaced || s.state !== 'replaced'))
+  const onCard = (card: CardId) => result.skills.filter((s) => s.card === card && s.state !== 'dropped' && (showReplaced || s.state !== 'replaced'))
+  const offCard = result.skills.filter((s) => s.state === 'dropped')
   const character = onCard('character')
   const left = character.filter((s) => s.side === 'left')
   const right = character.filter((s) => s.side === 'right')
@@ -234,12 +242,12 @@ export function CardView({ build, result }: { build: Build; result: ValidationRe
               const cs = characterSkills.find((c) => c.id === id)
               return <li key={id} className="skill active"><span className="grow">{cs?.name}{cs && cs.levelCosts.length > 1 ? ` ${level}` : ''}</span></li>
             })}
-            {left.map((s) => <SkillLine key={s.index} s={s} />)}
+            {left.map((s) => <SkillLine key={s.index} s={s} onToggleDrop={onToggleDrop} />)}
           </ul>
         </div>
         <div>
           <h3>Right side <span className={`count ${counted > 12 ? 'bad' : ''}`}>{counted}/12</span>{t5 > 0 && <span className={`count ${t5 > 4 ? 'bad' : ''}`}>T5 {t5}/4</span>}</h3>
-          <ul className="skills">{right.map((s) => <SkillLine key={s.index} s={s} />)}</ul>
+          <ul className="skills">{right.map((s) => <SkillLine key={s.index} s={s} onToggleDrop={onToggleDrop} />)}</ul>
           {right.length === 0 && <p className="muted small">No Occupational Skills yet.</p>}
         </div>
       </div>
@@ -251,6 +259,14 @@ export function CardView({ build, result }: { build: Build; result: ValidationRe
           </div>
         </div>
       ))}
+      {offCard.length > 0 && (
+        <div className="card special">
+          <div>
+            <h3>Off the card (kept for prerequisites)</h3>
+            <ul className="skills">{offCard.map((s) => <SkillLine key={s.index} s={s} onToggleDrop={onToggleDrop} />)}</ul>
+          </div>
+        </div>
+      )}
       <label className="check small">
         <input type="checkbox" checked={showReplaced} onChange={(e) => setShowReplaced(e.target.checked)} />
         Show replaced skills

@@ -17,8 +17,11 @@ export interface Issue {
   skill?: number
 }
 
-/** redundant: still on the card, but another held skill already covers it (shown differently from inactive). */
-export type SkillState = 'active' | 'inactive' | 'redundant' | 'replaced'
+/**
+ * redundant: still on the card, but another held skill already covers it (shown differently from inactive).
+ * dropped: taken off the card; still counts for prerequisites.
+ */
+export type SkillState = 'active' | 'inactive' | 'redundant' | 'replaced' | 'dropped'
 
 export interface SkillStatus {
   index: number
@@ -302,23 +305,23 @@ export function validate(input: Build): ValidationResult {
     const inactive = gap ? `Needs ${gap}` : disabled.get(h.id)
     // Polyglot covers every family script; TNS left over from a family without Script Master is redundant.
     // A Druid gets standard AV only, so Armour Mastery adds nothing (L10). The Expert level keeps its Crush immunity.
-    const redundant = h.id === 'translate-named-script' && scriptFamilyOf(h.param) && holds('polyglot', undefined, i)
+    const redundant = h.id === 'translate-named-script' && scriptFamilyOf(h.param) && os.some((o) => o.id === 'polyglot' && !o.dropped)
       ? 'Covered by Polyglot'
       : standardArmourOnly && (h.id === 'armour-mastery' || h.id === 'armour-mastery-advanced')
         ? 'Druid: standard AV only, so no extra AV' : undefined
-    const reason = inactive ?? redundant
+    const reason = h.dropped ? 'Off the card; still counts for prerequisites' : inactive ?? redundant
     const replaced = replacedBy.get(i)
     return {
       index: i, id: h.id, param: h.param, name: skillName(h.id, h.param), card: h.card ?? 'character',
       side: s?.side ?? 'right', tier: tierOf[i],
-      state: replaced ? 'replaced' : inactive ? 'inactive' : redundant ? 'redundant' : 'active',
+      state: h.dropped ? 'dropped' : replaced ? 'replaced' : inactive ? 'inactive' : redundant ? 'redundant' : 'active',
       reason, replacedBy: replaced,
     }
   })
 
   // ---------- Card limits (section 8.4) ----------
   // ponytail: only the character card counts toward limits; granted creature/power skills don't (unconfirmed).
-  const onCard = skills.filter((s) => s.state !== 'replaced' && s.card === 'character')
+  const onCard = skills.filter((s) => s.state !== 'replaced' && s.state !== 'dropped' && s.card === 'character')
   const seen = new Set<string>()
   for (const s of onCard) {
     const k = `${s.id}|${s.param ?? ''}`
