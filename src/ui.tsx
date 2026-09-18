@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  characterSkills, guildListById, guildLists, loresheetById, occupationalSkills, osById, raceById, scriptFamilies,
+  characterSkills, CS_LADDERS, csById, guildListById, guildLists, loresheetById, occupationalSkills, osById, raceById, scriptFamilies,
   type CsGroup,
 } from './data'
 import { factions } from './data/races'
@@ -34,6 +34,27 @@ export function CsPanel({ build, setBuild, points: { spent, available } }: {
           <legend>{label}</legend>
           {characterSkills.filter((s) => s.group === group).map((s) => {
             const level = build.cs[s.id] ?? 0
+            const ladder = CS_LADDERS.find((l) => (l.skills as readonly string[]).includes(s.id))
+            if (ladder) {
+              // One choice per ladder: the higher skill replaces the lower (CS-8).
+              if (ladder.skills[0] !== s.id) return null
+              const chosen = ladder.skills.find((id) => build.cs[id]) ?? ''
+              return (
+                <label key={ladder.name} className="check">
+                  <select aria-label={ladder.name} value={chosen}
+                    onChange={(e) => setBuild((b) => {
+                      const cs = { ...b.cs }
+                      for (const id of ladder.skills) delete cs[id]
+                      if (e.target.value) cs[e.target.value] = 1
+                      return { ...b, cs }
+                    })}>
+                    <option value="">–</option>
+                    {ladder.skills.map((id) => <option key={id} value={id}>{csById.get(id)!.name} ({csById.get(id)!.levelCosts[0]})</option>)}
+                  </select>
+                  <span className="grow">{ladder.name}</span><span className="cost">{chosen ? csById.get(chosen)!.levelCosts[0] : ''}</span>
+                </label>
+              )
+            }
             return s.levelCosts.length === 1 ? (
               <label key={s.id} className="check" title={s.summary}>
                 <input type="checkbox" checked={level > 0} onChange={(e) => setLevel(s.id, e.target.checked ? 1 : 0)} />

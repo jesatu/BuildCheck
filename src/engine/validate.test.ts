@@ -22,6 +22,12 @@ describe('character skills', () => {
     expect(rules(build({ cs: { 'projectile-weapon': 1, 'ritual-magic': 1 } }))).toEqual(['CS-7', 'CS-7'])
   })
 
+  it('allows only one skill from each ladder: armour use, and triage (CS-8)', () => {
+    expect(rules(build({ cs: { 'light-armour': 1, 'heavy-armour': 1 } }))).toEqual(['CS-8'])
+    expect(rules(build({ cs: { triage: 1, 'triage-advanced': 1 } }))).toEqual(['CS-8'])
+    expect(rules(build({ cs: { 'heavy-armour': 1, 'triage-advanced': 1 } }))).toEqual([])
+  })
+
   it('applies children\'s limits', () => {
     expect(rules(build({ age: 8, cs: { 'heavy-armour': 1 } }))).toEqual(['CH'])
     expect(rules(build({ age: 8, cs: { healing: 2, 'base-power': 1 } }))).toEqual([])
@@ -200,14 +206,31 @@ describe('awakened loresheets', () => {
   })
 })
 
+describe('notes', () => {
+  it('notes the Treewalker rules mismatch (L11)', () => {
+    const r = validate(build({ cs: { spellcasting: 1 }, loresheets: [{ id: 'treewalker' }] }))
+    expect(r.issues.filter((i) => i.rule === 'L11').map((i) => i.severity)).toEqual(['warning'])
+  })
+})
+
 describe('derived values', () => {
   it('applies the Rule of Double to Spell Power', () => {
     const d = validate(build({ cs: { healing: 1 }, os: [buy('spell-power-4'), buy('spell-power-8'), buy('spell-power-12'), buy('spell-power-16')] })).derived
     expect(d.spellPower).toEqual({ base: 4, total: 8, cap: 8 })
   })
 
-  it('adds power from several magic skills by default (A1)', () => {
-    expect(validate(build({ cs: { healing: 1, spellcasting: 2, 'base-power': 1 } })).derived.spellPower.base).toBe(20)
+  it('takes the highest magic CS grant as base, plus +Base Power (A1)', () => {
+    expect(validate(build({ cs: { healing: 1, spellcasting: 2 } })).derived.spellPower).toMatchObject({ base: 12, cap: 24 })
+    expect(validate(build({ cs: { spellcasting: 2, 'base-power': 1 } })).derived.spellPower).toMatchObject({ base: 16, cap: 32 })
+  })
+
+  it('shows Armour Mastery as redundant for a Druid, but keeps Armour Mastery (Expert) active for its Crush immunity (L10)', () => {
+    const b = build({
+      cs: { 'light-armour': 1 },
+      loresheets: [{ id: 'druid', tier: 1 }],
+      os: [{ id: 'armour-mastery', source: 'buy' }, { id: 'armour-mastery-advanced', source: 'buy' }, { id: 'armour-mastery-expert', source: 'buy' }],
+    })
+    expect(validate(b).skills.map((s) => s.state)).toEqual(['replaced', 'redundant', 'active'])
   })
 
   it('gives a Warlock no LHV from Body Development', () => {

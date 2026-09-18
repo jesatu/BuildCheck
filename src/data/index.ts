@@ -7,10 +7,9 @@ import { spellLists } from './spells'
 import type { CharacterSkill, FlagId, GuildList, Loresheet, OccupationalSkill, Race, Requirement, SpellList } from './types'
 
 export * from './types'
-export { RULES, DEFAULT_SWITCHES } from './rules'
-export type { RuleSwitches } from './rules'
+export { RULES } from './rules'
 export { characterSkills, occupationalSkills, loresheets, races, spellLists, guildLists }
-export { MAGIC_CS as MAGIC_CS_IDS } from './character-skills'
+export { CS_LADDERS, MAGIC_CS as MAGIC_CS_IDS } from './character-skills'
 export { scriptFamilies, scriptFamilyOf } from './scripts'
 
 export const FLAG_LABELS: Record<FlagId, string> = {

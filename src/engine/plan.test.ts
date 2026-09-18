@@ -89,6 +89,13 @@ describe('planner', () => {
     expect(noSheet.purchases.map((x) => x.route)).toEqual(['buy'])
   })
 
+  it('shows the loresheet\'s own note on a loresheet purchase (L3)', () => {
+    const b = build({ race: 'ancestral', loresheets: [{ id: 'ancestral' }], os: [{ id: 'dismiss-rank-5', source: 'loresheet', loresheet: 'ancestral' }] })
+    const p = planRoute(b, [t('dismiss-rank-10')]).cheapest!
+    expect(p.purchases[0]).toMatchObject({ tier: 1, route: 'loresheet' })
+    expect(p.purchases[0]!.notes).toContain('Printed as Tier 1 (other sheets say Tier 3): probably a loresheet error.')
+  })
+
   it('uses retirement double steps on two different trees in year 1', () => {
     const b = build({ cs: { 'poison-lore': 1, 'potion-lore': 1 } })
     const targets = [t('create-poison-master'), t('create-potion-master'), t('shield-mastery-expert')]
@@ -112,6 +119,14 @@ describe('planner', () => {
     })
   })
 
+  it('keeps the restricted note on a retirement double step (R5)', () => {
+    const b = build({ cs: { 'poison-lore': 1 } })
+    const p = planRoute(b, [t('create-poison-magical')], { retired: true }).cheapest!
+    const magical = p.purchases.find((x) => x.id === 'create-poison-magical')!
+    expect(p.purchases.some((x) => x.doubleStep)).toBe(true)
+    expect(magical.notes).toContain('Restricted: needs a training facility, tutor or forgery')
+  })
+
   it('validates the final build', () => {
     const p = planRoute(build({ cs: { 'poison-lore': 1 } }), [t('create-poison-master')]).cheapest!
     expect(p.validation.valid).toBe(true)
@@ -121,7 +136,7 @@ describe('planner', () => {
 
 describe('cheapest vs fastest divergence report', () => {
   const allCs = { spellcasting: 2, incantation: 1, healing: 1, corruption: 1, 'poison-lore': 1, 'potion-lore': 1,
-    'recognise-forgery': 1, 'sense-magic': 1, 'triage-advanced': 1, triage: 1, 'large-weapon': 1, shield: 1,
+    'recognise-forgery': 1, 'sense-magic': 1, 'triage-advanced': 1, 'large-weapon': 1, shield: 1,
     'projectile-weapon': 1, 'light-armour': 1, 'ritual-magic': 1, contribute: 1 }
   const profiles: Record<string, Build> = {
     standard: build({ cs: allCs, flags: ['bowCompetency', 'clawCompetency', 'factionPermission', 'researchRequest'] }),
