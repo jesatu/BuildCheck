@@ -71,6 +71,18 @@ export function describe(r: Requirement): string {
   return `not ${describe(r.not)}`
 }
 
+/** Whether the build already meets a requirement (held skills count through what they replace or include). */
+export function requirementMet(b: Build, r: Requirement): boolean {
+  if ('os' in r) return withGrants(b).some((h) => (h.id === r.os && (r.param === undefined || h.param === r.param)) || (r.param === undefined && coveredBy(h.id).has(r.os)))
+  if ('cs' in r) return (b.cs[r.cs] ?? 0) >= (r.level ?? 1)
+  if ('flag' in r) return b.flags.includes(r.flag)
+  if ('loresheet' in r) return r.loresheet === '*' ? b.loresheets.length > 0 : b.loresheets.some((l) => l.id === r.loresheet)
+  if ('pattern' in r) return b.pattern === r.pattern
+  if ('all' in r) return r.all.every((x) => requirementMet(b, x))
+  if ('any' in r) return r.any.some((x) => requirementMet(b, x))
+  return !requirementMet(b, r.not)
+}
+
 /** An essence creature's tier: the highest tier skill on the card (e.g. vampire-2), else the loresheet's recorded tier. */
 export function essenceTier(b: Build, loresheetId: string): number {
   const fromCard = b.os.map((h) => h.id.match(new RegExp(`^${loresheetId}-([1-4])$`))).filter(Boolean).map((m) => Number(m![1]))

@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import {
   characterSkills, CS_LADDERS, csById, guildListById, guildLists, loresheetById, loresheets, occupationalSkills, osById, raceById, researchCategories, scriptFamilies,
-  type CsGroup,
+  type CsGroup, type Requirement,
 } from './data'
 import { factions } from './data/races'
 import { skillKey, type Build, type CardId, type SkillSource } from './engine/build'
 import type { Plan } from './engine/plan'
-import { damageReductions, immunities, unaffectedBy, type Issue, type SkillStatus, type ValidationResult } from './engine/validate'
+import { damageReductions, describe, immunities, requirementMet, unaffectedBy, type Issue, type SkillStatus, type ValidationResult } from './engine/validate'
 
 const CS_GROUPS: Array<[CsGroup, string]> = [['weapon', 'Weapon'], ['armour', 'Armour'], ['knowledge', 'Knowledge'], ['power', 'Power']]
 const ROUTE_LABEL = { buy: 'Buy', loresheet: 'Loresheet', architect: 'Architect', joat: 'Jack of All Trades' } as const
@@ -128,6 +128,7 @@ export function SkillPicker({ build, onAdd, addPrereqs, onAddPrereqs }: {
                 </span>
               </div>
               <div className="meta">{s.summary}</div>
+              {s.learn && <Needs build={build} req={s.learn} />}
               <div className="meta">
                 {s.lists.map((l) => guildListById.get(l)?.name).join(', ')}
                 {sheetSkills.has(s.id) && <span className="tag">on {sheetSkills.get(s.id)}</span>}
@@ -143,6 +144,24 @@ export function SkillPicker({ build, onAdd, addPrereqs, onAddPrereqs }: {
         ))}
       </ul>
       {matches.length > shown.length && <p className="muted small">Showing {shown.length} of {matches.length}. Search to narrow the list.</p>}
+    </div>
+  )
+}
+
+/** A skill's prerequisites, each marked as already met or missing for this build. */
+function Needs({ build, req }: { build: Build; req: Requirement }) {
+  const parts = 'all' in req ? req.all : [req]
+  return (
+    <div className="meta needs">
+      Needs:{' '}
+      {parts.map((r, i) => {
+        const met = requirementMet(build, r)
+        return (
+          <span key={i} className={met ? 'met' : 'unmet'}>
+            {i > 0 && ', '}{describe(r)}{met ? ' ✓' : ''}
+          </span>
+        )
+      })}
     </div>
   )
 }
