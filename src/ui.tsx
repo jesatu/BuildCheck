@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  characterSkills, CS_LADDERS, csById, guildListById, guildLists, loresheetById, occupationalSkills, osById, raceById, scriptFamilies,
+  characterSkills, CS_LADDERS, csById, guildListById, guildLists, loresheetById, loresheets, occupationalSkills, osById, raceById, scriptFamilies,
   type CsGroup,
 } from './data'
 import { factions } from './data/races'
@@ -156,6 +156,12 @@ function paramSuggestions(id: string): string[] {
   return []
 }
 
+/** Params with a fixed list get a drop-down instead of free text. */
+function paramChoices(id: string): string[] {
+  if (id === 'awakened') return loresheets.filter((l) => l.kind === 'awakened').map((l) => l.name.replace(/^Awakened /, ''))
+  return []
+}
+
 interface Row { id: string; param?: string; card?: CardId; source?: SkillSource; loresheet?: string }
 
 export function SkillRows({ rows, build, onParam, onSource, onRemove }: {
@@ -170,6 +176,7 @@ export function SkillRows({ rows, build, onParam, onSource, onRemove }: {
       {rows.map((r, i) => {
         const s = osById.get(r.id)!
         const suggestions = paramSuggestions(r.id)
+        const choices = paramChoices(r.id)
         const sheets = build?.loresheets.filter((l) => loresheetById.get(l.id)?.skills.some((e) => e.os === r.id)) ?? []
         return (
           <li key={i} className="row">
@@ -177,7 +184,13 @@ export function SkillRows({ rows, build, onParam, onSource, onRemove }: {
               {s.name}
               {r.card && r.card !== 'character' && <span className="tag">{CARD_LABEL[r.card]}</span>}
             </span>
-            {s.param && (
+            {s.param && choices.length > 0 && (
+              <select className="param" aria-label={`${s.name}: ${s.param}`} value={r.param ?? ''} onChange={(e) => onParam(i, e.target.value || undefined)}>
+                <option value="">{s.param}…</option>
+                {choices.map((x) => <option key={x} value={x}>{x}</option>)}
+              </select>
+            )}
+            {s.param && !choices.length && (
               <>
                 <input className="param" aria-label={`${s.name}: ${s.param}`} placeholder={s.param} value={r.param ?? ''}
                   list={suggestions.length ? `x-${r.id}` : undefined} onChange={(e) => onParam(i, e.target.value || undefined)} />
