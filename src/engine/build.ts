@@ -6,6 +6,7 @@ export type SkillSource =
   | 'loresheet'  // alternative route from a held loresheet (LS-3)
   | 'architect'  // Architect route: prerequisites bypassed (LS-4a)
   | 'joat'       // Jack of All Trades: training facility for an Ω list of an Oathsworn guild (ruling)
+  | 'ritual'     // put straight on the character card by a ritual: no purchase, no prerequisites
   | 'granted'    // recorded on a special creature or special power card, no purchase
 
 /** 'loresheet': granted by a held loresheet, recorded there rather than on a card. */

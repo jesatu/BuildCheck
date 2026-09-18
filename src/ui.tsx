@@ -180,6 +180,7 @@ export function SkillRows({ rows, build, onParam, onSource, onRemove }: {
                   onSource(i, v.startsWith('ls:') ? 'loresheet' : (v as SkillSource), v.startsWith('ls:') ? v.slice(3) : undefined)
                 }}>
                 <option value="buy">Bought</option>
+                <option value="ritual">Ritual (no prerequisites)</option>
                 {build?.loresheets.some((l) => l.id === 'architect') && <option value="architect">Architect</option>}
                 {(build?.os.some((h) => h.id === 'jack-of-all-trades') || build?.loresheets.some((l) => l.id === 'awakened-human')) && <option value="joat">Jack of All Trades</option>}
                 {sheets.map((l) => <option key={l.id} value={`ls:${l.id}`}>{loresheetById.get(l.id)?.name} loresheet</option>)}
@@ -299,11 +300,12 @@ export function Issues({ issues, nameOf }: { issues: Issue[]; nameOf: (i: number
   )
 }
 
-export function PlanView({ plan }: { plan: Plan }) {
+export function PlanView({ plan, title, note }: { plan: Plan; title: string; note?: string }) {
   const years = [...new Set(plan.purchases.map((p) => p.year))].sort((a, b) => a - b)
   return (
     <div className="panel">
-      <h2>Route <span className="count">{plan.totalOsp} OSP · {plan.years} {plan.years === 1 ? 'year' : 'years'}</span></h2>
+      <h2>{title} <span className="count">{plan.totalOsp} OSP · {plan.years} {plan.years === 1 ? 'year' : 'years'}{title === 'Spent so far' ? ' minimum' : ''}</span></h2>
+      {note && <p className="muted small">{note}</p>}
       {plan.blockers.length > 0 && (
         <div className="blockers">
           <b>Can't plan until:</b>

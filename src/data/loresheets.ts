@@ -449,20 +449,22 @@ export const loresheets: Loresheet[] = [
 
   // ---- Skill loresheets from the PDF that the markdown lost ----
   {
-    id: 'circle-warden', name: 'Circle Warden', kind: 'skill', source: 'LS: Circle Warden (PDF)',
+    id: 'circle-warden', name: 'Circle Warden', kind: 'skill', skill: 'circle-warden', source: 'LS: Circle Warden (PDF)',
     summary: 'Bonded to one Ritual Circle. Network Attunement without Ritual Magic 3; Transportation in 30 s; circle rites.',
     restrictions: [{ kind: 'grantsSkills', skills: ['immune-mute', 'immune-charms'] }],
     skills: [
+      s('circle-warden', 5, 85),
       s('immune-mind-effects', 5, 40, { learn: os('rally') }),
       s('cast-all-magecraft', 5, 65, { learn: os('cast-additional-magecraft') }),
       s('cast-all-incantation', 5, 65, { learn: os('cast-additional-incantation') }),
     ],
   },
   {
-    id: 'circle-watcher', name: 'Circle Watcher', kind: 'skill', source: 'LS: Circle Watcher (PDF)',
+    id: 'circle-watcher', name: 'Circle Watcher', kind: 'skill', skill: 'circle-watcher', source: 'LS: Circle Watcher (PDF)',
     summary: 'Aligned to the Watchers\' circles. As Circle Warden, plus Rite of Blocking and Network Leap.',
     restrictions: [{ kind: 'grantsSkills', skills: ['immune-mute', 'immune-charms'] }],
     skills: [
+      s('circle-watcher', 5, 85),
       s('immune-mind-effects', 5, 40, { learn: os('rally') }),
       s('voidportal', 4, 85),
       s('cast-all-magecraft', 5, 65, { learn: os('cast-additional-magecraft') }),
@@ -470,7 +472,7 @@ export const loresheets: Loresheet[] = [
     ],
   },
   {
-    id: 'diagnose-powers', name: 'Diagnose Powers', kind: 'skill', source: 'LS: Diagnose Powers (PDF)',
+    id: 'diagnose-powers', name: 'Diagnose Powers', kind: 'skill', skill: 'diagnose-powers', source: 'LS: Diagnose Powers (PDF)',
     summary: 'Identify item powers; once per day restore an item card.',
     restrictions: [],
     skills: [
@@ -481,20 +483,25 @@ export const loresheets: Loresheet[] = [
 
   // ---- Skill and route loresheets ----
   {
-    id: 'treewalker', name: 'Treewalker', kind: 'skill', source: 'LS: Treewalker',
+    id: 'treewalker', name: 'Treewalker', kind: 'skill', skill: 'treewalker', source: 'LS: Treewalker',
     summary: 'Tree Network travel. Needs Perform Transport Rite.',
     restrictions: [
       { kind: 'requiresCs', cs: ['spellcasting', 'incantation', 'healing'] },
       { kind: 'excludesCs', cs: ['corruption'] },
       { kind: 'note', text: 'Not available with Necromancy or an Unliving pattern (L11).' },
     ],
-    skills: [],
+    skills: [s('treewalker', 5, 85, { learn: os('perform-transport-rite') })],
   },
   {
-    id: 'voidportal', name: 'Voidportal', kind: 'skill', source: 'LS: Voidportal',
+    id: 'voidportal', name: 'Voidportal', kind: 'skill', skill: 'voidportal', source: 'LS: Voidportal',
     summary: 'Grants Perform Teleport Rite and Spell Reduction (2) on Teleport.',
     restrictions: [{ kind: 'grantsSkills', skills: ['perform-teleport-rite'] }],
-    skills: [],
+    skills: [s('voidportal', 5, 85)],
+  },
+  {
+    id: 'tpc', name: 'TPC', kind: 'route', unpublished: true, source: 'Owner request, 2026-09-18',
+    summary: 'Placeholder: details to come.',
+    restrictions: [], skills: [],
   },
   {
     id: 'npc-dpc', name: 'NPC/DPC', kind: 'route', unpublished: true, param: 'Faction or Guild', source: 'Owner ruling, 2026-09-18',

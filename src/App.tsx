@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { csById, FLAG_LABELS, loresheetById, loresheets, osById, races, type FlagId, type Pattern } from './data'
-import { addLoresheets, skillKey, type Build, type CardId, type HeldSkill } from './engine/build'
-import { planRoute } from './engine/plan'
+import { skillKey, type Build, type CardId } from './engine/build'
+import { addHeldSkill, addLoresheetsAndSkills, planRoute, spentSoFar } from './engine/plan'
 import { essenceTier, missingLoresheets, validate } from './engine/validate'
 import { decodeState, emptyState, encodeState, type EditorState } from './state'
 import { CardView, CsPanel, FACTIONS_AND_GUILDS, Issues, PlanView, SkillPicker, SkillRows } from './ui'
@@ -18,20 +18,29 @@ export function App() {
   // Dropped skills stay in the build (they still count for prerequisites) but are marked off the card.
   const build = useMemo(() => ({ ...saved, os: saved.os.map((h) => (dropped.includes(skillKey(h.id, h.param)) ? { ...h, dropped: true } : h)) }), [saved, dropped])
 
+  // A retirement's double steps happen in the character's first year: in its history if it has one, otherwise in the plan.
+  const hasHistory = build.os.some((h) => h.source !== 'granted')
+  const spent = useMemo(() => (hasHistory ? spentSoFar(build, { retired }) : undefined), [build, retired, hasHistory])
+
   // One plan: the cheapest, with years as the tiebreak (owner decision).
-  const plan = useMemo(() => (targets.length ? planRoute(build, targets, { retired, drop: dropped }).cheapest : undefined), [build, targets, retired, dropped])
+  const plan = useMemo(() => (targets.length ? planRoute(build, targets, { retired: retired && !hasHistory, drop: dropped }).cheapest : undefined),
+    [build, targets, retired, hasHistory, dropped])
   const result = useMemo(() => plan?.validation ?? validate(build), [plan, build])
 
   const add = (id: string, where: 'want' | 'held' | CardId) => {
     if (where === 'want') return setState((s) => ({ ...s, targets: [...s.targets, { id }] }))
-    // A loresheet-only skill is recorded as bought from a loresheet that lists it (a held one if possible).
+    if (where !== 'held') return setBuild((b) => ({ ...b, os: [...b.os, { id, source: 'granted', card: where }] }))
+    // Held skills bring their prerequisites, assumed bought along the normal route (change to Architect or Ritual if not).
     const s = osById.get(id)!
-    const sheets = loresheets.filter((l) => l.skills.some((e) => e.os === id))
-    const sheet = sheets.find((l) => build.loresheets.some((h) => h.id === l.id)) ?? sheets[0]
-    const skill: HeldSkill = where !== 'held' ? { id, source: 'granted', card: where }
-      : (s.loresheetOnly || !s.lists.length) && sheet ? { id, source: 'loresheet', loresheet: sheet.id }
-        : { id, source: 'buy' }
-    setBuild((b) => ({ ...b, os: [...b.os, skill] }))
+    if (s.loresheetOnly || !s.lists.length) {
+      // A loresheet-only skill is recorded as bought from a loresheet that lists it (a held one if possible).
+      const sheets = loresheets.filter((l) => l.skills.some((e) => e.os === id))
+      const sheet = sheets.find((l) => build.loresheets.some((h) => h.id === l.id)) ?? sheets[0]
+      if (sheet && !build.loresheets.some((h) => h.id === sheet.id)) {
+        return setBuild((b) => ({ ...b, os: [...b.os, { id, source: 'loresheet', loresheet: sheet.id }] }))
+      }
+    }
+    setBuild((b) => addHeldSkill(b, id))
   }
 
   const heldSheetIds = new Set(build.loresheets.map((l) => l.id))
@@ -53,7 +62,7 @@ export function App() {
       {missing.length > 0 && (
         <div className="prompt" role="status">
           <span>This build needs the {missing.map((id) => loresheetById.get(id)?.name).join(', ')} {missing.length === 1 ? 'loresheet' : 'loresheets'}.</span>
-          <button type="button" onClick={() => setBuild((b) => addLoresheets(b, missing))}>Add required loresheets</button>
+          <button type="button" onClick={() => setBuild((b) => addLoresheetsAndSkills(b, missing))}>Add required loresheets</button>
         </div>
       )}
 
@@ -127,7 +136,7 @@ export function App() {
             <select aria-label="Add a loresheet" value=""
               onChange={(e) => {
                 const ls = loresheetById.get(e.target.value)
-                if (ls) setBuild((b) => addLoresheets(b, [ls.id]))
+                if (ls) setBuild((b) => addLoresheetsAndSkills(b, [ls.id]))
               }}>
               <option value="">Add a loresheet…</option>
               {loresheets.filter((l) => !heldSheetIds.has(l.id) && l.kind !== 'condition').map((l) => (
@@ -168,7 +177,8 @@ export function App() {
         <section className="col">
           <CardView build={build} result={result} onToggleDrop={toggleDrop} />
           <Issues issues={result.issues} nameOf={(i) => result.skills[i]?.name} />
-          {plan && <PlanView plan={plan} />}
+          {spent && spent.purchases.length > 0 && <PlanView plan={spent} title="Spent so far" note="The fewest years the skills already held could have taken, in the routes recorded." />}
+          {plan && <PlanView plan={plan} title="Route" />}
           <p className="muted small">
             Rules: Lorien Trust Rules Handbook v4.06 and loresheets v4.06, summarised in the project's rules reference.
             {' '}{csById.size} Character Skills, {osById.size} Occupational Skills.
