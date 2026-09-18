@@ -157,6 +157,50 @@ describe('redundant skills', () => {
   })
 })
 
+describe('implicit replacements and covered skills (rulings C17-C19)', () => {
+  it('replaces along the chains the owner confirmed', () => {
+    const r = validate(build({ cs: { spellcasting: 1 }, os: [buy('perform-transport-rite'), buy('perform-teleport-rite'), buy('identify'), buy('diagnose-powers')] }))
+    expect(r.skills.map((s) => `${s.id}:${s.state}`)).toEqual([
+      'perform-transport-rite:replaced', 'perform-teleport-rite:active', 'identify:replaced', 'diagnose-powers:active',
+    ])
+  })
+
+  it('Vampire Dismiss/Control +8 replaces +4', () => {
+    const b = build({ pattern: 'unliving', loresheets: [{ id: 'vampire' }, { id: 'unliving' }], os: [
+      { id: 'vampire-1', source: 'loresheet', loresheet: 'vampire' },
+      { id: 'dismiss-control-4', source: 'loresheet', loresheet: 'vampire' },
+      { id: 'dismiss-control-8', source: 'loresheet', loresheet: 'vampire' }] })
+    expect(state(b, 'dismiss-control-4')).toMatchObject({ state: 'replaced', replacedBy: 'Dismiss/Control +8' })
+  })
+
+  it('Beguile replaces only Detect and Remove Beguile; Cast Mass Charms stays', () => {
+    const b = build({ os: ['detect-remove-beguile', 'immune-charms', 'cast-mass-charms', 'beguile'].map((id) => buy(id)) })
+    expect(validate(b).skills.map((s) => s.state)).toEqual(['replaced', 'replaced', 'active', 'active'])
+  })
+
+  it('Beguile makes a held Immune to Charms redundant', () => {
+    const b = build({ os: [{ id: 'immune-charms', source: 'ritual' }, { id: 'beguile', source: 'ritual' }] })
+    expect(state(b, 'immune-charms')).toMatchObject({ state: 'redundant', reason: 'Covered by Beguile' })
+  })
+
+  it('marks covered skills redundant without replacing them or counting them for prerequisites', () => {
+    const b = build({ os: [buy('immune-fear'), buy('immune-mute'), { ...buy('rally'), dropped: true }, buy('immune-mind-effects'), buy('immune-befriend-confusion')] })
+    expect(state(b, 'immune-befriend-confusion')).toMatchObject({ state: 'redundant', reason: 'Covered by Immune to Mind Effects' })
+    // Immune to Mind Effects doesn't count as Immune to Fear for a prerequisite.
+    expect(rules(build({ os: [{ id: 'immune-mind-effects', source: 'ritual' }, buy('immune-mute')] }))).toEqual(['OS-4'])
+  })
+
+  it('a higher Fearsome Aspect or Beguile level replaces the lower ones', () => {
+    const b = build({ loresheets: [{ id: 'werecreature' }], os: [
+      { id: 'werecreature-3', source: 'ritual' },
+      { id: 'fearsome-aspect-level', param: '1', source: 'loresheet', loresheet: 'werecreature' },
+      { id: 'fearsome-aspect-level', param: '2', source: 'loresheet', loresheet: 'werecreature' },
+      { id: 'fearsome-aspect-level', param: '4', source: 'loresheet', loresheet: 'werecreature' }] })
+    expect(validate(b).skills.map((s) => s.state)).toEqual(['active', 'replaced', 'replaced', 'active'])
+    expect(validate(b).skills.slice(1, 3).map((x) => x.replacedBy)).toEqual(['Fearsome Aspect (2)', 'Fearsome Aspect (4)'])
+  })
+})
+
 describe('loresheet purchases', () => {
   it('accept any held loresheet that offers the skill (Cast All Magecraft: Warlock or Circle Warden)', () => {
     const b = build({ cs: { spellcasting: 2 }, loresheets: [{ id: 'circle-warden' }],
@@ -307,7 +351,9 @@ describe('derived values', () => {
       loresheets: [{ id: 'druid', tier: 1 }],
       os: [{ id: 'armour-mastery', source: 'buy' }, { id: 'armour-mastery-advanced', source: 'buy' }, { id: 'armour-mastery-expert', source: 'buy' }],
     })
-    expect(validate(b).skills.map((s) => s.state)).toEqual(['replaced', 'redundant', 'active'])
+    // Expert replaces Advanced (C17) and keeps its Crush immunity; without Expert, Advanced is redundant for a Druid.
+    expect(validate(b).skills.map((s) => s.state)).toEqual(['replaced', 'replaced', 'active'])
+    expect(validate({ ...b, os: b.os.slice(0, 2) }).skills.map((s) => s.state)).toEqual(['replaced', 'redundant'])
   })
 
   it('gives a Warlock no LHV from Body Development', () => {

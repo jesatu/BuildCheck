@@ -292,6 +292,13 @@ export function validate(input: Build): ValidationResult {
   // ---------- Status: replaced, inactive or active ----------
   const replacedBy = new Map<number, string>()
   const sheetReplaces = lsRestrictions.flatMap((r) => (r.kind === 'replaces' ? [r] : []))
+  // Levelled skills: a higher <X> level replaces the lower ones (Fearsome Aspect 4 replaces 2 and 1).
+  os.forEach((h, j) => {
+    if (!osById.get(h.id)?.levelled) return
+    const higher = os.filter((o) => o.id === h.id && Number(o.param) > Number(h.param))
+      .sort((a, b) => Number(a.param) - Number(b.param))[0]
+    if (higher) replacedBy.set(j, skillName(higher.id, higher.param))
+  })
   os.forEach((h) => {
     const extra = sheetReplaces.filter((r) => r.skill === h.id).flatMap((r) => r.replaces)
     for (const r of [...(osById.get(h.id)?.replaces ?? []), ...extra]) {
@@ -320,7 +327,8 @@ export function validate(input: Build): ValidationResult {
     const onCharacterCard = !h.card || h.card === 'character'
     // Scripts use the Polyglot rule below; other skills are covered only by a skill with the same <X> (or none).
     const coverer = onCharacterCard && h.id !== 'translate-named-script'
-      ? os.find((o, j) => j !== i && !o.dropped && !replacedBy.has(j) && coveredBy(o.id).has(h.id)
+      ? os.find((o, j) => j !== i && !o.dropped && !replacedBy.has(j)
+        && (coveredBy(o.id).has(h.id) || osById.get(o.id)?.covers?.includes(h.id))
         && (o.param === undefined || h.param === undefined || o.param === h.param))
       : undefined
     const alsoGranted = onCharacterCard ? os.find((o) => o !== h && o.id === h.id && o.param === h.param && o.card && o.card !== 'character') : undefined
