@@ -8,6 +8,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "divergence": "vitest run src/engine/plan.test.ts -t divergence --reporter=verbose",
     "typecheck": "tsc --noEmit"
   },
   "repository": {
