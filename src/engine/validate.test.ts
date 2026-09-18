@@ -392,4 +392,11 @@ describe('derived values', () => {
       .toEqual(['A character can only be one special creature: this one is Awakened Human, unliving pattern.'])
   })
 
+  it('needs the Awakened Human sheet for more than one Jack of All Trades use', () => {
+    const joat = (sheet: boolean) => validate({ ...newBuild(), loresheets: sheet ? [{ id: 'awakened-human' }] : [],
+      os: [{ id: 'jack-of-all-trades', source: 'granted', card: 'power' }, { id: 'oathsworn', param: 'Militia Guild', source: 'buy' },
+        { id: 'immune-fear', source: 'joat' }, { id: 'immune-fumble', source: 'joat' }] }).issues.filter((x) => x.rule === 'JoAT')
+    expect(joat(false)).toHaveLength(1)
+    expect(joat(true)).toEqual([])
+  })
 })

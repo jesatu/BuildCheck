@@ -261,6 +261,12 @@ export function validate(input: Build): ValidationResult {
     }
   }
 
+  // Each use of Jack of All Trades removes it from the card; only the Awakened Human sheet sells it again.
+  const joatUses = b.os.filter((h) => h.source === 'joat').length
+  if (joatUses > 1 && !heldLs.has('awakened-human')) {
+    err('JoAT', `${joatUses} skills were learned with Jack of All Trades, but each use removes it from the card. Only the Awakened Human loresheet sells it again (20 OSP each time).`)
+  }
+
   // ---------- Occupational Skills: how each was obtained ----------
   const tierOf: (Tier | undefined)[] = []
   os.forEach((h, i) => {
