@@ -48,6 +48,15 @@ describe('skill status', () => {
     expect(validate(b).valid).toBe(true)
   })
 
+  it('Script Master <family> replaces only the TNS skills in that family', () => {
+    const b = build({ os: [buy('translate-named-script', 'Elven'), buy('translate-named-script', 'Nihon'), buy('script-master', 'People & Race')] })
+    const r = validate(b)
+    expect(r.skills.map((s) => s.state)).toEqual(['replaced', 'active', 'active'])
+    expect(r.skills[0]!.replacedBy).toBe('Script Master People & Race')
+    expect(r.valid).toBe(true)
+    expect(rules(build({ os: [buy('translate-named-script', 'Nihon'), buy('script-master', 'Myth & Magic')] }))).toEqual(['OS-4'])
+  })
+
   it('matches parameters when replacing income skills', () => {
     const b = build({ os: [buy('apprentice', 'Smith'), buy('journeyman', 'Smith'), buy('apprentice', 'Baker')] })
     const r = validate(b)

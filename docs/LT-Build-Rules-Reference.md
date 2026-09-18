@@ -1289,6 +1289,9 @@ These items were settled by the project owner on 2026-09-17. They are now rules 
 | A13 | Pattern changes: Living → Magical or Living → Unliving only. | 3.1 |
 | R6 | Architect purchases follow one step per tree per year but do **not** count toward the 4 buys per year. | 12.1 |
 | C2 | Newsmonger goes on the left side; Improved Research Ability on the right (working assumption, to be validated). | Section 2 |
+| C3 | Skills granted on a special creature or special power card don't count toward the 12-skill limit, the Tier 5 cap or mutual exclusions. Only the character card counts. | 8.4 |
+| C4 | A Warlock's extra power (Focus of the Void) is added on top of the Rule of Double cap. | 12.4 |
+| C5 | Script Master <X> is bought for one script family (for example *Script Master <Myth & Magic>*) and replaces the Translate Named Script skills in that family. | Section 10 |
 
 ### Ambiguous rules
 

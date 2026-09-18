@@ -1,5 +1,5 @@
 import {
-  csById, DEFAULT_SWITCHES, loresheetById, MAGIC_CS_IDS, osById, raceById, RULES,
+  csById, DEFAULT_SWITCHES, loresheetById, MAGIC_CS_IDS, osById, raceById, RULES, scriptFamilies, scriptFamilyOf,
   type FlagId, type Loresheet, type LoresheetSkill, type OccupationalSkill, type Requirement, type RuleSwitches, type Tier,
 } from '../data'
 import { factions } from '../data/races'
@@ -196,6 +196,12 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
       if (s.loresheetOnly || s.lists.length === 0) err('OS-6', `${name} can only be gained from a lammie or loresheet.`, i)
       const gap = missing(s.learn, false, i)
       if (gap) err('OS-4', `${name} needs ${gap} before it can be bought.`, i)
+      if (h.id === 'script-master' && h.param) {
+        if (!scriptFamilies[h.param]) err('OS-3', `"${h.param}" is not a script category.`, i)
+        else if (!os.some((o) => o.id === 'translate-named-script' && scriptFamilyOf(o.param) === h.param)) {
+          err('OS-4', `${name} needs a Translate Named Script skill from the ${h.param} family.`, i)
+        }
+      }
     } else if (h.source === 'loresheet') {
       const ls = loresheetById.get(h.loresheet ?? '')
       const entry = ls && lsEntry(ls, h)
@@ -224,7 +230,10 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
   os.forEach((h) => {
     for (const r of osById.get(h.id)?.replaces ?? []) {
       os.forEach((o, j) => {
-        if (o.id === r && (o.param === undefined || h.param === undefined || o.param === h.param)) replacedBy.set(j, skillName(h.id, h.param))
+        // Script Master <family> replaces the TNS skills in that family; other parameterised skills match on the same <X>.
+        const sameX = h.id === 'script-master' ? scriptFamilyOf(o.param) === h.param
+          : o.param === undefined || h.param === undefined || o.param === h.param
+        if (o.id === r && sameX) replacedBy.set(j, skillName(h.id, h.param))
       })
     }
   })
