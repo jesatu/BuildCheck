@@ -65,7 +65,7 @@ export const skillName = (id: string, param?: string) => {
 
 /** OS ids each skill counts as, through replaces and includes, transitively (REP-2b). */
 const covers = new Map<string, Set<string>>()
-function coveredBy(id: string): Set<string> {
+export function coveredBy(id: string): Set<string> {
   let set = covers.get(id)
   if (set) return set
   set = new Set()
