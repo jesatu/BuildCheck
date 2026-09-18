@@ -78,7 +78,12 @@ export function CsPanel({ build, setBuild, points: { spent, available } }: {
 
 // ---------- Skill picker ----------
 
-export function SkillPicker({ build, onAdd }: { build: Build; onAdd: (id: string, where: 'want' | 'held' | CardId) => void }) {
+export function SkillPicker({ build, onAdd, addPrereqs, onAddPrereqs }: {
+  build: Build
+  onAdd: (id: string, where: 'want' | 'held' | CardId) => void
+  addPrereqs: boolean
+  onAddPrereqs: (value: boolean) => void
+}) {
   const [query, setQuery] = useState('')
   const [list, setList] = useState('all')
   const sheetSkills = new Map<string, string>() // skill id -> loresheet names that offer it
@@ -94,7 +99,13 @@ export function SkillPicker({ build, onAdd }: { build: Build; onAdd: (id: string
   const shown = matches.slice(0, 50)
   return (
     <div className="panel">
-      <h2>Find skills</h2>
+      <h2>
+        Find skills
+        <label className="check h2-option" title="When you add a skill with Have, also add the earlier skills it needs, as if bought along the normal route">
+          <input type="checkbox" checked={addPrereqs} onChange={(e) => onAddPrereqs(e.target.checked)} />
+          Add earlier skills
+        </label>
+      </h2>
       <div className="search">
         <input type="search" placeholder="Search skills…" aria-label="Search skills" value={query} onChange={(e) => setQuery(e.target.value)} />
         <select aria-label="Filter by list" value={list} onChange={(e) => setList(e.target.value)}>

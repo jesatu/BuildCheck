@@ -8,9 +8,11 @@ export interface EditorState {
   retired: boolean
   /** Skills (skillKey) taken off the card: held or planned. */
   dropped: string[]
+  /** Have also adds the skill's earlier (prerequisite) skills. */
+  addPrereqs: boolean
 }
 
-export const emptyState = (): EditorState => ({ build: newBuild(), targets: [], retired: false, dropped: [] })
+export const emptyState = (): EditorState => ({ build: newBuild(), targets: [], retired: false, dropped: [], addPrereqs: true })
 
 const PREFIX = '#b='
 

@@ -83,6 +83,7 @@ button:hover { filter: brightness(1.08); }
 .count.bad, .bad { color: var(--bad); }
 .ok { color: var(--ok); font-size: .8rem; }
 h2 .bad { font-size: .8rem; }
+.h2-option { margin: 0 0 0 auto; font-size: .8rem; font-weight: normal; }
 .tag { font-size: .7rem; color: var(--loresheet); border: 1px solid currentColor; border-radius: 4px; padding: 0 .3rem; margin-left: .4rem; white-space: nowrap; }
 
 .search { display: flex; gap: .5rem; margin-bottom: .5rem; }
