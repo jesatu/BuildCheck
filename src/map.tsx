@@ -7,7 +7,8 @@ import { coveredBy, type SkillStatus, type ValidationResult } from './engine/val
 
 interface Node {
   s: SkillStatus
-  year?: number
+  /** Every year it was bought (Jack of All Trades is re-bought for each use). */
+  years: number[]
   planned: boolean
   route: string
   learn?: Requirement
@@ -22,7 +23,8 @@ const ROUTE_NAMES: Record<string, string> = { buy: 'Buy', loresheet: 'Loresheet'
 
 export function BuildMap({ build, result, spent, plan }: { build: Build; result: ValidationResult; spent?: Plan; plan?: Plan }) {
   const past = spent?.years ?? 0
-  const match = (ps: PlannedPurchase[] | undefined, s: SkillStatus) => ps?.find((p) => p.id === s.id && (p.param ?? '') === (s.param ?? ''))
+  const same = (p: PlannedPurchase, s: SkillStatus) => p.id === s.id && (p.param ?? '') === (s.param ?? '')
+  const match = (ps: PlannedPurchase[] | undefined, s: SkillStatus) => ps?.find((p) => same(p, s))
 
   const nodes: Node[] = result.skills.filter((s) => s.card === 'character').map((s) => {
     const held = build.os[s.index]
@@ -30,8 +32,8 @@ export function BuildMap({ build, result, spent, plan }: { build: Build; result:
     const route = held?.source ?? planned?.route ?? 'buy'
     const sheet = route === 'loresheet' ? loresheetById.get(held?.loresheet ?? planned?.loresheet ?? '') : undefined
     const learn = route === 'loresheet' ? sheet?.skills.find((e) => e.os === s.id)?.learn : osById.get(s.id)?.learn
-    const year = held ? match(spent?.purchases, s)?.year : planned ? past + planned.year : undefined
-    return { s, year, planned: !held, route, learn, skipped: ['architect', 'ritual', 'granted'].includes(route), col: 0, row: 0 }
+    const years = held ? (spent?.purchases ?? []).filter((p) => same(p, s)).map((p) => p.year) : planned ? [past + planned.year] : []
+    return { s, years, planned: !held, route, learn, skipped: ['architect', 'ritual', 'granted'].includes(route), col: 0, row: 0 }
   })
 
   // Edges run from a prerequisite to the skill it unlocks. A skipped route still shows the handbook link, dotted.
@@ -64,7 +66,7 @@ export function BuildMap({ build, result, spent, plan }: { build: Build; result:
   const bands: Array<{ label: string; top: number }> = []
   for (const tree of linked) {
     const rows = new Map<number, number>()
-    for (const n of [...tree].sort((a, b) => (a.year ?? 99) - (b.year ?? 99))) {
+    for (const n of [...tree].sort((a, b) => (a.years[0] ?? 99) - (b.years[0] ?? 99))) {
       n.col = depth(n)
       n.row = y + (rows.get(n.col) ?? 0)
       rows.set(n.col, (rows.get(n.col) ?? 0) + 1)
@@ -102,7 +104,7 @@ export function BuildMap({ build, result, spent, plan }: { build: Build; result:
           return <path key={i} d={`M${x1},${y1} C${mid},${y1} ${mid},${y2} ${x2 - 2},${y2}`} className={`map-edge${e.skipped ? ' skipped' : ''}`} markerEnd="url(#arrow)" />
         })}
         {nodes.map((n) => {
-          const sub = [n.year ? `Year ${n.year}${n.planned ? ' (planned)' : ''}` : n.planned ? 'Planned' : 'Held', ROUTE_NAMES[n.route] ?? n.route,
+          const sub = [n.years.length ? `Year${n.years.length > 1 ? 's' : ''} ${n.years.join(', ')}${n.planned ? ' (planned)' : ''}` : n.planned ? 'Planned' : 'Held', ROUTE_NAMES[n.route] ?? n.route,
             n.s.state !== 'active' ? n.s.state === 'dropped' ? 'off card' : n.s.state : ''].filter(Boolean).join(' · ')
           return (
             <g key={n.s.index} transform={`translate(${x(n)},${top(n)})`} className={`map-node ${n.s.state}${n.planned ? ' planned' : ''}`}>

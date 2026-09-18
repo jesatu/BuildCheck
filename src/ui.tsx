@@ -343,7 +343,7 @@ export function PlanView({ plan, title, note }: { plan: Plan; title: string; not
           const slots = buys.filter((p) => p.countsTowardYearly).length
           return (
             <li key={y}>
-              <h3>Year {y} <span className="meta">{slots}/4 purchases · {buys.reduce((n, p) => n + p.cost, 0)} OSP</span></h3>
+              <h3>Year {y} <span className="meta">{buys.length} {buys.length === 1 ? 'skill' : 'skills'} · {slots}/4 purchases · {buys.reduce((n, p) => n + p.cost, 0)} OSP</span></h3>
               <ul className="skills">
                 {buys.map((p) => (
                   <li key={`${p.id}|${p.param}`} className="skill active">
