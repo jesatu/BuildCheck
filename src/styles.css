@@ -107,6 +107,8 @@ h2 .bad { font-size: .8rem; }
 .skill.redundant { background: var(--redundant-bg); color: var(--redundant); border-left: 3px dashed var(--redundant); font-style: italic; }
 .skill.replaced { color: var(--muted); text-decoration: line-through; }
 .skill.replaced .detail { text-decoration: none; }
+.skill.dropped { color: var(--muted); }
+.skill button.drop { padding: 0 .4rem; font-size: .72rem; background: transparent; color: var(--accent); }
 .legend { color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; }
 .legend .skill { display: inline-flex; padding: 0 .35rem; margin: 0; }
 
