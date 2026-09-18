@@ -5,7 +5,7 @@ import { addHeldSkill, addLoresheetsAndSkills, planRoute, spentSoFar } from './e
 import { essenceTier, missingLoresheets, validate } from './engine/validate'
 import { decodeState, emptyState, encodeState, type EditorState } from './state'
 import { BuildMap } from './map'
-import { CardView, CsPanel, FACTIONS_AND_GUILDS, Issues, PlanView, SkillPicker, SkillRows } from './ui'
+import { CardView, CsPanel, FACTIONS_AND_GUILDS, Immunities, Issues, PlanView, SkillPicker, SkillRows } from './ui'
 
 export function App() {
   const [state, setState] = useState<EditorState>(() => decodeState(location.hash) ?? emptyState())
@@ -205,6 +205,7 @@ export function App() {
 
         <section className="col">
           <CardView build={build} result={result} onToggleDrop={toggleDrop} />
+          <Immunities result={result} />
           <Issues issues={result.issues} nameOf={(i) => result.skills[i]?.name} />
           {spent && spent.purchases.length > 0 && <PlanView plan={spent} title="Spent so far" note="The fewest years the skills already held could have taken, in the routes recorded." />}
           {plan && <PlanView plan={plan} title="Route" />}
