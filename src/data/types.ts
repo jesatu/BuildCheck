@@ -151,6 +151,9 @@ export type Restriction =
   | { kind: 'csDisablesSkills'; cs: string; skills: string[] }
   | { kind: 'excludesCs'; cs: string[] }
   | { kind: 'requiresCs'; cs: string[] }
+  | { kind: 'requiresRace'; race: string }
+  /** Loresheet-specific replacement (Awakened Halfling: Traverse Faction Wards includes and replaces Escape Bonds). */
+  | { kind: 'replaces'; skill: string; replaces: string[] }
   | { kind: 'note'; text: string }
 
 export interface Loresheet {

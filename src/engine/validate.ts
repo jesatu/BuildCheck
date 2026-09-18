@@ -86,8 +86,8 @@ export function withGrants(b: Build): HeldSkill[] {
  * Why Jack of All Trades can't teach this skill, or undefined if it can. Needs the JoAT skill and
  * Oathsworn <guild> (bought, or granted by an NPC loresheet) for a guild whose Ω list has the skill.
  */
-export function joatBlocker(os: HeldSkill[], skillId: string): string | undefined {
-  if (!os.some((h) => h.id === 'jack-of-all-trades')) return 'needs Jack of All Trades'
+export function joatBlocker(os: HeldSkill[], skillId: string, canBuyJoat = false): string | undefined {
+  if (!canBuyJoat && !os.some((h) => h.id === 'jack-of-all-trades')) return 'needs Jack of All Trades'
   if (skillId === 'high-magic') return 'High Magic <X> cannot be learned with Jack of All Trades'
   const guilds = joatGuilds(skillId)
   if (guilds.length === 0) return `${skillName(skillId)} is not on a Jack of All Trades (Ω) list`
@@ -189,6 +189,7 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
     if (ls.param && !l.param) err('12', `${ls.name} needs a value for <X> (${ls.param}).`)
     for (const r of ls.restrictions) {
       if (r.kind === 'requiresLoresheet' && !heldLs.has(r.loresheet)) err('12.4', `${ls.name} needs the ${loresheetById.get(r.loresheet)?.name} loresheet.`)
+      if (r.kind === 'requiresRace' && r.race !== b.race) err('12.3', `${ls.name} is only for ${raceById.get(r.race)?.name} characters.`)
       if (r.kind === 'requiresCs' && !r.cs.some((c) => csLevel(c))) err('12.7', `${ls.name} needs one of: ${r.cs.map((c) => csById.get(c)?.name).join(', ')}.`)
       if (r.kind === 'excludesCs') for (const c of r.cs) if (csLevel(c)) err('12.7', `${ls.name} is not available with ${csById.get(c)?.name}.`)
       if (r.kind === 'noBenefitFrom') {
@@ -230,7 +231,8 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
         if (entry.minType && creatureTier < entry.minType) err('LS-5', `${name} needs ${ls.name} tier ${entry.minType} or higher.`, i)
       }
     } else if (h.source === 'joat') {
-      const blocker = joatBlocker(os, h.id)
+      // JoAT is used up, so a skill learned with it only needs a JoAT source: held, or the Awakened Human sheet.
+      const blocker = joatBlocker(os, h.id, heldLs.has('awakened-human'))
       if (blocker) err('JoAT', `${name} through Jack of All Trades: ${blocker}.`, i)
       const gap = missing(s.learn, false, i)
       if (gap) err('OS-4', `${name} needs ${gap} before it can be bought.`, i)
@@ -247,8 +249,10 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
 
   // ---------- Status: replaced, inactive or active ----------
   const replacedBy = new Map<number, string>()
+  const sheetReplaces = lsRestrictions.flatMap((r) => (r.kind === 'replaces' ? [r] : []))
   os.forEach((h) => {
-    for (const r of osById.get(h.id)?.replaces ?? []) {
+    const extra = sheetReplaces.filter((r) => r.skill === h.id).flatMap((r) => r.replaces)
+    for (const r of [...(osById.get(h.id)?.replaces ?? []), ...extra]) {
       os.forEach((o, j) => {
         // Script Master <family> replaces the TNS skills in that family; other parameterised skills match on the same <X>.
         const sameX = h.id === 'script-master' ? scriptFamilyOf(o.param) === h.param

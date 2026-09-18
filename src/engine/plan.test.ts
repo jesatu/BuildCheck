@@ -68,17 +68,25 @@ describe('planner', () => {
     expect(p.purchases[1]!.notes).toContain('Restricted: needs a training facility, tutor or forgery')
   })
 
-  it('re-buys Jack of All Trades for 20 OSP in each later season it is used', () => {
+  it('re-buys Jack of All Trades from the Awakened Human sheet for 20 OSP in each later season it is used', () => {
     const b = build({
       cs: { spellcasting: 1, 'ritual-magic': 1 },
       os: [{ id: 'jack-of-all-trades', source: 'granted', card: 'power' }],
-      loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }],
+      loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }, { id: 'awakened-human' }],
     })
     const p = planRoute(b, [t('thaulmonic-alignment'), t('ritualist-master')]).cheapest!
     expect(p.purchases.filter((x) => x.route === 'joat').map((x) => `${x.year}:${x.id}`)).toEqual(['1:thaulmonic-alignment', '4:ritualist-master'])
-    expect(p.purchases.filter((x) => x.id === 'jack-of-all-trades').map((x) => `${x.year}:${x.cost}:${x.countsTowardYearly}`)).toEqual(['4:20:true'])
+    expect(p.purchases.filter((x) => x.id === 'jack-of-all-trades').map((x) => `${x.year}:${x.cost}:${x.route}`)).toEqual(['4:20:loresheet'])
     expect(p.totalOsp).toBe(30 + 10 + 30 + 40 + 50 + 20)
     expect(p.validation.valid).toBe(true)
+  })
+
+  it('buys Jack of All Trades from the Awakened Human sheet when none is held; without the sheet it only uses a held one', () => {
+    const b = build({ loresheets: [{ id: 'awakened-human' }, { id: 'npc-dpc', param: 'Mages Guild' }] })
+    const p = planRoute(b, [t('thaulmonic-alignment')]).cheapest!
+    expect(p.purchases.map((x) => `${x.year}:${x.id}:${x.route}:${x.cost}`)).toEqual(['1:jack-of-all-trades:loresheet:20', '1:thaulmonic-alignment:joat:30'])
+    const noSheet = planRoute(build({ loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }] }), [t('thaulmonic-alignment')]).cheapest!
+    expect(noSheet.purchases.map((x) => x.route)).toEqual(['buy'])
   })
 
   it('uses retirement double steps on two different trees in year 1', () => {

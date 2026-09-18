@@ -264,17 +264,23 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
   }
 
   // Jack of All Trades stands in for the training facility a restricted skill needs: one use per season,
-  // because using it removes it from the card. The first use spends the JoAT already held; each later
-  // season's use re-buys it (20 OSP, one of that year's purchases), so only use it where a slot is free.
+  // because using it removes it from the card. The first use can spend a JoAT already held; every other
+  // use buys it from the Awakened Human loresheet (20 OSP, one of that year's purchases), so only use it
+  // where a slot is free.
+  const held = withGrants(build)
+  const heldJoat = held.some((h) => h.id === 'jack-of-all-trades')
+  const joatSheet = build.loresheets.some((l) => l.id === 'awakened-human')
+  const joatEntry = loresheetById.get('awakened-human')!.skills.find((e) => e.os === 'jack-of-all-trades')!
   const joatYears = new Set<number>()
   const rebuyYears = new Set<number>()
   const viaJoat = new Set<string>()
   const slotsUsed = (y: number) => items.filter((i) => year.get(i.key) === y && countsYearly(i) && !doubled.has(i.key)).length + (rebuyYears.has(y) ? 1 : 0)
   for (const i of [...items].sort((a, b) => (year.get(a.key) ?? 0) - (year.get(b.key) ?? 0) || b.cost - a.cost)) {
     const y = year.get(i.key) ?? 0
-    if (i.route !== 'buy' || !osById.get(i.id)?.restricted || joatYears.has(y) || joatBlocker(withGrants(build), i.id)) continue
-    if (joatYears.size > 0) {
-      if (slotsUsed(y) >= RULES.purchasesPerYear) continue
+    if (i.route !== 'buy' || !osById.get(i.id)?.restricted || joatYears.has(y) || joatBlocker(held, i.id, joatSheet)) continue
+    const usesHeld = heldJoat && joatYears.size === 0
+    if (!usesHeld) {
+      if (!joatSheet || slotsUsed(y) >= RULES.purchasesPerYear) continue
       rebuyYears.add(y)
     }
     viaJoat.add(i.key)
@@ -288,6 +294,7 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
     const notes: string[] = []
     if (i.route === 'buy' && s.restricted) notes.push('Restricted: needs a training facility, tutor or forgery')
     if (i.route === 'joat') notes.push('Uses Jack of All Trades (removed from the card afterwards)')
+    if (i.route === 'loresheet') notes.push('Main event only (not prebook); no training voucher needed')
     if (s.mainEventOnly) notes.push('Main event only')
     if (i.param === ANY || i.param?.startsWith(`${ANY}:`)) notes.push('Choose any value for <X>')
     return {
@@ -298,8 +305,8 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
   })
   for (const y of rebuyYears) {
     purchases.push({
-      year: y, id: joat.id, name: joat.name, route: 'buy', cost: joat.cost!, tier: joat.tier, countsTowardYearly: true,
-      notes: ['Re-buy: last season\'s use removed it from the card'],
+      year: y, id: joat.id, name: joat.name, route: 'loresheet', loresheet: 'awakened-human', cost: joatEntry.cost, tier: joatEntry.tier,
+      countsTowardYearly: true, notes: ['Bought to use this season (each use removes it from the card)', 'Main event only (not prebook)'],
     })
   }
   purchases.sort((a, b) => a.year - b.year || a.name.localeCompare(b.name))

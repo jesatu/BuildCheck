@@ -184,6 +184,22 @@ describe('race, pattern and loresheets', () => {
   })
 })
 
+describe('awakened loresheets', () => {
+  it('only fit their base race', () => {
+    expect(rules(build({ race: 'human', loresheets: [{ id: 'awakened-human' }] }))).toEqual([])
+    expect(rules(build({ race: 'elf', loresheets: [{ id: 'awakened-human' }] }))).toEqual(['12.3'])
+  })
+
+  it('apply loresheet-specific replacement (Awakened Halfling: Traverse Faction Wards replaces Escape Bonds)', () => {
+    const skills = [
+      { id: 'escape-bonds', source: 'loresheet', loresheet: 'awakened-halfling' },
+      { id: 'traverse-faction-wards', source: 'loresheet', loresheet: 'awakened-halfling' },
+    ] as HeldSkill[]
+    expect(state(build({ race: 'halfling', loresheets: [{ id: 'awakened-halfling' }], os: skills }), 'escape-bonds')?.state).toBe('replaced')
+    expect(state(build({ os: skills.map((s) => ({ ...s, source: 'buy' as const })) }), 'escape-bonds')?.state).toBe('active')
+  })
+})
+
 describe('derived values', () => {
   it('applies the Rule of Double to Spell Power', () => {
     const d = validate(build({ cs: { healing: 1 }, os: [buy('spell-power-4'), buy('spell-power-8'), buy('spell-power-12'), buy('spell-power-16')] })).derived
