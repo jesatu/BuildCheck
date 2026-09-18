@@ -413,4 +413,12 @@ describe('derived values', () => {
     expect(chant('mind-healing')).toBe('redundant')
     expect(state(build({ os: [buy('immune-sleep'), buy('unending-voice')] }), 'unending-voice')!.state).toBe('active')
   })
+  it('allows one faction and one guild Oathsworn, counting switched-off and loresheet oaths (LIM-7)', () => {
+    const oath = (param: string, extra: Partial<HeldSkill> = {}): HeldSkill => ({ ...buy('oathsworn', param), ...extra })
+    const rules = (b: Build) => validate(b).issues.filter((i) => i.rule === 'LIM-7').map((i) => i.rule)
+    expect(rules(build({ os: [oath('Lions'), oath('Mages Guild')] }))).toEqual([])
+    expect(rules(build({ os: [oath('Lions'), oath('Wolves', { dropped: true })] }))).toEqual(['LIM-7'])
+    expect(rules(build({ os: [oath('Bards Guild')], loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }] }))).toEqual(['LIM-7'])
+    expect(rules(build({ os: [oath('Mages Guild')], loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }] }))).toEqual([])
+  })
 })
