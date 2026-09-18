@@ -122,4 +122,4 @@ h2 .bad { font-size: .8rem; }
 .route { font-size: .72rem; border-radius: 4px; padding: 0 .35rem; border: 1px solid currentColor; }
 .route.buy { color: var(--muted); }
 .route.loresheet { color: var(--loresheet); }
-.route.architect { color: var(--architect); }
+.route.architect, .route.joat { color: var(--architect); }

@@ -9,7 +9,7 @@ import type { Plan } from './engine/plan'
 import type { Issue, SkillStatus, ValidationResult } from './engine/validate'
 
 const CS_GROUPS: Array<[CsGroup, string]> = [['weapon', 'Weapon'], ['armour', 'Armour'], ['knowledge', 'Knowledge'], ['power', 'Power']]
-const ROUTE_LABEL = { buy: 'Buy', loresheet: 'Loresheet', architect: 'Architect' } as const
+const ROUTE_LABEL = { buy: 'Buy', loresheet: 'Loresheet', architect: 'Architect', joat: 'Jack of All Trades' } as const
 const CARD_LABEL: Record<CardId, string> = { character: 'Character card', creature: 'Special creature card', power: 'Special power card' }
 const STATE_LABEL = { active: 'Active', inactive: 'Inactive', redundant: 'Redundant', replaced: 'Replaced' } as const
 
@@ -160,6 +160,7 @@ export function SkillRows({ rows, build, onParam, onSource, onRemove }: {
                 }}>
                 <option value="buy">Bought</option>
                 {build?.loresheets.some((l) => l.id === 'architect') && <option value="architect">Architect</option>}
+                {build?.os.some((h) => h.id === 'jack-of-all-trades') && <option value="joat">Jack of All Trades</option>}
                 {sheets.map((l) => <option key={l.id} value={`ls:${l.id}`}>{loresheetById.get(l.id)?.name} loresheet</option>)}
               </select>
             )}

@@ -1,5 +1,5 @@
 import {
-  csById, DEFAULT_SWITCHES, FLAG_LABELS, loresheetById, MAGIC_CS_IDS, osById, raceById, RULES, scriptFamilies, scriptFamilyOf,
+  csById, DEFAULT_SWITCHES, FLAG_LABELS, guildOf, joatGuilds, loresheetById, MAGIC_CS_IDS, osById, raceById, RULES, scriptFamilies, scriptFamilyOf,
   type Loresheet, type LoresheetSkill, type OccupationalSkill, type Requirement, type RuleSwitches, type Tier,
 } from '../data'
 import { factions } from '../data/races'
@@ -65,6 +65,19 @@ export function describe(r: Requirement): string {
   if ('all' in r) return r.all.map(describe).join(' and ')
   if ('any' in r) return `one of: ${r.any.map(describe).join(', ')}`
   return `not ${describe(r.not)}`
+}
+
+/**
+ * Why Jack of All Trades can't teach this skill, or undefined if it can. Needs the JoAT skill and
+ * Oathsworn <guild> (bought, or granted by an NPC loresheet) for a guild whose Ω list has the skill.
+ */
+export function joatBlocker(os: HeldSkill[], skillId: string): string | undefined {
+  if (!os.some((h) => h.id === 'jack-of-all-trades')) return 'needs Jack of All Trades'
+  if (skillId === 'high-magic') return 'High Magic <X> cannot be learned with Jack of All Trades'
+  const guilds = joatGuilds(skillId)
+  if (guilds.length === 0) return `${skillName(skillId)} is not on a Jack of All Trades (Ω) list`
+  const sworn = new Set(os.filter((h) => h.id === 'oathsworn').map((h) => guildOf(h.param)))
+  return guilds.some((g) => sworn.has(g)) ? undefined : `needs Oathsworn to one of: ${guilds.map((g) => `${g} Guild`).join(', ')}`
 }
 
 /** OS ids each skill counts as, through replaces and includes, transitively (REP-2b). */
@@ -208,6 +221,11 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
         const creatureTier = heldLs.get(ls.id)?.tier ?? 0
         if (entry.minType && creatureTier < entry.minType) err('LS-5', `${name} needs ${ls.name} tier ${entry.minType} or higher.`, i)
       }
+    } else if (h.source === 'joat') {
+      const blocker = joatBlocker(os, h.id)
+      if (blocker) err('JoAT', `${name} through Jack of All Trades: ${blocker}.`, i)
+      const gap = missing(s.learn, false, i)
+      if (gap) err('OS-4', `${name} needs ${gap} before it can be bought.`, i)
     } else if (h.source === 'architect') {
       if (!heldLs.has('architect')) err('LS-4a', `${name} uses the Architect route, but the character doesn't hold the Architect loresheet.`, i)
       const onList = !s.loresheetOnly && s.lists.length > 0

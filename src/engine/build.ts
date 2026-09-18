@@ -5,6 +5,7 @@ export type SkillSource =
   | 'buy'        // normal purchase from a handbook list
   | 'loresheet'  // alternative route from a held loresheet (LS-3)
   | 'architect'  // Architect route: prerequisites bypassed (LS-4a)
+  | 'joat'       // Jack of All Trades: training facility for an Ω list of an Oathsworn guild (ruling)
   | 'granted'    // recorded on a special creature or special power card, no purchase
 
 export type CardId = 'character' | 'creature' | 'power'

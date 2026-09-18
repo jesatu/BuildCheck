@@ -56,6 +56,18 @@ describe('planner', () => {
     expect(summary(b, [t('champion')])).toEqual({ years: 1, osp: 10, steps: ['1:Champion:loresheet'] })
   })
 
+  it('uses Jack of All Trades for one restricted skill per season', () => {
+    const b = build({ os: [
+      { id: 'jack-of-all-trades', source: 'granted', card: 'power' },
+      { id: 'oathsworn', param: 'Mages Guild', source: 'buy' },
+    ] })
+    const p = planRoute(b, [t('thaulmonic-alignment'), t('impweave-expertise')]).cheapest!
+    expect(p.purchases.map((x) => `${x.year}:${x.id}:${x.route}`)).toEqual([
+      '1:impweave-expertise:joat', '1:thaulmonic-alignment:buy',
+    ])
+    expect(p.purchases[1]!.notes).toContain('Restricted: needs a training facility, tutor or forgery')
+  })
+
   it('uses retirement double steps on two different trees in year 1', () => {
     const b = build({ cs: { 'poison-lore': 1, 'potion-lore': 1 } })
     const targets = [t('create-poison-master'), t('create-potion-master'), t('shield-mastery-expert')]

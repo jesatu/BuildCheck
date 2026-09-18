@@ -108,6 +108,20 @@ describe('buying routes', () => {
     expect(rules(build({ os: [{ id: 'mighty-blow', source: 'architect' }] }))).toEqual(['LS-4a'])
   })
 
+  it('lets Jack of All Trades teach an Ω skill for an Oathsworn guild, including via an NPC loresheet grant', () => {
+    const joat: HeldSkill = { id: 'jack-of-all-trades', source: 'granted', card: 'power' }
+    const oath: HeldSkill = { id: 'oathsworn', param: 'Mages Guild', source: 'granted', card: 'power' } // NPC loresheet
+    const skill: HeldSkill = { id: 'thaulmonic-alignment', source: 'joat' }
+    expect(rules(build({ os: [joat, oath, skill] }))).toEqual([])
+    expect(rules(build({ os: [joat, { ...oath, param: 'Bards Guild' }, skill] }))).toEqual(['JoAT'])
+    expect(rules(build({ os: [oath, skill] }))).toEqual(['JoAT'])
+    // Group lists count: Oathsworn Mages opens the Arcane Guilds list, except High Magic <X>.
+    expect(rules(build({ cs: { spellcasting: 2 }, os: [joat, oath, { id: 'spell-power-4', source: 'joat' }] }))).toEqual([])
+    expect(rules(build({ cs: { spellcasting: 2 }, os: [joat, oath, { id: 'high-magic', param: 'Spellcasting', source: 'joat' }] }))).toEqual(['JoAT'])
+    // Prerequisites still apply.
+    expect(rules(build({ os: [joat, oath, { id: 'ritualist-master', source: 'joat' }] }))).toEqual(['OS-4'])
+  })
+
   it('keeps granted skills off the character card', () => {
     expect(rules(build({ os: [{ id: 'immune-fatal', source: 'granted', card: 'power' }] }))).toEqual([])
     expect(rules(build({ os: [{ id: 'immune-fatal', source: 'granted' }] }))).toEqual(['OS-6'])

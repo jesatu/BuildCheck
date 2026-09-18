@@ -1293,6 +1293,7 @@ These items were settled by the project owner on 2026-09-17. They are now rules 
 | C4 | A Warlock's extra power (Focus of the Void) is added on top of the Rule of Double cap. | 12.4 |
 | C5 | Script Master <X> is bought for one script family (for example *Script Master <Myth & Magic>*) and replaces the Translate Named Script skills in that family. | Section 10 |
 | C6 | After Polyglot, any Translate Named Script skill left over from one of the three families is **redundant**: it stays on the card but is shown as covered by Polyglot. Restricted scripts (Runes, Spiral) and scripts outside the families are not redundant. | Section 10 |
+| C7 | **Jack of All Trades** is its own route. It needs the JoAT skill and **Oathsworn <guild>**, either bought or granted by an NPC loresheet. It teaches one skill of any tier (restricted included) from an Ω list of that guild, including the guild's group list; not High Magic <X>. Learn prerequisites, 4 purchases per year and one step per tree still apply. One use per season. | 8.3 |
 
 ### Ambiguous rules
 

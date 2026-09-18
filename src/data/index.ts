@@ -32,6 +32,18 @@ export const raceById: Map<string, Race> = byId(races)
 export const spellListById: Map<string, SpellList> = byId(spellLists)
 export const guildListById: Map<string, GuildList> = byId(guildLists)
 
+/** Guilds whose Ω lists include this skill: the guilds Jack of All Trades can teach it for. */
+export function joatGuilds(skillId: string): string[] {
+  const lists = osById.get(skillId)?.lists ?? []
+  return [...new Set(lists.flatMap((l) => (guildListById.get(l)?.jackOfAllTrades ? guildListById.get(l)!.guilds : [])))]
+}
+
+/** Guild named by an Oathsworn <X> value ("Mages Guild" or "Mages"), if it is a guild. */
+export function guildOf(param: string | undefined): string | undefined {
+  const name = param?.replace(/ Guild$/i, '').trim().toLowerCase()
+  return guildLists.flatMap((g) => g.guilds).find((g) => g.toLowerCase() === name)
+}
+
 /** Every leaf requirement in an expression, in order. */
 export function requirementLeaves(r: Requirement | undefined): Requirement[] {
   if (!r) return []

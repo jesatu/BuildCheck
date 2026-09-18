@@ -3,13 +3,13 @@ import {
   type LoresheetSkill, type Requirement, type Tier,
 } from '../data'
 import type { Build, HeldSkill } from './build'
-import { coveredBy, describe, skillName, validate, type ValidationResult } from './validate'
+import { coveredBy, describe, joatBlocker, skillName, validate, type ValidationResult } from './validate'
 
 // Route planner (reference doc 8.2, 8.3, 8.8). Turns target skills into a year-by-year purchase plan.
 // With an unlimited OSP pool, plans differ only in route choice (buy / loresheet / Architect) and
 // "one of" prerequisites, so we enumerate those alternatives and schedule each one.
 
-export type Route = 'buy' | 'loresheet' | 'architect'
+export type Route = 'buy' | 'loresheet' | 'architect' | 'joat'
 
 export interface Target { id: string; param?: string }
 
@@ -262,10 +262,24 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
     if (y === 1) for (const c of [...doubled.keys()]) if (!year.has(c)) doubled.delete(c)
   }
 
-  const purchases: PlannedPurchase[] = items.map((i) => {
+  // Jack of All Trades stands in for the training facility a restricted skill needs: one use per season,
+  // because using it removes it from the card. ponytail: re-buying JoAT between seasons isn't costed.
+  const joatYears = new Set<number>()
+  const viaJoat = new Set<string>()
+  for (const i of [...items].sort((a, b) => (year.get(a.key) ?? 0) - (year.get(b.key) ?? 0) || b.cost - a.cost)) {
+    const y = year.get(i.key) ?? 0
+    if (i.route === 'buy' && osById.get(i.id)?.restricted && !joatYears.has(y) && !joatBlocker(build.os, i.id)) {
+      viaJoat.add(i.key)
+      joatYears.add(y)
+    }
+  }
+
+  const purchases: PlannedPurchase[] = items.map((acq) => {
+    const i: Acq = viaJoat.has(acq.key) ? { ...acq, route: 'joat' } : acq
     const s = osById.get(i.id)!
     const notes: string[] = []
     if (i.route === 'buy' && s.restricted) notes.push('Restricted: needs a training facility, tutor or forgery')
+    if (i.route === 'joat') notes.push('Uses Jack of All Trades (removed from the card afterwards)')
     if (s.mainEventOnly) notes.push('Main event only')
     if (i.param === ANY || i.param?.startsWith(`${ANY}:`)) notes.push('Choose any value for <X>')
     return {
