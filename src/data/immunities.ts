@@ -55,8 +55,8 @@ export const onlyAffects: Record<string, 'living' | 'unliving'> = {
   Smite: 'unliving', 'Bind Unliving': 'unliving', 'Enthral Unliving': 'unliving',
 }
 
-/** Loresheets that stop an effect working on the holder (owner rulings, not in the published text). */
+/** Loresheets that stop an effect working on the holder. */
 export const unaffectedBySheet: Record<string, string[]> = {
-  'npc-dpc': ['Beguile'],
-  paladin: ['Chant of Healing'],
+  'npc-dpc': ['Beguile'], // owner ruling, not in the published text
+  paladin: ['Heal Wound|and effects based on it'], // Blind Faith: can't be targeted by Heal Wound
 }
