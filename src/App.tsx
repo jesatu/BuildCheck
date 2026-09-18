@@ -205,7 +205,7 @@ export function App() {
 
         <section className="col">
           <CardView build={build} result={result} onToggleDrop={toggleDrop} />
-          <Immunities result={result} />
+          <Immunities build={build} result={result} />
           <Issues issues={result.issues} nameOf={(i) => result.skills[i]?.name} />
           {spent && spent.purchases.length > 0 && <PlanView plan={spent} title="Spent so far" note="The fewest years the skills already held could have taken, in the routes recorded." />}
           {plan && <PlanView plan={plan} title="Route" />}

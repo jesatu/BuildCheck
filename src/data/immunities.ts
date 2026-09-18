@@ -45,3 +45,17 @@ export const damageReductionBySkill: Record<string, string[]> = {
   'damage-reduction-all': ['All damage effects|not Bane'],
   'magic-resistance': ['Harm', 'Mage Bolt'],
 }
+
+/**
+ * Effects that only work on some patterns (HB Damage Effects and spells), so they can't affect the others at all,
+ * even with an Elemental Weakness or Artefact damage type.
+ */
+export const onlyAffects: Record<string, 'living' | 'unliving'> = {
+  Decay: 'living', Disease: 'living', Fatal: 'living', Paralysis: 'living',
+  Smite: 'unliving', 'Bind Unliving': 'unliving', 'Enthral Unliving': 'unliving',
+}
+
+/** Loresheets that stop an effect working on the holder (owner ruling: NPC/DPC can't be Beguiled). */
+export const unaffectedBySheet: Record<string, string[]> = {
+  'npc-dpc': ['Beguile'],
+}

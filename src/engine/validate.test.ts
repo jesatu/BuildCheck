@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { addLoresheets, newBuild, type Build, type HeldSkill } from './build'
-import { damageReductions, immunities, missingLoresheets, validate } from './validate'
+import { damageReductions, immunities, missingLoresheets, unaffectedBy, validate } from './validate'
 import { damageReductionBySkill, immunitiesBySkill, osById } from '../data'
 
 const buy = (id: string, param?: string): HeldSkill => ({ id, param, source: 'buy' })
@@ -445,5 +445,12 @@ describe('derived values', () => {
     const hm = (param: string) => state(build({ cs: { healing: 2 }, os: [buy('high-magic', param)] }), 'high-magic')!.state
     expect(hm('Healing')).toBe('active')
     expect(hm('Spellcasting')).toBe('inactive')
+  })
+  it('lists effects that cannot affect the character because of its pattern or loresheets', () => {
+    const not = (b: Partial<Build>) => unaffectedBy(build(b)).map((u) => `${u.effect}: ${u.from.join(', ')}`)
+    expect(not({})).toEqual(['Bind Unliving: Living pattern', 'Enthral Unliving: Living pattern', 'Smite: Living pattern'])
+    expect(not({ pattern: 'unliving' })).toEqual(['Decay: Unliving pattern', 'Disease: Unliving pattern', 'Fatal: Unliving pattern', 'Paralysis: Unliving pattern'])
+    expect(not({ pattern: 'magical' })).toHaveLength(7)
+    expect(not({ loresheets: [{ id: 'npc-dpc', param: 'Lions' }] })).toContain('Beguile: NPC/DPC')
   })
 })

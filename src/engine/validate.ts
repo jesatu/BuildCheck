@@ -1,5 +1,5 @@
 import {
-  csById, CS_LADDERS, FLAG_LABELS, loresheets, guildOf, joatGuilds, loresheetById, MAGIC_CS_IDS, osById, damageReductionBySkill, immunitiesBySkill, raceById, RULES, scriptFamilies, scriptFamilyOf,
+  csById, CS_LADDERS, FLAG_LABELS, loresheets, guildOf, joatGuilds, loresheetById, MAGIC_CS_IDS, osById, damageReductionBySkill, immunitiesBySkill, onlyAffects, raceById, unaffectedBySheet, RULES, scriptFamilies, scriptFamilyOf,
   type Loresheet, type LoresheetSkill, type OccupationalSkill, type Requirement, type Tier,
 } from '../data'
 import { factions } from '../data/races'
@@ -502,4 +502,16 @@ export function immunities(result: ValidationResult, table = immunitiesBySkill):
 export function damageReductions(result: ValidationResult) {
   const immune = new Set(immunities(result).map((i) => i.effect))
   return immunities(result, damageReductionBySkill).filter((d) => !immune.has(d.effect))
+}
+
+type Protection = { effect: string; limit?: string; from: string[] }
+
+/** Effects that can't affect the character at all: the wrong pattern for them, or a loresheet that stops them. */
+export function unaffectedBy(b: Build): Protection[] {
+  const pattern = `${b.pattern[0]!.toUpperCase()}${b.pattern.slice(1)} pattern`
+  const out: Protection[] = Object.entries(onlyAffects).filter(([, p]) => p !== b.pattern).map(([effect]) => ({ effect, from: [pattern] }))
+  for (const l of b.loresheets) {
+    for (const effect of unaffectedBySheet[l.id] ?? []) out.push({ effect, from: [loresheetById.get(l.id)!.name] })
+  }
+  return out.sort((a, c) => a.effect.localeCompare(c.effect))
 }
