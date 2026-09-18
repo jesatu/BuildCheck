@@ -57,7 +57,7 @@ describe('occupational skills', () => {
     for (const s of occupationalSkills) {
       expect(brokenRefs(s.learn), `${s.id} learn`).toEqual([])
       expect(brokenRefs(s.use), `${s.id} use`).toEqual([])
-      for (const x of [...(s.replaces ?? []), ...(s.includes ?? []), ...(s.excludes ?? [])]) {
+      for (const x of [...(s.replaces ?? []), ...(s.includes ?? []), ...(s.excludes ?? []), ...(s.covers ?? [])]) {
         expect(osById.has(x), `${s.id} → ${x}`).toBe(true)
       }
     }
@@ -100,11 +100,13 @@ describe('occupational skills', () => {
     expect(wrong).toEqual([])
   })
 
-  it('only replace a skill outside the learn prerequisite for loresheet-only skills', () => {
+  it('only replace a skill outside the learn prerequisite for loresheet-only skills (or known exceptions)', () => {
+    // Dismiss/Control +8 also replaces +4 because the Vampire route skips +6 (ruling C17).
+    const exceptions = new Set(['dismiss-control-8 replaces dismiss-control-4'])
     const wrong = occupationalSkills.flatMap((s) => {
       const learn = new Set(osIdsIn(s.learn))
       return (s.replaces ?? []).filter((r) => !learn.has(r) && !s.loresheetOnly).map((r) => `${s.id} replaces ${r}`)
-    })
+    }).filter((w) => !exceptions.has(w))
     expect(wrong).toEqual([])
   })
 

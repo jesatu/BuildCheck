@@ -89,8 +89,15 @@ export interface OccupationalSkill {
   use?: Requirement
   /** Skills removed from the card when this is bought (REP-1, REP-2a). */
   replaces?: string[]
-  /** Skills whose abilities this one includes without them being replaced on the card. */
+  /** Skills whose abilities this one includes without them being replaced on the card. Counts for prerequisites. */
   includes?: string[]
+  /**
+   * Skills this one makes redundant (it does everything they do) without replacing them or counting as them for
+   * prerequisites. They stay on the card, marked redundant, until dropped by hand (ruling C18).
+   */
+  covers?: string[]
+  /** <X> is a level (Fearsome Aspect <X>, Beguile <X>): a higher level replaces the lower ones (ruling C19). */
+  levelled?: boolean
   /** OS that cannot be held alongside this one (8.6). */
   excludes?: string[]
   side: CardSide
