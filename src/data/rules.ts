@@ -17,6 +17,7 @@ export const RULES = {
   powerRatingLimit: 12,              // PR-1
   baseLhvCap: 4,                     // +1 Base LHV
   architectMaxTier: 4,               // Architect ruling
+  prebookMaxTier: 3,                 // 8.3 self-teaching
   csSpellPower: { 1: 4, 2: 12 } as Record<number, number>,
   basePowerPerLevel: 4,
   childPoints: { under5: 0, age5to9: 10, age10to15: 16 },
