@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { addLoresheets, newBuild, type Build, type HeldSkill } from './build'
-import { missingLoresheets, validate } from './validate'
+import { immunities, missingLoresheets, validate } from './validate'
+import { immunitiesBySkill, osById } from '../data'
 
 const buy = (id: string, param?: string): HeldSkill => ({ id, param, source: 'buy' })
 const build = (b: Partial<Build>): Build => ({ ...newBuild(), ...b })
@@ -420,5 +421,14 @@ describe('derived values', () => {
     expect(rules(build({ os: [oath('Lions'), oath('Wolves', { dropped: true })] }))).toEqual(['LIM-7'])
     expect(rules(build({ os: [oath('Bards Guild')], loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }] }))).toEqual(['LIM-7'])
     expect(rules(build({ os: [oath('Mages Guild')], loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }] }))).toEqual([])
+  })
+  it('lists immunities from working skills, including those of replaced and included skills', () => {
+    expect(Object.keys(immunitiesBySkill).filter((id) => !osById.has(id))).toEqual([])
+    const imm = (os: HeldSkill[], b: Partial<Build> = {}) => immunities(validate(build({ ...b, os })))
+      .map((i) => `${i.effect}${i.limit ? ` (${i.limit})` : ''}: ${i.from.join(', ')}`)
+    expect(imm([buy('rally'), buy('sleepless-chanting')])).toEqual(['Fear: Rally', 'Sleep (while casting a Chant): Sleepless Chanting'])
+    expect(imm([buy('mighty-blow')], { cs: { 'large-weapon': 1 } })).toEqual(['Repel: Mighty Blow', 'Strikedown: Mighty Blow'])
+    expect(imm([buy('mind-healing'), buy('sleepless-chanting')], { cs: { healing: 2 } })).toContain('Sleep: Mind Healing, Sleepless Chanting')
+    expect(imm([buy('mighty-blow')])).toEqual([]) // inactive without Large Melee Weapon Use
   })
 })
