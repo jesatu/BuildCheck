@@ -10,6 +10,12 @@ import { CardView, CsPanel, FACTIONS_AND_GUILDS, Issues, PlanView, SkillPicker, 
 export function App() {
   const [state, setState] = useState<EditorState>(() => decodeState(location.hash) ?? emptyState())
   const [showMap, setShowMap] = useState(false)
+  const [copied, setCopied] = useState('')
+  const copyLink = () => {
+    const say = (text: string) => { setCopied(text); setTimeout(() => setCopied(''), 2500) }
+    Promise.resolve(navigator.clipboard?.writeText(location.href) ?? Promise.reject())
+      .then(() => say('Link copied'), () => say("Couldn't copy: use the address bar"))
+  }
   const { build: saved, targets, retired, dropped, addPrereqs, prebook, autoLoresheets } = state
   useEffect(() => { history.replaceState(null, '', encodeState(state)) }, [state])
 
@@ -59,7 +65,7 @@ export function App() {
         </div>
         <div className="top-actions">
           <button type="button" onClick={() => setShowMap((v) => !v)} aria-expanded={showMap}>{showMap ? 'Hide build map' : 'Build map'}</button>
-          <button type="button" className="quiet" onClick={() => navigator.clipboard?.writeText(location.href)}>Copy share link</button>
+          <button type="button" className="quiet" onClick={copyLink} aria-live="polite">{copied || 'Copy share link'}</button>
           <button type="button" className="quiet" onClick={() => { if (confirm('Clear this build?')) setState(emptyState()) }}>New build</button>
         </div>
       </header>
