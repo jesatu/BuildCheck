@@ -10,6 +10,7 @@ export * from './types'
 export { RULES, DEFAULT_SWITCHES } from './rules'
 export type { RuleSwitches } from './rules'
 export { characterSkills, occupationalSkills, loresheets, races, spellLists, guildLists }
+export { MAGIC_CS as MAGIC_CS_IDS } from './character-skills'
 
 function byId<T extends { id: string }>(items: T[]): Map<string, T> {
   return new Map(items.map((i) => [i.id, i]))
