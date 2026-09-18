@@ -7,3 +7,4 @@ dist/
 # Never commit the full rules text (copyright Merlinroute Ltd)
 Lorien-Trust-Rules-Handbook*.md
 Lorien_Trust_Loresheets*.md
+*.tsbuildinfo
