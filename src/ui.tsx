@@ -161,6 +161,7 @@ function paramSuggestions(id: string): string[] {
 /** Params with a fixed list get a drop-down instead of free text, as option groups ('' = no group). */
 function paramChoices(id: string): Array<[string, string[]]> {
   if (id === 'awakened') return [['', loresheets.filter((l) => l.kind === 'awakened').map((l) => l.name.replace(/^Awakened /, ''))]]
+  if (id === 'high-magic') return [['', ['Spellcasting', 'Incantation', 'Healing', 'Corruption']]]
   if (id === 'scholar' || id === 'sage') return Object.entries(researchCategories).map(([c, subjects]) => [c, subjects.map((x) => `${c} (${x})`)])
   return []
 }

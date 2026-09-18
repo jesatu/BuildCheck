@@ -361,7 +361,9 @@ export function validate(input: Build): ValidationResult {
       if (h.id === 'awakened') return sheet?.kind === 'awakened' && (!h.param || sheet.name === `Awakened ${h.param}`)
       return sheet?.skill === h.id || !!sheet?.skills.some((e) => e.os === h.id)
     })
-    const gap = missing(s?.use, via)
+    // High Magic <X> needs Level 2 in its own <X> (HB: level 3 of the lists the character casts at level 2).
+    const hmCs = h.id === 'high-magic' && h.param ? h.param.toLowerCase() : undefined
+    const gap = missing(hmCs && csById.has(hmCs) ? { cs: hmCs, level: 2 } : s?.use, via)
     const inactive = gap ? `Needs ${gap}` : disabled.get(h.id)
     // Polyglot covers every family script; TNS left over from a family without Script Master is redundant.
     // A Druid gets standard AV only, so Armour Mastery adds nothing (L10). The Expert level keeps its Crush immunity.
