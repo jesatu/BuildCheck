@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { loresheetById, occupationalSkills } from '../data'
-import { newBuild, type Build } from './build'
+import { newBuild, type Build, type HeldSkill } from './build'
 import { addHeldSkill, addLoresheetsAndSkills, planRoute, spentSoFar, type Target } from './plan'
 import { validate } from './validate'
 
@@ -155,6 +155,24 @@ describe('planner', () => {
     expect(p.purchases.at(-1)!.countsTowardYearly).toBe(false)
     // Only 3 purchases that season: no advancement.
     expect(summary(b, targets.slice(0, 3), { prebook: true }).years).toBe(2)
+  })
+
+  it('starts the chain of Jack of All Trades uses as early as it can, after the JoAT that pays for the first', () => {
+    const buys = ['immune-repel', 'immune-repel-strikedown', 'mighty-blow', 'immune-fumble', 'immune-fumble-shatter', 'immune-through',
+      'immune-fear', 'immune-mute', 'rally', 'armour-mastery', 'armour-mastery-advanced', 'detect-remove-beguile', 'immune-charms']
+    const b = build({
+      cs: { 'large-weapon': 1, 'medium-armour': 1 }, loresheets: [{ id: 'awakened-human' }],
+      os: [
+        { id: 'oathsworn', param: 'Militia Guild', source: 'buy' },
+        { id: 'jack-of-all-trades', source: 'loresheet', loresheet: 'awakened-human', dropped: true },
+        ...buys.map((id): HeldSkill => ({ id, source: 'buy' })),
+        ...['crushing-blow', 'magic-resistance', 'immune-mind-effects', 'armour-mastery-expert'].map((id): HeldSkill => ({ id, source: 'joat' })),
+      ],
+    })
+    const p = spentSoFar(b, { retired: true })
+    expect(p.years).toBe(6)
+    const at = (id: string) => p.purchases.filter((x) => x.id === id).map((x) => x.year)
+    expect(Math.min(...at('jack-of-all-trades'))).toBeLessThanOrEqual(Math.min(...p.purchases.filter((x) => x.route === 'joat').map((x) => x.year)))
   })
 
   it('does not use prebook tier advancement in a retirement double-step year (C20)', () => {
