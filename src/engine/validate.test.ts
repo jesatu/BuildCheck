@@ -115,21 +115,23 @@ describe('buying routes', () => {
   })
 
   it('lets Jack of All Trades teach an Ω skill for an Oathsworn guild, including Oathsworn from an NPC/DPC loresheet', () => {
-    const joat: HeldSkill = { id: 'jack-of-all-trades', source: 'granted', card: 'power' }
+    const joat: HeldSkill = { id: 'jack-of-all-trades', source: 'loresheet', loresheet: 'awakened-human' }
+    const human = [{ id: 'awakened-human' }]
     const oath: HeldSkill = { id: 'oathsworn', param: 'Mages Guild', source: 'buy' }
     const skill: HeldSkill = { id: 'thaulmonic-alignment', source: 'joat' }
-    expect(rules(build({ flags: ['factionPermission'], os: [joat, oath, skill] }))).toEqual([])
-    const npc = build({ os: [joat, skill], loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }] })
+    expect(rules(build({ flags: ['factionPermission'], loresheets: human, os: [joat, oath, skill] }))).toEqual([])
+    const npc = build({ os: [joat, skill], loresheets: [...human, { id: 'npc-dpc', param: 'Mages Guild' }] })
     expect(rules(npc)).toEqual([])
     expect(state(npc, 'oathsworn')).toMatchObject({ card: 'loresheet', param: 'Mages Guild' })
-    expect(rules(build({ os: [joat, skill], loresheets: [{ id: 'npc-dpc' }] }))).toContain('12')
-    expect(rules(build({ flags: ['factionPermission'], os: [joat, { ...oath, param: 'Bards Guild' }, skill] }))).toEqual(['JoAT'])
-    expect(rules(build({ flags: ['factionPermission'], os: [oath, skill] }))).toEqual(['JoAT'])
+    expect(rules(build({ os: [joat, skill], loresheets: [...human, { id: 'npc-dpc' }] }))).toContain('12')
+    expect(rules(build({ flags: ['factionPermission'], loresheets: human, os: [joat, { ...oath, param: 'Bards Guild' }, skill] }))).toEqual(['JoAT'])
+    // No Awakened Human sheet: no JoAT, even with one on a card.
+    expect(rules(build({ flags: ['factionPermission'], os: [{ id: 'jack-of-all-trades', source: 'granted', card: 'power' }, oath, skill] }))).toEqual(['JoAT'])
     // Group lists count: Oathsworn Mages opens the Arcane Guilds list, except High Magic <X>.
-    expect(rules(build({ cs: { spellcasting: 2 }, loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }], os: [joat, { id: 'spell-power-4', source: 'joat' }] }))).toEqual([])
-    expect(rules(build({ cs: { spellcasting: 2 }, loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }], os: [joat, { id: 'high-magic', param: 'Spellcasting', source: 'joat' }] }))).toEqual(['JoAT'])
+    expect(rules(build({ cs: { spellcasting: 2 }, loresheets: [...human, { id: 'npc-dpc', param: 'Mages Guild' }], os: [joat, { id: 'spell-power-4', source: 'joat' }] }))).toEqual([])
+    expect(rules(build({ cs: { spellcasting: 2 }, loresheets: [...human, { id: 'npc-dpc', param: 'Mages Guild' }], os: [joat, { id: 'high-magic', param: 'Spellcasting', source: 'joat' }] }))).toEqual(['JoAT'])
     // Prerequisites still apply.
-    expect(rules(build({ loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }], os: [joat, { id: 'ritualist-master', source: 'joat' }] }))).toEqual(['OS-4'])
+    expect(rules(build({ loresheets: [...human, { id: 'npc-dpc', param: 'Mages Guild' }], os: [joat, { id: 'ritualist-master', source: 'joat' }] }))).toEqual(['OS-4'])
   })
 
   it('keeps granted skills off the character card', () => {
@@ -392,11 +394,11 @@ describe('derived values', () => {
       .toEqual(['A character can only be one special creature: this one is Awakened Human, unliving pattern.'])
   })
 
-  it('needs the Awakened Human sheet for more than one Jack of All Trades use', () => {
+  it('needs the Awakened Human sheet for every Jack of All Trades use', () => {
     const joat = (sheet: boolean) => validate({ ...newBuild(), loresheets: sheet ? [{ id: 'awakened-human' }] : [],
       os: [{ id: 'jack-of-all-trades', source: 'granted', card: 'power' }, { id: 'oathsworn', param: 'Militia Guild', source: 'buy' },
         { id: 'immune-fear', source: 'joat' }, { id: 'immune-fumble', source: 'joat' }] }).issues.filter((x) => x.rule === 'JoAT')
-    expect(joat(false)).toHaveLength(1)
+    expect(joat(false)).toHaveLength(2)
     expect(joat(true)).toEqual([])
   })
 })

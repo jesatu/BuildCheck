@@ -293,7 +293,7 @@ export const occupationalSkills: OccupationalSkill[] = [
   special({ id: 'regeneration', name: 'Regenerates', param: 'Time period', use: ls, summary: 'Regenerate 1 hit per location per time period.', source: 'HB p.95' }),
   special({ id: 'improved-regeneration', name: 'Improved Regeneration', use: ls, summary: 'Regeneration one step faster (max 10 s). Buy once.', source: 'HB p.92' }),
   special({ id: 'improved-ritual-of-peace', name: 'Improved Ritual of Peace', summary: 'Not taken below 0 by listed effects under the Ritual of Peace. Only with no Tier 5 OS.', source: 'HB p.92' }),
-  { ...special({ id: 'jack-of-all-trades', name: 'Jack of All Trades', summary: 'Counts as a training facility for 1 Ω OS (not High Magic <X>). Used up; re-buying always costs 20 OSP.', source: 'HB p.93; cost from the Awakened Human loresheet (not in the published file)' }), tier: 2, cost: 20 },
+  { ...special({ id: 'jack-of-all-trades', name: 'Jack of All Trades', use: { loresheet: 'awakened-human' }, summary: 'Counts as a training facility for 1 Ω OS (not High Magic <X>). Used up; re-buying always costs 20 OSP.', source: 'HB p.93; cost from the Awakened Human loresheet (not in the published file)' }), tier: 2, cost: 20 },
   special({ id: 'level-2-spell-reduction-1', name: 'Level 2 Spell Reduction (1)', use: ls, summary: 'Spell Reduction (1) on L2 spells (not Iron Will).', source: 'HB p.93' }),
   special({ id: 'magical-armour-repair', name: 'Magical Armour Repair', summary: 'MAV restored after 5 minutes out of combat.', source: 'HB p.93' }),
   special({ id: 'master-brewer', name: 'Master Brewer', summary: 'Once per event, a second copy of an L1 or L2 potion or poison.', source: 'HB p.93' }),

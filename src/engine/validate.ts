@@ -126,8 +126,9 @@ export function withGrants(b: Build): HeldSkill[] {
  * Why Jack of All Trades can't teach this skill, or undefined if it can. Needs the JoAT skill and
  * Oathsworn <guild> (bought, or granted by an NPC loresheet) for a guild whose Ω list has the skill.
  */
-export function joatBlocker(os: HeldSkill[], skillId: string, canBuyJoat = false): string | undefined {
-  if (!canBuyJoat && !os.some((h) => h.id === 'jack-of-all-trades')) return 'needs Jack of All Trades'
+export function joatBlocker(os: HeldSkill[], skillId: string, hasSheet: boolean): string | undefined {
+  // JoAT only comes from the Awakened Human loresheet; a used one is bought again there.
+  if (!hasSheet) return 'needs the Awakened Human loresheet'
   if (skillId === 'high-magic') return 'High Magic <X> cannot be learned with Jack of All Trades'
   const guilds = joatGuilds(skillId)
   if (guilds.length === 0) return `${skillName(skillId)} is not on a Jack of All Trades (Ω) list`
@@ -261,12 +262,6 @@ export function validate(input: Build): ValidationResult {
     }
   }
 
-  // Each use of Jack of All Trades removes it from the card; only the Awakened Human sheet sells it again.
-  const joatUses = b.os.filter((h) => h.source === 'joat').length
-  if (joatUses > 1 && !heldLs.has('awakened-human')) {
-    err('JoAT', `${joatUses} skills were learned with Jack of All Trades, but each use removes it from the card. Only the Awakened Human loresheet sells it again (20 OSP each time).`)
-  }
-
   // ---------- Occupational Skills: how each was obtained ----------
   const tierOf: (Tier | undefined)[] = []
   os.forEach((h, i) => {
@@ -303,7 +298,7 @@ export function validate(input: Build): ValidationResult {
         if (entry.minType && creatureTier < entry.minType) err('LS-5', `${name} needs ${ls.tiers?.[entry.minType - 1]?.name ?? ls.name} or higher (Min. type).`, i)
       }
     } else if (h.source === 'joat') {
-      // JoAT is used up, so a skill learned with it only needs a JoAT source: held, or the Awakened Human sheet.
+      // JoAT is used up and bought again each time, so a skill learned with it needs the Awakened Human sheet.
       const blocker = joatBlocker(os, h.id, heldLs.has('awakened-human'))
       if (blocker) err('JoAT', `${name} through Jack of All Trades: ${blocker}.`, i)
       const gap = missing(s.learn, false, i)
