@@ -119,6 +119,14 @@ describe('planner', () => {
     })
   })
 
+  it('keeps the restricted note on a retirement double step (R5)', () => {
+    const b = build({ cs: { 'poison-lore': 1 } })
+    const p = planRoute(b, [t('create-poison-magical')], { retired: true }).cheapest!
+    const magical = p.purchases.find((x) => x.id === 'create-poison-magical')!
+    expect(p.purchases.some((x) => x.doubleStep)).toBe(true)
+    expect(magical.notes).toContain('Restricted: needs a training facility, tutor or forgery')
+  })
+
   it('validates the final build', () => {
     const p = planRoute(build({ cs: { 'poison-lore': 1 } }), [t('create-poison-master')]).cheapest!
     expect(p.validation.valid).toBe(true)

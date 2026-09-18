@@ -200,6 +200,13 @@ describe('awakened loresheets', () => {
   })
 })
 
+describe('notes', () => {
+  it('notes the Treewalker rules mismatch (L11)', () => {
+    const r = validate(build({ cs: { spellcasting: 1 }, loresheets: [{ id: 'treewalker' }] }))
+    expect(r.issues.filter((i) => i.rule === 'L11').map((i) => i.severity)).toEqual(['warning'])
+  })
+})
+
 describe('derived values', () => {
   it('applies the Rule of Double to Spell Power', () => {
     const d = validate(build({ cs: { healing: 1 }, os: [buy('spell-power-4'), buy('spell-power-8'), buy('spell-power-12'), buy('spell-power-16')] })).derived

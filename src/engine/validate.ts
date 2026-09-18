@@ -314,6 +314,9 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
   if (factionOaths > RULES.oathswornFactionCap || oaths.length - factionOaths > RULES.oathswornGuildCap) {
     err('LIM-7', 'At most one faction Oathsworn and one guild Oathsworn.')
   }
+  if (holds('treewalker') || heldLs.has('treewalker')) {
+    warn('L11', 'Treewalker: the handbook and the Treewalker loresheet give different requirements. Both are applied: Ritual Magic or Perform Transport Rite, and Spellcasting, Incantation or Healing CS; not Corruption, Necromancy or an Unliving pattern.')
+  }
   if (holds('improved-ritual-of-peace') && t5 > 0) warn('EX-6', 'Improved Ritual of Peace does nothing while the character has a Tier 5 skill.')
 
   // Mutual exclusions (8.6, MG-5)
