@@ -268,18 +268,26 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions, history = false, jo
   const year = new Map<string, number>()
   // Skills already learned with Jack of All Trades: one use per season, and each use past the ones a held JoAT
   // paid for re-bought it that season (20 OSP, one of the 4 purchases).
+  // ponytail: a re-buy is placed in the season of its use; buying it in an earlier free season (after the previous use) isn't modelled.
   const rebuyYears = new Set<number>()
   let joatUses = 0
+  const joatItem = items.find((i) => i.id === 'jack-of-all-trades')
   for (let y = 1; year.size < items.length; y++) {
     if (y > items.length + 1) break // unreachable unless preds form a cycle
+    // JoAT uses are one per season, so the uses still to come form a chain: rank them (and the JoAT that pays
+    // for the first) by that chain as well as by their own tree.
+    const joatLeft = items.filter((i) => i.route === 'joat' && !year.has(i.key)).length
+    const rank = (i: Acq) => heightOf(i.key) + (i === joatItem ? joatLeft + 1 : i.route === 'joat' ? joatLeft : 0)
     const ready = items
       .filter((i) => !year.has(i.key) && !doubled.has(i.key) && [...preds.get(i.key)!].every((p) => (year.get(p) ?? Infinity) < y))
-      .sort((a, b) => Number(isDoubleParent(b)) - Number(isDoubleParent(a)) || heightOf(b.key) - heightOf(a.key) ||
+      .sort((a, b) => Number(isDoubleParent(b)) - Number(isDoubleParent(a)) || rank(b) - rank(a) ||
         (opts.prebook ? Number(plain(b, RULES.prebookMaxTier)) - Number(plain(a, RULES.prebookMaxTier)) : 0) || a.cost - b.cost)
     let slots: number = RULES.purchasesPerYear
     for (const i of ready) {
       const joat = i.route === 'joat', rebuy = joat && joatUses >= joatCovered
       if (joat && [...year].some(([k, v]) => v === y && byKey.get(k)?.route === 'joat')) continue
+      // A use the held JoAT pays for can't come before that JoAT was bought.
+      if (joat && !rebuy && joatItem && !((year.get(joatItem.key) ?? Infinity) <= y)) continue
       const need = countsYearly(i) ? (rebuy ? 2 : 1) : 0
       if (need > slots) continue
       slots -= need
