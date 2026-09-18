@@ -6,7 +6,7 @@ import {
 import { factions } from './data/races'
 import { skillKey, type Build, type CardId, type SkillSource } from './engine/build'
 import type { Plan } from './engine/plan'
-import type { Issue, SkillStatus, ValidationResult } from './engine/validate'
+import { damageReductions, immunities, type Issue, type SkillStatus, type ValidationResult } from './engine/validate'
 
 const CS_GROUPS: Array<[CsGroup, string]> = [['weapon', 'Weapon'], ['armour', 'Armour'], ['knowledge', 'Knowledge'], ['power', 'Power']]
 const ROUTE_LABEL = { buy: 'Buy', loresheet: 'Loresheet', architect: 'Architect', joat: 'Jack of All Trades' } as const
@@ -297,6 +297,7 @@ export function CardView({ build, result, onToggleDrop }: { build: Build; result
           </div>
         </div>
       )}
+      <Immunities result={result} />
       <label className="check small">
         <input type="checkbox" checked={showReplaced} onChange={(e) => setShowReplaced(e.target.checked)} />
         Show replaced skills
@@ -307,6 +308,20 @@ export function CardView({ build, result, onToggleDrop }: { build: Build; result
       </p>
     </div>
   )
+}
+
+function Immunities({ result }: { result: ValidationResult }) {
+  const lists = [['Immune to', immunities(result)], ['Damage reduction', damageReductions(result)]] as const
+  return lists.filter(([, list]) => list.length > 0).map(([title, list]) => (
+    <div key={title} className="immunities">
+      <h3>{title}</h3>
+      <ul>
+        {list.map((i) => (
+          <li key={i.effect}><b>{i.effect}</b>{i.limit && ` (${i.limit})`} <span className="muted small">{i.from.join(', ')}</span></li>
+        ))}
+      </ul>
+    </div>
+  ))
 }
 
 // ---------- Issues and plan ----------

@@ -12,6 +12,7 @@ export { characterSkills, occupationalSkills, loresheets, races, spellLists, gui
 export { CS_LADDERS, MAGIC_CS as MAGIC_CS_IDS } from './character-skills'
 export { scriptFamilies, scriptFamilyOf } from './scripts'
 export { researchCategories } from './research'
+export { damageReductionBySkill, immunitiesBySkill } from './immunities'
 
 export const FLAG_LABELS: Record<FlagId, string> = {
   bowCompetency: 'Bow Competency',
