@@ -102,6 +102,17 @@ describe('planner', () => {
     expect(summary(b, [t('vampire-3')])).toMatchObject({ years: 2, osp: 50, steps: ['1:Mature Vampire:loresheet', '2:Elder Vampire:loresheet'] })
   })
 
+  it('plans Crushing Blow for an awakened human Oathsworn to the Militia Guild, using Jack of All Trades for the restricted step', () => {
+    const b = { ...newBuild(), cs: { 'large-weapon': 1 }, flags: ['factionPermission' as const],
+      loresheets: [{ id: 'awakened-human' }], os: [{ id: 'oathsworn', param: 'Militia Guild', source: 'buy' as const }] }
+    const p = planRoute(b, [{ id: 'crushing-blow' }]).cheapest!
+    expect(p.purchases.map((x) => `${x.year}:${x.id}:${x.route}:${x.cost}`)).toEqual([
+      '1:immune-repel:buy:20', '2:immune-repel-strikedown:buy:30', '3:mighty-blow:buy:40',
+      '4:crushing-blow:joat:50', '4:jack-of-all-trades:loresheet:20',
+    ])
+    expect(p.validation.valid).toBe(true)
+  })
+
   it('uses retirement double steps on two different trees in year 1', () => {
     const b = build({ cs: { 'poison-lore': 1, 'potion-lore': 1 } })
     const targets = [t('create-poison-master'), t('create-potion-master'), t('shield-mastery-expert')]
