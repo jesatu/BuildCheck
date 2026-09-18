@@ -18,7 +18,7 @@ export interface PlanOptions {
   retired?: boolean
   /** Skills (skillKey) to take off the finished card; they still count for prerequisites. */
   drop?: string[]
-  /** Prebook each season: a skill self-taught at prebook (T1–T3, not @) lets the next step on its tree be bought at an event that season (C20). */
+  /** Book all 4 events together each season: prebook tier advancement (C20). */
   prebook?: boolean
 }
 
@@ -35,10 +35,10 @@ export interface PlannedPurchase {
   countsTowardYearly: boolean
   /** Bought in the same year as its prerequisite, as a retirement double step. */
   doubleStep?: boolean
-  /** Self-taught at prebook so the next step on its tree can be bought at an event the same season. */
+  /** One of the season's 4 purchases, all made at prebook so one can be advanced (C20). */
   prebook?: boolean
-  /** Bought at an event in the same season as its prebooked prerequisite. */
-  afterPrebook?: boolean
+  /** Prebook tier advancement: a 5th purchase, the next level of one of that season's prebook purchases (C20). */
+  advanced?: boolean
   notes: string[]
 }
 
@@ -258,28 +258,36 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions, history = false): P
   }
 
   const isDoubleParent = (i: Acq) => [...doubled.values()].includes(i.key)
-  // Prebook (C20): a skill self-taught at prebook (buy route, T1–T3, not @, not main-event-only) lets a child on
-  // its tree be bought at an event the same season. The child can't itself be a prebook parent that season.
-  const canPrebook = (i: Acq) => !!opts.prebook && i.route === 'buy' && (i.tier ?? 5) <= RULES.prebookMaxTier &&
+  // Prebook tier advancement (C20): book all 4 events together and make all 4 purchases at prebook (T1–T3, not @),
+  // and one of them can be advanced a second level straight away: a 5th purchase, not T5 and not restricted.
+  const plain = (i: Acq, maxTier: number) => i.route === 'buy' && (i.tier ?? 5) <= maxTier &&
     !osById.get(i.id)?.restricted && !osById.get(i.id)?.mainEventOnly
   const prebooked = new Set<string>()
-  const afterPrebook = new Set<string>()
+  const advanced = new Set<string>()
   const year = new Map<string, number>()
   for (let y = 1; year.size < items.length; y++) {
     if (y > items.length + 1) break // unreachable unless preds form a cycle
-    const sameSeason = (p: string) => year.get(p) === y && canPrebook(byKey.get(p)!) && !afterPrebook.has(p) && !doubled.has(p)
+    const ready = items
+      .filter((i) => !year.has(i.key) && !doubled.has(i.key) && [...preds.get(i.key)!].every((p) => (year.get(p) ?? Infinity) < y))
+      .sort((a, b) => Number(isDoubleParent(b)) - Number(isDoubleParent(a)) || heightOf(b.key) - heightOf(a.key) ||
+        (opts.prebook ? Number(plain(b, RULES.prebookMaxTier)) - Number(plain(a, RULES.prebookMaxTier)) : 0) || a.cost - b.cost)
     let slots: number = RULES.purchasesPerYear
-    for (;;) {
-      const next = items
-        .filter((i) => !year.has(i.key) && !doubled.has(i.key) && (!countsYearly(i) || slots > 0) &&
-          [...preds.get(i.key)!].every((p) => (year.get(p) ?? Infinity) < y || sameSeason(p)))
-        .sort((a, b) => Number(isDoubleParent(b)) - Number(isDoubleParent(a)) || heightOf(b.key) - heightOf(a.key) || a.cost - b.cost)[0]
-      if (!next) break
-      if (countsYearly(next)) slots--
-      year.set(next.key, y)
-      const parents = [...preds.get(next.key)!].filter((p) => year.get(p) === y)
-      if (parents.length) { afterPrebook.add(next.key); parents.forEach((p) => prebooked.add(p)) }
-      for (const [c, p] of doubled) if (p === next.key && y === 1) year.set(c, y)
+    for (const i of ready) {
+      if (countsYearly(i)) { if (slots === 0) continue; slots-- }
+      year.set(i.key, y)
+      for (const [c, p] of doubled) if (p === i.key && y === 1) year.set(c, y)
+    }
+    // ponytail: greedy — only advances when the year's normal pick happens to be 4 prebookable skills.
+    const four = items.filter((i) => year.get(i.key) === y && countsYearly(i) && !doubled.has(i.key))
+    if (opts.prebook && four.length === RULES.purchasesPerYear && four.every((i) => plain(i, RULES.prebookMaxTier))) {
+      const step = items
+        .filter((i) => !year.has(i.key) && !doubled.has(i.key) && plain(i, RULES.prebookAdvanceMaxTier) && countsYearly(i))
+        .filter((i) => {
+          const same = [...preds.get(i.key)!].filter((p) => year.get(p) === y)
+          return same.length === 1 && four.some((f) => f.key === same[0]) && [...preds.get(i.key)!].every((p) => year.has(p))
+        })
+        .sort((a, b) => heightOf(b.key) - heightOf(a.key) || a.cost - b.cost)[0]
+      if (step) { year.set(step.key, y); advanced.add(step.key); four.forEach((f) => prebooked.add(f.key)) }
     }
     // A double step whose parent missed year 1 becomes a normal purchase.
     if (y === 1) for (const c of [...doubled.keys()]) if (!year.has(c)) doubled.delete(c)
@@ -296,7 +304,7 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions, history = false): P
   const joatYears = new Set<number>()
   const rebuyYears = new Set<number>()
   const viaJoat = new Set<string>()
-  const slotsUsed = (y: number) => items.filter((i) => year.get(i.key) === y && countsYearly(i) && !doubled.has(i.key)).length + (rebuyYears.has(y) ? 1 : 0)
+  const slotsUsed = (y: number) => items.filter((i) => year.get(i.key) === y && countsYearly(i) && !doubled.has(i.key) && !advanced.has(i.key)).length + (rebuyYears.has(y) ? 1 : 0)
   for (const i of history ? [] : [...items].sort((a, b) => (year.get(a.key) ?? 0) - (year.get(b.key) ?? 0) || b.cost - a.cost)) {
     const y = year.get(i.key) ?? 0
     if (i.route !== 'buy' || !osById.get(i.id)?.restricted || joatYears.has(y) || joatBlocker(held, i.id, joatSheet)) continue
@@ -322,9 +330,9 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions, history = false): P
     if (i.param === ANY || i.param?.startsWith(`${ANY}:`)) notes.push('Choose any value for <X>')
     return {
       year: year.get(i.key) ?? 0, id: i.id, param: i.param, name: displayName(i.id, i.param), route: i.route,
-      loresheet: i.loresheet, cost: i.cost, tier: i.tier, countsTowardYearly: countsYearly(i) && !doubled.has(i.key),
+      loresheet: i.loresheet, cost: i.cost, tier: i.tier, countsTowardYearly: countsYearly(i) && !doubled.has(i.key) && !advanced.has(i.key),
       doubleStep: doubled.has(i.key) || undefined, prebook: prebooked.has(acq.key) || undefined,
-      afterPrebook: afterPrebook.has(acq.key) || undefined, notes,
+      advanced: advanced.has(acq.key) || undefined, notes,
     }
   })
   for (const y of rebuyYears) {
@@ -333,7 +341,7 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions, history = false): P
       countsTowardYearly: true, notes: ['Bought to use this season (each use removes it from the card)', 'Main event only (not prebook)'],
     })
   }
-  purchases.sort((a, b) => a.year - b.year || Number(!!b.prebook) - Number(!!a.prebook) || a.name.localeCompare(b.name))
+  purchases.sort((a, b) => a.year - b.year || Number(!!a.advanced) - Number(!!b.advanced) || a.name.localeCompare(b.name))
 
   const finalBuild: Build = {
     ...build,

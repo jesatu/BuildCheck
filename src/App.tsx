@@ -121,7 +121,7 @@ export function App() {
             </label>
             <label className="check">
               <input type="checkbox" checked={prebook} onChange={(e) => setState((s) => ({ ...s, prebook: e.target.checked }))} />
-              Prebook each season (a T1–T3 skill self-taught at prebook lets the next step on its tree be bought at an event that season)
+              Book all 4 events together each season (spending all 4 purchases at prebook lets you advance one of them a second level)
             </label>
           </div>
 
