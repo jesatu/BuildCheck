@@ -4,7 +4,7 @@ import type { Build, CardId, HeldSkill } from './engine/build'
 import { planRoute } from './engine/plan'
 import { validate } from './engine/validate'
 import { decodeState, emptyState, encodeState, type EditorState } from './state'
-import { CardView, CsPanel, Issues, PlanView, SkillPicker, SkillRows } from './ui'
+import { CardView, CsPanel, FACTIONS_AND_GUILDS, Issues, PlanView, SkillPicker, SkillRows } from './ui'
 
 export function App() {
   const [state, setState] = useState<EditorState>(() => decodeState(location.hash) ?? emptyState())
@@ -99,6 +99,10 @@ export function App() {
                 return (
                   <li key={l.id} className="row">
                     <span className="grow">{ls.name}{ls.unpublished && <span className="tag">unpublished</span>}</span>
+                    {ls.param && (
+                      <input className="param" aria-label={`${ls.name}: ${ls.param}`} placeholder={ls.param} value={l.param ?? ''} list="faction-guild"
+                        onChange={(e) => setBuild((b) => ({ ...b, loresheets: b.loresheets.map((x, j) => j === i ? { ...x, param: e.target.value || undefined } : x) }))} />
+                    )}
                     {ls.tiers && (
                       <select aria-label={`${ls.name} tier`} value={l.tier ?? 1}
                         onChange={(e) => setBuild((b) => ({ ...b, loresheets: b.loresheets.map((x, j) => j === i ? { ...x, tier: Number(e.target.value) as 1 | 2 | 3 | 4 } : x) }))}>
@@ -111,6 +115,7 @@ export function App() {
                 )
               })}
             </ul>
+            <datalist id="faction-guild">{FACTIONS_AND_GUILDS.map((x) => <option key={x} value={x} />)}</datalist>
             <select aria-label="Add a loresheet" value=""
               onChange={(e) => {
                 const ls = loresheetById.get(e.target.value)

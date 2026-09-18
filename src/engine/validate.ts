@@ -67,6 +67,21 @@ export function describe(r: Requirement): string {
   return `not ${describe(r.not)}`
 }
 
+/** The build's skills plus those granted by held loresheets (Paladin → Dedicated Follower, NPC/DPC → Oathsworn <X>). */
+export function withGrants(b: Build): HeldSkill[] {
+  const os: HeldSkill[] = [...b.os]
+  for (const l of b.loresheets) {
+    for (const r of loresheetById.get(l.id)?.restrictions ?? []) {
+      if (r.kind !== 'grantsSkills') continue
+      const param = r.withParam ? l.param : undefined
+      for (const id of r.skills) {
+        if (!os.some((h) => h.id === id && h.param === param)) os.push({ id, param, source: 'granted', card: 'loresheet', loresheet: l.id })
+      }
+    }
+  }
+  return os
+}
+
 /**
  * Why Jack of All Trades can't teach this skill, or undefined if it can. Needs the JoAT skill and
  * Oathsworn <guild> (bought, or granted by an NPC loresheet) for a guild whose Ω list has the skill.
@@ -104,15 +119,7 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
   const heldLs = new Map(b.loresheets.map((l) => [l.id, l]))
   const lsRestrictions = b.loresheets.flatMap((l) => loresheetById.get(l.id)?.restrictions ?? [])
 
-  // Skills granted by held loresheets (Paladin → Dedicated Follower, Voidportal → Perform Teleport Rite).
-  const os: HeldSkill[] = [...b.os]
-  for (const l of b.loresheets) {
-    for (const r of loresheetById.get(l.id)?.restrictions ?? []) {
-      if (r.kind === 'grantsSkills') {
-        for (const id of r.skills) if (!os.some((h) => h.id === id)) os.push({ id, source: 'granted', card: 'creature', loresheet: l.id })
-      }
-    }
-  }
+  const os = withGrants(b)
 
   const csLevel = (id: string) => b.cs[id] ?? 0
   /** `except`: index of the skill being checked, so it can't satisfy its own prerequisite. */
@@ -179,6 +186,7 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
     const ls = loresheetById.get(l.id)
     if (!ls) { err('12', `Unknown loresheet "${l.id}".`); continue }
     if (ls.kind === 'essence' && !l.tier) err('12.4', `${ls.name} needs a tier (1–4).`)
+    if (ls.param && !l.param) err('12', `${ls.name} needs a value for <X> (${ls.param}).`)
     for (const r of ls.restrictions) {
       if (r.kind === 'requiresLoresheet' && !heldLs.has(r.loresheet)) err('12.4', `${ls.name} needs the ${loresheetById.get(r.loresheet)?.name} loresheet.`)
       if (r.kind === 'requiresCs' && !r.cs.some((c) => csLevel(c))) err('12.7', `${ls.name} needs one of: ${r.cs.map((c) => csById.get(c)?.name).join(', ')}.`)

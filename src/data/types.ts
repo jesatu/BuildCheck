@@ -146,7 +146,8 @@ export type Restriction =
   | { kind: 'requiresLoresheet'; loresheet: string }
   | { kind: 'setsPattern'; pattern: Pattern }
   | { kind: 'setsRace'; race: string }
-  | { kind: 'grantsSkills'; skills: string[] }
+  /** withParam: granted with the held loresheet's <X> (NPC/DPC → Oathsworn <X>). */
+  | { kind: 'grantsSkills'; skills: string[]; withParam?: boolean }
   | { kind: 'csDisablesSkills'; cs: string; skills: string[] }
   | { kind: 'excludesCs'; cs: string[] }
   | { kind: 'requiresCs'; cs: string[] }
@@ -158,6 +159,8 @@ export interface Loresheet {
   kind: LoresheetKind
   /** True if the loresheet is not in the published loresheets file. */
   unpublished?: boolean
+  /** Label for a loresheet held for a specific <X>, e.g. "Faction or Guild". */
+  param?: string
   skills: LoresheetSkill[]
   tiers?: EssenceTier[]
   restrictions: Restriction[]

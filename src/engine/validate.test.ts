@@ -108,18 +108,22 @@ describe('buying routes', () => {
     expect(rules(build({ os: [{ id: 'mighty-blow', source: 'architect' }] }))).toEqual(['LS-4a'])
   })
 
-  it('lets Jack of All Trades teach an Ω skill for an Oathsworn guild, including via an NPC loresheet grant', () => {
+  it('lets Jack of All Trades teach an Ω skill for an Oathsworn guild, including Oathsworn from an NPC/DPC loresheet', () => {
     const joat: HeldSkill = { id: 'jack-of-all-trades', source: 'granted', card: 'power' }
-    const oath: HeldSkill = { id: 'oathsworn', param: 'Mages Guild', source: 'granted', card: 'power' } // NPC loresheet
+    const oath: HeldSkill = { id: 'oathsworn', param: 'Mages Guild', source: 'buy' }
     const skill: HeldSkill = { id: 'thaulmonic-alignment', source: 'joat' }
-    expect(rules(build({ os: [joat, oath, skill] }))).toEqual([])
-    expect(rules(build({ os: [joat, { ...oath, param: 'Bards Guild' }, skill] }))).toEqual(['JoAT'])
-    expect(rules(build({ os: [oath, skill] }))).toEqual(['JoAT'])
+    expect(rules(build({ flags: ['factionPermission'], os: [joat, oath, skill] }))).toEqual([])
+    const npc = build({ os: [joat, skill], loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }] })
+    expect(rules(npc)).toEqual([])
+    expect(state(npc, 'oathsworn')).toMatchObject({ card: 'loresheet', param: 'Mages Guild' })
+    expect(rules(build({ os: [joat, skill], loresheets: [{ id: 'npc-dpc' }] }))).toContain('12')
+    expect(rules(build({ flags: ['factionPermission'], os: [joat, { ...oath, param: 'Bards Guild' }, skill] }))).toEqual(['JoAT'])
+    expect(rules(build({ flags: ['factionPermission'], os: [oath, skill] }))).toEqual(['JoAT'])
     // Group lists count: Oathsworn Mages opens the Arcane Guilds list, except High Magic <X>.
-    expect(rules(build({ cs: { spellcasting: 2 }, os: [joat, oath, { id: 'spell-power-4', source: 'joat' }] }))).toEqual([])
-    expect(rules(build({ cs: { spellcasting: 2 }, os: [joat, oath, { id: 'high-magic', param: 'Spellcasting', source: 'joat' }] }))).toEqual(['JoAT'])
+    expect(rules(build({ cs: { spellcasting: 2 }, loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }], os: [joat, { id: 'spell-power-4', source: 'joat' }] }))).toEqual([])
+    expect(rules(build({ cs: { spellcasting: 2 }, loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }], os: [joat, { id: 'high-magic', param: 'Spellcasting', source: 'joat' }] }))).toEqual(['JoAT'])
     // Prerequisites still apply.
-    expect(rules(build({ os: [joat, oath, { id: 'ritualist-master', source: 'joat' }] }))).toEqual(['OS-4'])
+    expect(rules(build({ loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }], os: [joat, { id: 'ritualist-master', source: 'joat' }] }))).toEqual(['OS-4'])
   })
 
   it('keeps granted skills off the character card', () => {

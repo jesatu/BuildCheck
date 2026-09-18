@@ -3,7 +3,7 @@ import {
   type LoresheetSkill, type Requirement, type Tier,
 } from '../data'
 import type { Build, HeldSkill } from './build'
-import { coveredBy, describe, joatBlocker, skillName, validate, type ValidationResult } from './validate'
+import { coveredBy, describe, joatBlocker, skillName, validate, withGrants, type ValidationResult } from './validate'
 
 // Route planner (reference doc 8.2, 8.3, 8.8). Turns target skills into a year-by-year purchase plan.
 // With an unlimited OSP pool, plans differ only in route choice (buy / loresheet / Architect) and
@@ -78,8 +78,9 @@ export function planRoute(build: Build, targets: Target[], opts: PlanOptions = {
     want === undefined || want === ANY || want === have ||
     (want.startsWith(`${ANY}:`) && scriptFamilyOf(have) === want.slice(ANY.length + 1))
 
+  const held = withGrants(build)
   const heldNow = (id: string, param?: string) =>
-    build.os.some((h) => (h.id === id && paramMatches(param, h.param)) || ((param === undefined || param === ANY) && coveredBy(h.id).has(id)))
+    held.some((h) => (h.id === id && paramMatches(param, h.param)) || ((param === undefined || param === ANY) && coveredBy(h.id).has(id)))
 
   const leafMet = (r: Requirement): boolean => {
     if ('cs' in r) return (build.cs[r.cs] ?? 0) >= (r.level ?? 1)
@@ -268,7 +269,7 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
   const viaJoat = new Set<string>()
   for (const i of [...items].sort((a, b) => (year.get(a.key) ?? 0) - (year.get(b.key) ?? 0) || b.cost - a.cost)) {
     const y = year.get(i.key) ?? 0
-    if (i.route === 'buy' && osById.get(i.id)?.restricted && !joatYears.has(y) && !joatBlocker(build.os, i.id)) {
+    if (i.route === 'buy' && osById.get(i.id)?.restricted && !joatYears.has(y) && !joatBlocker(withGrants(build), i.id)) {
       viaJoat.add(i.key)
       joatYears.add(y)
     }

@@ -348,6 +348,12 @@ export const loresheets: Loresheet[] = [
     skills: [],
   },
   {
+    id: 'npc-dpc', name: 'NPC/DPC', kind: 'route', unpublished: true, param: 'Faction or Guild', source: 'Owner ruling, 2026-09-18',
+    summary: 'Held by NPC and DPC characters for a faction or guild. Grants Oathsworn <X> and <X> Command (Command is never on a player card).',
+    restrictions: [{ kind: 'grantsSkills', skills: ['oathsworn', 'command'], withParam: true }],
+    skills: [],
+  },
+  {
     id: 'architect', name: 'Architect', kind: 'route', unpublished: true, source: 'Owner ruling, 2026-09-17',
     summary: 'Buy any skill you have access to, up to Tier 4, without buying its prerequisites. The skill still costs OSP; one step per tree per year and use requirements still apply.',
     restrictions: [],

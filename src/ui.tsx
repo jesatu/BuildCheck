@@ -10,7 +10,7 @@ import type { Issue, SkillStatus, ValidationResult } from './engine/validate'
 
 const CS_GROUPS: Array<[CsGroup, string]> = [['weapon', 'Weapon'], ['armour', 'Armour'], ['knowledge', 'Knowledge'], ['power', 'Power']]
 const ROUTE_LABEL = { buy: 'Buy', loresheet: 'Loresheet', architect: 'Architect', joat: 'Jack of All Trades' } as const
-const CARD_LABEL: Record<CardId, string> = { character: 'Character card', creature: 'Special creature card', power: 'Special power card' }
+const CARD_LABEL: Record<CardId, string> = { character: 'Character card', creature: 'Special creature card', power: 'Special power card', loresheet: 'Granted by loresheets' }
 const STATE_LABEL = { active: 'Active', inactive: 'Inactive', redundant: 'Redundant', replaced: 'Replaced' } as const
 
 // ---------- Character Skills ----------
@@ -115,11 +115,11 @@ export function SkillPicker({ build, onAdd }: { build: Build; onAdd: (id: string
 
 // ---------- Wanted / held rows ----------
 
-const guildNames = [...new Set(guildLists.flatMap((g) => g.guilds))].map((g) => `${g} Guild`)
+export const FACTIONS_AND_GUILDS = [...factions, ...new Set(guildLists.flatMap((g) => g.guilds).map((g) => `${g} Guild`))]
 function paramSuggestions(id: string): string[] {
   if (id === 'script-master') return Object.keys(scriptFamilies)
   if (id === 'translate-named-script') return Object.values(scriptFamilies).flat()
-  if (id === 'oathsworn' || id === 'activate-item') return [...factions, ...guildNames, 'Bank']
+  if (id === 'oathsworn' || id === 'activate-item') return FACTIONS_AND_GUILDS
   if (id === 'general-knowledge') return ['Guildsman', 'Merchant', 'Rumour Monger', 'Storyteller', 'Wanderer', 'War Scout']
   return []
 }
@@ -195,7 +195,7 @@ export function CardView({ build, result }: { build: Build; result: ValidationRe
   const t5 = character.filter((s) => s.state !== 'replaced' && s.tier === 5).length
   const race = raceById.get(build.race)
   const d = result.derived
-  const specials = (['creature', 'power'] as const).filter((c) => onCard(c).length > 0 || (c === 'creature' && (race && !race.startingRace)))
+  const specials = (['creature', 'power', 'loresheet'] as const).filter((c) => onCard(c).length > 0 || (c === 'creature' && (race && !race.startingRace)))
 
   return (
     <div className="panel">
