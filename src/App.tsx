@@ -4,10 +4,12 @@ import { skillKey, type Build, type CardId } from './engine/build'
 import { addHeldSkill, addLoresheetsAndSkills, planRoute, spentSoFar } from './engine/plan'
 import { essenceTier, missingLoresheets, validate } from './engine/validate'
 import { decodeState, emptyState, encodeState, type EditorState } from './state'
+import { BuildMap } from './map'
 import { CardView, CsPanel, FACTIONS_AND_GUILDS, Issues, PlanView, SkillPicker, SkillRows } from './ui'
 
 export function App() {
   const [state, setState] = useState<EditorState>(() => decodeState(location.hash) ?? emptyState())
+  const [showMap, setShowMap] = useState(false)
   const { build: saved, targets, retired, dropped } = state
   useEffect(() => { history.replaceState(null, '', encodeState(state)) }, [state])
 
@@ -54,7 +56,8 @@ export function App() {
           <p className="muted">Plan and check a Lorien Trust character build.</p>
         </div>
         <div className="top-actions">
-          <button type="button" onClick={() => navigator.clipboard?.writeText(location.href)}>Copy share link</button>
+          <button type="button" onClick={() => setShowMap((v) => !v)} aria-expanded={showMap}>{showMap ? 'Hide build map' : 'Build map'}</button>
+          <button type="button" className="quiet" onClick={() => navigator.clipboard?.writeText(location.href)}>Copy share link</button>
           <button type="button" className="quiet" onClick={() => { if (confirm('Clear this build?')) setState(emptyState()) }}>New build</button>
         </div>
       </header>
@@ -64,6 +67,14 @@ export function App() {
           <span>This build needs the {missing.map((id) => loresheetById.get(id)?.name).join(', ')} {missing.length === 1 ? 'loresheet' : 'loresheets'}.</span>
           <button type="button" onClick={() => setBuild((b) => addLoresheetsAndSkills(b, missing))}>Add required loresheets</button>
         </div>
+      )}
+
+      {showMap && (
+        <section className="panel map-panel">
+          <h2>Build map</h2>
+          <p className="muted small">Each row is a skill tree: prerequisites on the left, the skills they unlock on the right. Solid boxes are held, dashed boxes are planned. A dotted link is a prerequisite skipped by Architect or a ritual.</p>
+          <BuildMap build={build} result={result} spent={spent} plan={plan} />
+        </section>
       )}
 
       <main className="layout">
