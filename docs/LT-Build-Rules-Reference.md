@@ -2,7 +2,7 @@
 
 **Sources:**
 - Lorien Trust Rules Handbook v4.06 (`Lorien-Trust-Rules-Handbook-v4.06-3.md`), cited as `HB p.NN`.
-- Lorien Trust Printable Loresheets and Files v4.06 (`Lorien_Trust_Loresheets_v4.06.md`), cited as `LS: <sheet name>`.
+- Lorien Trust Printable Loresheets and Files v4.06, cited as `LS: <sheet name>`. The original PDF is the authority. The markdown copy (`Lorien_Trust_Loresheets_v4.06.md`) is incomplete: it lost ten sheets and some table rows (see L15).
 
 **Scope:** Character creation, Character Skills (CS), Occupational Skills (OS), loresheet skill lists, prerequisites, limits and derived values. Only the rules that decide whether a build is legal and what it can do are included.
 **Out of scope:** Combat procedure, safety, event logistics, weapon construction, full spell descriptions and the in-play use of creature powers. Use the source files for these.
@@ -61,7 +61,7 @@ This is a summary for building a tool. It does not replace the source files. Bot
 A character card holds:
 
 - Identity: character name, race, faction, player name, player ID (PID), and the year and version the card was printed.
-- **Left side:** Character Skills (bought with 16 points), **plus** these OS: income skills (Apprentice, Journeyman and Master <X>), research skills (Scholar and Sage <X>), knowledge skills (General Knowledge <X> and Newsmonger) and <X> Oathsworn. Improved Research Ability goes on the right. *(Rulings, 2026-09-17/18. Newsmonger and Improved Research Ability are working assumptions still to be validated.)*
+- **Left side:** Character Skills (bought with 16 points), **plus** exactly the OS that don't count toward the 12 (LIM-4): income skills (Apprentice, Journeyman and Master <X>), research skills (Scholar and Sage <X>), General Knowledge <X> and <X> Oathsworn. (<X> Command is also exempt but never on a player card.) Newsmonger and Improved Research Ability go on the right. *(Ruling, 2026-09-18.)*
 - **Right side:** all other Occupational Skills, up to a limit of 12 (see [8.4](#84-card-limits)).
 - **Never on the card:** <X> Command. It is recorded on an unpublished NPC/DPC loresheet, not on a player character card. *(Ruling.)*
 - Optionally: at most one special creature lammie, at most one special power lammie, and loresheets.
@@ -951,6 +951,7 @@ Source: `Lorien_Trust_Loresheets_v4.06.md`. The tables below give costs, tiers a
 - **LS-7** A character with a loresheet must carry it. Spellcasting or power-using characters also need the Event Power Sheet, which tracks daily Spell Power and ritual use:
   - Ritualist Performance and Ritualist Contribute: 1 each per day.
   - Contribute to Ritual: up to 3 per day.
+- **LS-8** Loresheet skills can only be bought **at a main event, not at prebook**. They need **no training voucher**, so a restricted (`@`) skill bought from a loresheet needs no training facility. They still count toward the 4 per year (LS-1).
 
 ### 12.2 Loresheet types
 
@@ -1044,11 +1045,56 @@ The format is `Skill [Tier·OSP]`, and a prerequisite follows in brackets. "None
 - +2 Natural Armour [4·35] (needs +1 Natural Armour)
 - Natural Armour Regrowth [4·30] (needs +2 Natural Armour)
 
+**Awakened (all).** An awakened creature still counts as its base race for Bane, Affect, detection and elemental weakness. Awakening is a 10-minute rite by an awakened creature of the same type and costs the target 10 OSP. An awakened creature cannot also become an essence, summonable or other special creature. Each awakened sheet only fits its base race.
+
 **Awakened Drow.** Racial ability: immune to Wasting. Incantation 2 CS grants Chant of Wasting. Dark Incantation gives Spell Reduction (1) on Chant of Wasting.
 - TNS Elven [1·5], Dedicated Follower [1·10]
 - Light Incantation [1·5] (needs Incantation CS), Dark Incantation [1·5] (needs Incantation CS). MG-5 still applies: you cannot hold both.
 - Focused Through [2·15] (needs Immune to Fumble), Conceal Item [2·10], Locate [2·15]
 - Traverse Faction Wards [3·20]
+- Cast Additional Incantation [5·20] (needs Last Rites (Improved) or Master Countermagic)
+
+**Awakened Dwarf.** Stubborn as an Ancestor: once per 10 minutes, resist a Normal Strikedown or Crush from a melee weapon (not Earth).
+- TNS Dwarf [1·5], Quick Armour Repair [1·10]
+- Advanced Armour Repair [3·30] (needs Quick Armour Repair) → Master Armour Repair [4·40] → Self Repairing Armour [3·30]
+- Ritual Magic (Improved) [3·25], Spell Tempering [3·25] → Spell Tempering (Master) [4·35] → Ritual Crafter [4·55]
+
+**Awakened Elf.** Quickblood: once per 10 minutes, Paralysis lasts 30 s instead of 1 minute.
+- TNS Elven [·5], Immune to Sleep [·35] (no tier printed; see L14)
+- +4 Spell Power [1·5] → +8 [2·15] → +12 [3·35] → +16 [4·45]
+- Level 2 Spell Reduction (1) [5·55] (needs +12 Spell Power), Strike for Enchanted [4·45]
+
+**Awakened Fey.** The Song of Arcadia: once per 10 minutes, Mute lasts 30 s instead of 1 minute.
+- TNS Fey [1·5], Detect and Remove Beguile [1·5] → Immune to Charms [2·25]
+- Magical Armour Mastery [2·15] (needs any Armour Use CS)
+- +1 Magical Armour [3·35] → +2 Magical Armour [4·45] → Magical Armour Repair [4·35]
+
+**Awakened Halfling.** Younger (Race) and Trickier: for this character, Traverse Faction Wards includes and replaces Escape Bonds, and Conceal Item (or Improved) includes and replaces Locate.
+- TNS Halfling [1·5], Escape Bonds [1·5] → Traverse Faction Wards [3·20]
+- Immune to Fear [1·5], Locate [2·15] → Conceal Item [2·15] → Conceal Item (Improved) [3·25]
+- Identify [1·5], Venom Resistance [1·10], Beguile <1> [3·25]
+
+**Awakened Human.** The Innocence: immune to the Red Mist curse. Oathbreaker: Tier 5 skills learned with Jack of All Trades (and JoAT itself) are suspended while the guild's Oathbreaker Curse lasts, and lost if it isn't lifted within a year. If the loresheet is lost, every skill learned with JoAT is removed.
+- Improved Ritual of Peace [1·10], Hard Worker [1·5]
+- **Jack of All Trades [2·20]**: the source of JoAT. Each use removes it from the card, so each use needs another 20 OSP purchase.
+- +1 Bonus PR [2·15] → +2 Bonus PR [3·30]
+
+**Awakened Olog.** Walk It Off: once per 10 minutes, resist a Normal Strikedown or Crush from a melee weapon (not Air).
+- TNS Olog [1·5], +1 Natural Armour [3·30] → +2 Natural Armour [4·40]
+- Regeneration (10 min) [·40] (does not regenerate Artefact; no tier printed) → Improved Regeneration [4·30]
+- +1 LHV [4·35] → +2 LHV [4·45] (also needs Body Development 1) → +1 Base LHV [4·60] (also needs Body Development 2)
+
+**Awakened Uruk.** Hagglemaster: better Fence offers. Brutish Strike is replaced by Mighty Blow, which then costs 20 OSP less; Focused Strike is replaced by Crushing Blow, which then costs 25 OSP less. Goblin Resilience excludes all four.
+- TNS Uruk [·5], +1 LHV [·45], Master Brewer [·30], Herb Lore [·5] → Herb Lore (Improved) [·20] (no tiers printed; see L14)
+- Brutish Strike [1·10], Focused Strike [3·25] (needs Brutish Strike or Mighty Blow)
+- Goblin Resilience [2·15] → Toughen Body [4·35] → Harden Body [5·50]
+
+**Circle Warden** and **Circle Watcher** (skill loresheets). Both grant Immune to Mute and Immune to Charms, Network Attunement without Ritual Magic 3, and a 30-second Transportation spell. Warden is bonded to one Ritual Circle; Watcher is aligned to the Watchers' circles and adds the Rite of Blocking and Network Leap.
+- Both: Immune to Mind Effects [5·40] (needs Rally), Cast All Magecraft [5·65] (needs Cast Additional Magecraft), Cast All Incantation [5·65] (needs Cast Additional Incantation)
+- Watcher only: Voidportal # [4·85]
+
+**Diagnose Powers** (skill loresheet). Held with the Diagnose Powers skill.
+- Daemonology, Elementalism, Necromancy, Theology [1·5 each], Level 2 Spell Reduction (1) [4·60]
 
 ### 12.4 Essence creatures
 
@@ -1166,8 +1212,8 @@ Rules that affect a build:
 |---|---|---|---|---|---|
 | 1 | Vampire | 10 | 10 | Mist Form (V) | 1 |
 | 2 | Mature Vampire | 20 | 20 (V) | + Waste Not Want Not | 2 |
-| 3 | Elder Vampire | 30 | 45 (V) | + Crypt Blade | 3 |
-| 4 | Ancient Vampire | 40 | 60 (V) | + Death Incarnate (V) | 4 |
+| 3 | Elder Vampire | 30 | 45 (V), +1 Base LHV (V) | + Crypt Blade | 3 |
+| 4 | Ancient Vampire | 40 | 60 (V), +2 Base LHV (V) | + Death Incarnate (V) | 4 |
 
 | Skill | Min. type | T | OSP | Prereq |
 |---|---|---|---|---|
@@ -1288,11 +1334,15 @@ These items were settled by the project owner on 2026-09-17. They are now rules 
 | C1 | Income, research and knowledge skills and Oathsworn go on the left side of the card. Command is never on a player card. | Section 2 |
 | A13 | Pattern changes: Living → Magical or Living → Unliving only. | 3.1 |
 | R6 | Architect purchases follow one step per tree per year but do **not** count toward the 4 buys per year. | 12.1 |
-| C2 | Newsmonger goes on the left side; Improved Research Ability on the right (working assumption, to be validated). | Section 2 |
+| C2 | The left side holds exactly the skills that don't count toward the 12 (LIM-4). Newsmonger and Improved Research Ability are right-side skills. | Section 2 |
 | C3 | Skills granted on a special creature or special power card don't count toward the 12-skill limit, the Tier 5 cap or mutual exclusions. Only the character card counts. | 8.4 |
 | C4 | A Warlock's extra power (Focus of the Void) is added on top of the Rule of Double cap. | 12.4 |
 | C5 | Script Master <X> is bought for one script family (for example *Script Master <Myth & Magic>*) and replaces the Translate Named Script skills in that family. | Section 10 |
 | C6 | After Polyglot, any Translate Named Script skill left over from one of the three families is **redundant**: it stays on the card but is shown as covered by Polyglot. Restricted scripts (Runes, Spiral) and scripts outside the families are not redundant. | Section 10 |
+| C8 | Jack of All Trades costs **20 OSP every time** it is bought (Awakened Human loresheet). | 12.3 |
+| C9 | Where a loresheet row has no tier printed, use the skill's tier from the handbook, if it has one. | L14 |
+| C10 | Master Brewer (Awakened Uruk) is Tier 3 and Regeneration (Awakened Olog) is Tier 4. What matters is that neither is Tier 5. Both can only be bought from their loresheets. | L14 |
+| C7 | **Jack of All Trades** is its own route. It needs the JoAT skill and **Oathsworn <guild>**, either bought or granted by the unpublished **NPC/DPC loresheet** (held for a faction or guild; it grants Oathsworn <X> and <X> Command). It teaches one skill of any tier (restricted included) from an Ω list of that guild, including the guild's group list; not High Magic <X>. Learn prerequisites, 4 purchases per year and one step per tree still apply. One use per season. | 8.3 |
 
 ### Ambiguous rules
 
@@ -1346,6 +1396,8 @@ These items were settled by the project owner on 2026-09-17. They are now rules 
 | L10 | The Druid **armour limit** ("no bonus AV from external sources") doesn't say whether Armour Mastery OS count as external. | LS: Druid | Treat Armour Mastery as bonus AV, so it doesn't apply. **Confirm.** |
 | L11 | The Treewalker **loresheet** also excludes Necromancy and needs Spellcasting, Incantation or Healing CS. The handbook entry only needs Ritual Magic or Perform Transport Rite, and excludes Unliving and Corruption. | LS: Treewalker; HB p.97 | Apply both sets of restrictions. |
 | L12 | On essence loresheets, skill **tier** and **Min. type** are separate columns. For example, Werecreature *Discern Race and Pattern* is Tier 3 with Min. type "All". The file doesn't say whether creature tier limits skill tier. | LS: Werecreature | Only Min. type restricts by creature tier. Skill tier drives the T5 cap and acquisition routes. |
+| L14 | **Resolved (C9, C10).** No tier printed for some awakened rows: Elf (TNS Elven, Immune to Sleep), Olog (Regeneration), Uruk (TNS Uruk, +1 LHV, Master Brewer, Herb Lore, Herb Lore (Improved)). | LS (PDF) | Handbook tier where one exists; otherwise Master Brewer Tier 3 and Olog Regeneration Tier 4. |
+| L15 | The markdown copy of the loresheets file was incomplete. It lost the Awakened Dwarf, Elf, Fey, Halfling, Human, Olog and Uruk sheets, the Circle Warden, Circle Watcher and Diagnose Powers sheets, Awakened Drow's Cast Additional Incantation row, the Vampire Base LHV bonuses, and the rule that loresheet skills are main-event only with no training voucher. | PDF vs markdown | Use the PDF. All of these are now in the tool's data. |
 | L13 | Umbral is a starting race, but the loresheets file has no Umbral loresheet. There is no Unliving race either: Unliving is a pattern loresheet. | LS | Model race and pattern as separate fields. |
 
 ---

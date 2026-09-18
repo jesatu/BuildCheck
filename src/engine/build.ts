@@ -5,9 +5,11 @@ export type SkillSource =
   | 'buy'        // normal purchase from a handbook list
   | 'loresheet'  // alternative route from a held loresheet (LS-3)
   | 'architect'  // Architect route: prerequisites bypassed (LS-4a)
+  | 'joat'       // Jack of All Trades: training facility for an Ω list of an Oathsworn guild (ruling)
   | 'granted'    // recorded on a special creature or special power card, no purchase
 
-export type CardId = 'character' | 'creature' | 'power'
+/** 'loresheet': granted by a held loresheet, recorded there rather than on a card. */
+export type CardId = 'character' | 'creature' | 'power' | 'loresheet'
 
 export interface HeldSkill {
   id: string
@@ -23,6 +25,8 @@ export interface HeldLoresheet {
   id: string
   /** Essence creature tier (1–4). */
   tier?: 1 | 2 | 3 | 4
+  /** <X> for loresheets held for a faction or guild (NPC/DPC). */
+  param?: string
 }
 
 export interface Build {

@@ -39,9 +39,6 @@ export interface CharacterSkill {
   /** Total cost at each level. Unlevelled skills have one entry. (CS-3) */
   levelCosts: number[]
   requires?: Requirement
-  /** CS that cannot be held alongside this one. */
-  excludes?: string[]
-  aliases?: string[]
   summary: string
   source: string
 }
@@ -102,8 +99,6 @@ export interface OccupationalSkill {
   exemptFromYearly: boolean
   /** Can only be bought at a main event (8.3). */
   mainEventOnly?: boolean
-  /** Can be bought for several different <X> values (OS-3). */
-  repeatableWithParam?: boolean
   paragon?: boolean
   summary: string
   source: string
@@ -138,18 +133,8 @@ export interface EssenceTier {
   name: string
   cost: number
   powerRating: number
-  /** Build-relevant numbers granted at this tier. */
-  grants: {
-    baseLhv?: number
-    lhv?: number
-    baseAv?: number
-    av?: number
-    naturalAv?: number
-    extraSpellPower?: number
-    dismissRank?: number
-    beastFormOnly?: boolean
-    nightOnly?: boolean
-  }
+  /** Warlock Focus of the Void: daily power added on top of the Rule of Double cap. */
+  extraSpellPower?: number
   abilities: string[]
 }
 
@@ -161,10 +146,14 @@ export type Restriction =
   | { kind: 'requiresLoresheet'; loresheet: string }
   | { kind: 'setsPattern'; pattern: Pattern }
   | { kind: 'setsRace'; race: string }
-  | { kind: 'grantsSkills'; skills: string[] }
+  /** withParam: granted with the held loresheet's <X> (NPC/DPC → Oathsworn <X>). */
+  | { kind: 'grantsSkills'; skills: string[]; withParam?: boolean }
   | { kind: 'csDisablesSkills'; cs: string; skills: string[] }
   | { kind: 'excludesCs'; cs: string[] }
   | { kind: 'requiresCs'; cs: string[] }
+  | { kind: 'requiresRace'; race: string }
+  /** Loresheet-specific replacement (Awakened Halfling: Traverse Faction Wards includes and replaces Escape Bonds). */
+  | { kind: 'replaces'; skill: string; replaces: string[] }
   | { kind: 'note'; text: string }
 
 export interface Loresheet {
@@ -173,11 +162,11 @@ export interface Loresheet {
   kind: LoresheetKind
   /** True if the loresheet is not in the published loresheets file. */
   unpublished?: boolean
+  /** Label for a loresheet held for a specific <X>, e.g. "Faction or Guild". */
+  param?: string
   skills: LoresheetSkill[]
   tiers?: EssenceTier[]
   restrictions: Restriction[]
-  /** Route loresheets (Architect): bypass learn prerequisites up to this tier. */
-  bypassPrereqsUpToTier?: Tier
   summary: string
   source: string
 }
@@ -213,5 +202,4 @@ export interface Race {
   elementalWeakness: Element
   /** Loresheet that a character of this race holds. */
   loresheet?: string
-  aliases?: string[]
 }

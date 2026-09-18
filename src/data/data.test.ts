@@ -48,7 +48,6 @@ describe('character skills', () => {
   it('reference existing skills', () => {
     for (const s of characterSkills) {
       expect(brokenRefs(s.requires), s.id).toEqual([])
-      for (const x of s.excludes ?? []) expect(csById.has(x), `${s.id} excludes ${x}`).toBe(true)
     }
   })
 })
@@ -116,7 +115,7 @@ describe('occupational skills', () => {
 
   it('left-side skills match the card-side ruling', () => {
     const left = occupationalSkills.filter((s) => s.side === 'left').map((s) => s.id).sort()
-    expect(left).toEqual(['apprentice', 'general-knowledge', 'journeyman', 'master', 'newsmonger', 'oathsworn', 'sage', 'scholar'])
+    expect(left).toEqual(['apprentice', 'general-knowledge', 'journeyman', 'master', 'oathsworn', 'sage', 'scholar'])
   })
 
   it('mutual exclusions are symmetric', () => {
@@ -171,10 +170,6 @@ describe('loresheets', () => {
       const keys = l.skills.map((s) => `${s.os}|${s.param ?? ''}`)
       expect(keys.length, l.id).toBe(new Set(keys).size)
     }
-  })
-
-  it('only Architect bypasses prerequisites', () => {
-    expect(loresheets.filter((l) => l.bypassPrereqsUpToTier).map((l) => l.id)).toEqual(['architect'])
   })
 })
 

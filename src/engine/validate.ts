@@ -1,6 +1,6 @@
 import {
-  csById, DEFAULT_SWITCHES, loresheetById, MAGIC_CS_IDS, osById, raceById, RULES, scriptFamilies, scriptFamilyOf,
-  type FlagId, type Loresheet, type LoresheetSkill, type OccupationalSkill, type Requirement, type RuleSwitches, type Tier,
+  csById, DEFAULT_SWITCHES, FLAG_LABELS, guildOf, joatGuilds, loresheetById, MAGIC_CS_IDS, osById, raceById, RULES, scriptFamilies, scriptFamilyOf,
+  type Loresheet, type LoresheetSkill, type OccupationalSkill, type Requirement, type RuleSwitches, type Tier,
 } from '../data'
 import { factions } from '../data/races'
 import type { Build, CardId, HeldSkill } from './build'
@@ -50,17 +50,49 @@ export interface ValidationResult {
   derived: Derived
 }
 
-const FLAG_NAMES: Record<FlagId, string> = {
-  bowCompetency: 'Bow Competency',
-  clawCompetency: 'Claw Competency',
-  factionPermission: 'faction or guild permission',
-  awakenedRite: 'an Awakened Rite of Creation',
-  researchRequest: 'a research request',
-}
-
 export const skillName = (id: string, param?: string) => {
   const name = osById.get(id)?.name ?? id
   return param ? name.replace('<X>', param) : name
+}
+
+/** Plain-English description of a requirement, e.g. "Spellcasting 2 CS". */
+export function describe(r: Requirement): string {
+  if ('os' in r) return skillName(r.os, r.param)
+  if ('cs' in r) return `${csById.get(r.cs)?.name ?? r.cs}${r.level && r.level > 1 ? ` ${r.level}` : ''} CS`
+  if ('flag' in r) return FLAG_LABELS[r.flag]
+  if ('loresheet' in r) return r.loresheet === '*' ? 'a lammie or loresheet' : `${loresheetById.get(r.loresheet)?.name} loresheet`
+  if ('pattern' in r) return `a ${r.pattern} pattern`
+  if ('all' in r) return r.all.map(describe).join(' and ')
+  if ('any' in r) return `one of: ${r.any.map(describe).join(', ')}`
+  return `not ${describe(r.not)}`
+}
+
+/** The build's skills plus those granted by held loresheets (Paladin → Dedicated Follower, NPC/DPC → Oathsworn <X>). */
+export function withGrants(b: Build): HeldSkill[] {
+  const os: HeldSkill[] = [...b.os]
+  for (const l of b.loresheets) {
+    for (const r of loresheetById.get(l.id)?.restrictions ?? []) {
+      if (r.kind !== 'grantsSkills') continue
+      const param = r.withParam ? l.param : undefined
+      for (const id of r.skills) {
+        if (!os.some((h) => h.id === id && h.param === param)) os.push({ id, param, source: 'granted', card: 'loresheet', loresheet: l.id })
+      }
+    }
+  }
+  return os
+}
+
+/**
+ * Why Jack of All Trades can't teach this skill, or undefined if it can. Needs the JoAT skill and
+ * Oathsworn <guild> (bought, or granted by an NPC loresheet) for a guild whose Ω list has the skill.
+ */
+export function joatBlocker(os: HeldSkill[], skillId: string, canBuyJoat = false): string | undefined {
+  if (!canBuyJoat && !os.some((h) => h.id === 'jack-of-all-trades')) return 'needs Jack of All Trades'
+  if (skillId === 'high-magic') return 'High Magic <X> cannot be learned with Jack of All Trades'
+  const guilds = joatGuilds(skillId)
+  if (guilds.length === 0) return `${skillName(skillId)} is not on a Jack of All Trades (Ω) list`
+  const sworn = new Set(os.filter((h) => h.id === 'oathsworn').map((h) => guildOf(h.param)))
+  return guilds.some((g) => sworn.has(g)) ? undefined : `needs Oathsworn to one of: ${guilds.map((g) => `${g} Guild`).join(', ')}`
 }
 
 /** OS ids each skill counts as, through replaces and includes, transitively (REP-2b). */
@@ -87,32 +119,13 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
   const heldLs = new Map(b.loresheets.map((l) => [l.id, l]))
   const lsRestrictions = b.loresheets.flatMap((l) => loresheetById.get(l.id)?.restrictions ?? [])
 
-  // Skills granted by held loresheets (Paladin → Dedicated Follower, Voidportal → Perform Teleport Rite).
-  const os: HeldSkill[] = [...b.os]
-  for (const l of b.loresheets) {
-    for (const r of loresheetById.get(l.id)?.restrictions ?? []) {
-      if (r.kind === 'grantsSkills') {
-        for (const id of r.skills) if (!os.some((h) => h.id === id)) os.push({ id, source: 'granted', card: 'creature', loresheet: l.id })
-      }
-    }
-  }
+  const os = withGrants(b)
 
   const csLevel = (id: string) => b.cs[id] ?? 0
   /** `except`: index of the skill being checked, so it can't satisfy its own prerequisite. */
   const holds = (id: string, param?: string, except?: number) =>
     os.some((h, i) => i !== except &&
       ((h.id === id && (param === undefined || h.param === param)) || (param === undefined && coveredBy(h.id).has(id))))
-
-  const describe = (r: Requirement): string => {
-    if ('os' in r) return skillName(r.os, r.param)
-    if ('cs' in r) return `${csById.get(r.cs)?.name ?? r.cs}${r.level && r.level > 1 ? ` ${r.level}` : ''} CS`
-    if ('flag' in r) return FLAG_NAMES[r.flag]
-    if ('loresheet' in r) return r.loresheet === '*' ? 'a lammie or loresheet' : `${loresheetById.get(r.loresheet)?.name} loresheet`
-    if ('pattern' in r) return `a ${r.pattern} pattern`
-    if ('all' in r) return r.all.map(describe).join(' and ')
-    if ('any' in r) return `one of: ${r.any.map(describe).join(', ')}`
-    return `not ${describe(r.not)}`
-  }
 
   /** Returns undefined if met, otherwise a description of what is missing. */
   const missing = (r: Requirement | undefined, viaLoresheet = false, except?: number): string | undefined => {
@@ -173,8 +186,10 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
     const ls = loresheetById.get(l.id)
     if (!ls) { err('12', `Unknown loresheet "${l.id}".`); continue }
     if (ls.kind === 'essence' && !l.tier) err('12.4', `${ls.name} needs a tier (1–4).`)
+    if (ls.param && !l.param) err('12', `${ls.name} needs a value for <X> (${ls.param}).`)
     for (const r of ls.restrictions) {
       if (r.kind === 'requiresLoresheet' && !heldLs.has(r.loresheet)) err('12.4', `${ls.name} needs the ${loresheetById.get(r.loresheet)?.name} loresheet.`)
+      if (r.kind === 'requiresRace' && r.race !== b.race) err('12.3', `${ls.name} is only for ${raceById.get(r.race)?.name} characters.`)
       if (r.kind === 'requiresCs' && !r.cs.some((c) => csLevel(c))) err('12.7', `${ls.name} needs one of: ${r.cs.map((c) => csById.get(c)?.name).join(', ')}.`)
       if (r.kind === 'excludesCs') for (const c of r.cs) if (csLevel(c)) err('12.7', `${ls.name} is not available with ${csById.get(c)?.name}.`)
       if (r.kind === 'noBenefitFrom') {
@@ -215,6 +230,12 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
         const creatureTier = heldLs.get(ls.id)?.tier ?? 0
         if (entry.minType && creatureTier < entry.minType) err('LS-5', `${name} needs ${ls.name} tier ${entry.minType} or higher.`, i)
       }
+    } else if (h.source === 'joat') {
+      // JoAT is used up, so a skill learned with it only needs a JoAT source: held, or the Awakened Human sheet.
+      const blocker = joatBlocker(os, h.id, heldLs.has('awakened-human'))
+      if (blocker) err('JoAT', `${name} through Jack of All Trades: ${blocker}.`, i)
+      const gap = missing(s.learn, false, i)
+      if (gap) err('OS-4', `${name} needs ${gap} before it can be bought.`, i)
     } else if (h.source === 'architect') {
       if (!heldLs.has('architect')) err('LS-4a', `${name} uses the Architect route, but the character doesn't hold the Architect loresheet.`, i)
       const onList = !s.loresheetOnly && s.lists.length > 0
@@ -228,8 +249,10 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
 
   // ---------- Status: replaced, inactive or active ----------
   const replacedBy = new Map<number, string>()
+  const sheetReplaces = lsRestrictions.flatMap((r) => (r.kind === 'replaces' ? [r] : []))
   os.forEach((h) => {
-    for (const r of osById.get(h.id)?.replaces ?? []) {
+    const extra = sheetReplaces.filter((r) => r.skill === h.id).flatMap((r) => r.replaces)
+    for (const r of [...(osById.get(h.id)?.replaces ?? []), ...extra]) {
       os.forEach((o, j) => {
         // Script Master <family> replaces the TNS skills in that family; other parameterised skills match on the same <X>.
         const sameX = h.id === 'script-master' ? scriptFamilyOf(o.param) === h.param
@@ -313,7 +336,7 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
     + csLevel('base-power') * RULES.basePowerPerLevel
   const osPower = [16, 12, 8, 4].find((n) => isActive(`spell-power-${n}`)) ?? 0
   const warlockTier = heldLs.get('warlock')?.tier
-  const warlockPower = warlockTier ? loresheetById.get('warlock')!.tiers![warlockTier - 1]!.grants.extraSpellPower ?? 0 : 0
+  const warlockPower = warlockTier ? loresheetById.get('warlock')!.tiers![warlockTier - 1]!.extraSpellPower ?? 0 : 0
   // ponytail: Warlock power is added outside the Rule of Double cap ("stacks with other sources"); unconfirmed.
   const spellPower = { base: basePower, total: Math.min(basePower * 2, basePower + osPower) + warlockPower, cap: basePower * 2 }
 

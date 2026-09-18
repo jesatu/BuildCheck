@@ -19,7 +19,7 @@ describe('planner', () => {
   })
 
   it('reports Character Skills it cannot buy as blockers', () => {
-    expect(planRoute(newBuild(), [t('create-poison-novice')]).cheapest!.blockers).toEqual(['needs Poison Lore (Character Skill)'])
+    expect(planRoute(newBuild(), [t('create-poison-novice')]).cheapest!.blockers).toEqual(['needs Poison Lore CS'])
   })
 
   it('skips skills already held, including ones covered by a replacing skill', () => {
@@ -56,6 +56,39 @@ describe('planner', () => {
     expect(summary(b, [t('champion')])).toEqual({ years: 1, osp: 10, steps: ['1:Champion:loresheet'] })
   })
 
+  it('uses Jack of All Trades for one restricted skill per season', () => {
+    const b = build({ os: [
+      { id: 'jack-of-all-trades', source: 'granted', card: 'power' },
+      { id: 'oathsworn', param: 'Mages Guild', source: 'buy' },
+    ] })
+    const p = planRoute(b, [t('thaulmonic-alignment'), t('impweave-expertise')]).cheapest!
+    expect(p.purchases.map((x) => `${x.year}:${x.id}:${x.route}`)).toEqual([
+      '1:impweave-expertise:joat', '1:thaulmonic-alignment:buy',
+    ])
+    expect(p.purchases[1]!.notes).toContain('Restricted: needs a training facility, tutor or forgery')
+  })
+
+  it('re-buys Jack of All Trades from the Awakened Human sheet for 20 OSP in each later season it is used', () => {
+    const b = build({
+      cs: { spellcasting: 1, 'ritual-magic': 1 },
+      os: [{ id: 'jack-of-all-trades', source: 'granted', card: 'power' }],
+      loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }, { id: 'awakened-human' }],
+    })
+    const p = planRoute(b, [t('thaulmonic-alignment'), t('ritualist-master')]).cheapest!
+    expect(p.purchases.filter((x) => x.route === 'joat').map((x) => `${x.year}:${x.id}`)).toEqual(['1:thaulmonic-alignment', '4:ritualist-master'])
+    expect(p.purchases.filter((x) => x.id === 'jack-of-all-trades').map((x) => `${x.year}:${x.cost}:${x.route}`)).toEqual(['4:20:loresheet'])
+    expect(p.totalOsp).toBe(30 + 10 + 30 + 40 + 50 + 20)
+    expect(p.validation.valid).toBe(true)
+  })
+
+  it('buys Jack of All Trades from the Awakened Human sheet when none is held; without the sheet it only uses a held one', () => {
+    const b = build({ loresheets: [{ id: 'awakened-human' }, { id: 'npc-dpc', param: 'Mages Guild' }] })
+    const p = planRoute(b, [t('thaulmonic-alignment')]).cheapest!
+    expect(p.purchases.map((x) => `${x.year}:${x.id}:${x.route}:${x.cost}`)).toEqual(['1:jack-of-all-trades:loresheet:20', '1:thaulmonic-alignment:joat:30'])
+    const noSheet = planRoute(build({ loresheets: [{ id: 'npc-dpc', param: 'Mages Guild' }] }), [t('thaulmonic-alignment')]).cheapest!
+    expect(noSheet.purchases.map((x) => x.route)).toEqual(['buy'])
+  })
+
   it('uses retirement double steps on two different trees in year 1', () => {
     const b = build({ cs: { 'poison-lore': 1, 'potion-lore': 1 } })
     const targets = [t('create-poison-master'), t('create-potion-master'), t('shield-mastery-expert')]
@@ -65,6 +98,18 @@ describe('planner', () => {
     const doubles = p.purchases.filter((x) => x.doubleStep)
     expect(doubles).toHaveLength(2)
     expect(new Set(doubles.map((d) => d.id.split('-')[1])).size).toBe(2) // poison and potion, not the same tree
+  })
+
+  it('plans Polyglot from an existing script without a prerequisite cycle', () => {
+    const b = build({ cs: { 'recognise-forgery': 1 }, os: [{ id: 'translate-named-script', param: 'Elven', source: 'buy' }] })
+    expect(summary(b, [t('polyglot')]).steps).toEqual(['1:Script Master (your choice):buy', '2:Polyglot:buy'])
+  })
+
+  it('uses a planned Script Master to satisfy Polyglot instead of adding another', () => {
+    const b = build({ cs: { 'recognise-forgery': 1 }, os: [{ id: 'translate-named-script', param: 'Elven', source: 'buy' }] })
+    expect(summary(b, [t('polyglot'), t('script-master', 'People & Race')])).toEqual({
+      years: 2, osp: 100, steps: ['1:Script Master People & Race:buy', '2:Polyglot:buy'],
+    })
   })
 
   it('validates the final build', () => {
@@ -92,7 +137,7 @@ describe('cheapest vs fastest divergence report', () => {
   const target = (id: string) => t(id, id === 'script-master' ? 'Myth & Magic' : osById(id)?.param ? 'Test' : undefined)
   function osById(id: string) { return buyable.find((s) => s.id === id) }
 
-  it('cheapest is never dearer and fastest is never slower', () => {
+  it('schedules every purchase, cheapest is never dearer and fastest is never slower', () => {
     const rows: string[] = []
     for (const [name, b] of Object.entries(profiles)) {
       let runs = 0, diverged = 0
@@ -107,6 +152,7 @@ describe('cheapest vs fastest divergence report', () => {
         const r = planRoute(b, targets)
         if (!r.cheapest || !r.fastest || r.cheapest.blockers.length) continue
         runs++
+        for (const p of [r.cheapest, r.fastest]) expect(p.purchases.filter((x) => x.year < 1).map((x) => x.id), targets.map((x) => x.id).join('+')).toEqual([])
         expect(r.cheapest.totalOsp).toBeLessThanOrEqual(r.fastest.totalOsp)
         expect(r.fastest.years).toBeLessThanOrEqual(r.cheapest.years)
         if (r.diverges) {

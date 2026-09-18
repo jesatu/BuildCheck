@@ -144,10 +144,10 @@ export const loresheets: Loresheet[] = [
     summary: 'Transforms into beast form; mandatory after 8pm. Silver weakness.',
     restrictions: [{ kind: 'note', text: essenceNote }, { kind: 'note', text: 'Needs removable mask, natural claws and Claw Competency.' }],
     tiers: [
-      tier(1, 'Werecreature', 10, 1, { beastFormOnly: true }, ['Regeneration 1 per 10 min (beast form)', '2 voluntary changes per day']),
-      tier(2, 'Mature Werecreature', 20, 2, { baseLhv: 1, beastFormOnly: true }, ['Regeneration 1 per 5 min', '3 changes per day']),
-      tier(3, 'Elder Werecreature', 30, 3, { baseLhv: 1, lhv: 1, beastFormOnly: true }, ['DR Crush', 'Regeneration 1 per 1 min', '4 changes per day']),
-      tier(4, 'Alpha Werecreature', 40, 4, { baseLhv: 1, lhv: 2, beastFormOnly: true }, ['DR Crush', 'Regeneration 1 per 1 min', '6 changes per day']),
+      tier(1, 'Werecreature', 10, 1, ['Regeneration 1 per 10 min (beast form)', '2 voluntary changes per day']),
+      tier(2, 'Mature Werecreature', 20, 2, ['+1 Base LHV (beast form)', 'Regeneration 1 per 5 min', '3 changes per day']),
+      tier(3, 'Elder Werecreature', 30, 3, ['+1 Base LHV, +1 LHV (beast form)', 'DR Crush', 'Regeneration 1 per 1 min', '4 changes per day']),
+      tier(4, 'Alpha Werecreature', 40, 4, ['+1 Base LHV, +2 LHV (beast form)', 'DR Crush', 'Regeneration 1 per 1 min', '6 changes per day']),
     ],
     skills: [
       s('tracking', 1, 5, { minType: ALL, ...B }),
@@ -179,10 +179,10 @@ export const loresheets: Loresheet[] = [
       { kind: 'note', text: 'Blind Faith: cannot be targeted by Heal Wound or derived effects.' },
     ],
     tiers: [
-      tier(1, 'Paladin', 10, 1, { av: 1 }, ['Voice Above Them All: Speak with Ancestor for 4 power, once per day']),
-      tier(2, 'Questing Paladin', 20, 2, { baseAv: 1, av: 1 }, ['Shield/Dagger of Pantheon: Sanctuary or Wasting chant for 0 power, once per hour']),
-      tier(3, 'Knight Paladin', 30, 3, { baseAv: 1, av: 2 }, ['Dagger of Suns Dawning: small weapon strikes Lay to Rest for 10 minutes (4 power)']),
-      tier(4, 'Lord Paladin', 40, 4, { baseAv: 2, av: 2 }, []),
+      tier(1, 'Paladin', 10, 1, ['Focus of Piety: +1 AV', 'Voice Above Them All: Speak with Ancestor for 4 power, once per day']),
+      tier(2, 'Questing Paladin', 20, 2, ['Focus of Piety: +1 Base AV, +1 AV', 'Shield/Dagger of Pantheon: Sanctuary or Wasting chant for 0 power, once per hour']),
+      tier(3, 'Knight Paladin', 30, 3, ['Focus of Piety: +1 Base AV, +2 AV', 'Dagger of Suns Dawning: small weapon strikes Lay to Rest for 10 minutes (4 power)']),
+      tier(4, 'Lord Paladin', 40, 4, ['Focus of Piety: +2 Base AV, +2 AV']),
     ],
     skills: [
       s('champion', 1, 10, { minType: ALL }),
@@ -210,10 +210,10 @@ export const loresheets: Loresheet[] = [
       { kind: 'noBenefitFrom', items: ['body-development', 'base-lhv-1', 'toughen-body', 'harden-body', 'Titans Endurance', 'Paladins Armour'] },
     ],
     tiers: [
-      tier(1, 'Warlock', 10, 1, {}, ['Circle Affinity', 'Max wedge contribution 1']),
-      tier(2, 'Adept Warlock', 20, 2, { extraSpellPower: 4 }, ['Familiar Spell', 'Max wedge contribution 2']),
-      tier(3, 'Master Warlock', 30, 3, { extraSpellPower: 8 }, ['Leech Power', 'Max wedge contribution 3']),
-      tier(4, 'Master Adept Warlock', 40, 4, { extraSpellPower: 12 }, ['Magic Weaver', 'Max wedge contribution 4']),
+      tier(1, 'Warlock', 10, 1, ['Circle Affinity', 'Max wedge contribution 1']),
+      { ...tier(2, 'Adept Warlock', 20, 2, ['+4 Warlock Power', 'Familiar Spell', 'Max wedge contribution 2']), extraSpellPower: 4 },
+      { ...tier(3, 'Master Warlock', 30, 3, ['+8 Warlock Power', 'Leech Power', 'Max wedge contribution 3']), extraSpellPower: 8 },
+      { ...tier(4, 'Master Adept Warlock', 40, 4, ['+12 Warlock Power', 'Magic Weaver', 'Max wedge contribution 4']), extraSpellPower: 12 },
     ],
     skills: [
       s('cast-high-countermagic', 1, 10, { minType: ALL, learn: cs('spellcasting', 2) }),
@@ -242,10 +242,10 @@ export const loresheets: Loresheet[] = [
       { kind: 'setsPattern', pattern: 'unliving' },
     ],
     tiers: [
-      tier(1, 'Vampire', 10, 1, { dismissRank: 10 }, ['Mist Form (night)']),
-      tier(2, 'Mature Vampire', 20, 2, { dismissRank: 20, nightOnly: true }, ['Waste Not Want Not']),
-      tier(3, 'Elder Vampire', 30, 3, { dismissRank: 45, nightOnly: true }, ['Crypt Blade']),
-      tier(4, 'Ancient Vampire', 40, 4, { dismissRank: 60, nightOnly: true }, ['Death Incarnate (night)']),
+      tier(1, 'Vampire', 10, 1, ['Base dismiss rank 10', 'Mist Form (night)']),
+      tier(2, 'Mature Vampire', 20, 2, ['Base dismiss rank 20 (night)', 'Waste Not Want Not']),
+      tier(3, 'Elder Vampire', 30, 3, ['+1 Base LHV (night)', 'Base dismiss rank 45 (night)', 'Crypt Blade']),
+      tier(4, 'Ancient Vampire', 40, 4, ['+2 Base LHV (night)', 'Base dismiss rank 60 (night)', 'Death Incarnate (night)']),
     ],
     skills: [
       s('beguile-level', 1, 10, { param: '1', minType: ALL, ...V }),
@@ -271,10 +271,10 @@ export const loresheets: Loresheet[] = [
       { kind: 'noMageArmour' },
     ],
     tiers: [
-      tier(1, 'Druid', 10, 1, {}, ['Root Veins: Paralysis lasts 30 s']),
-      tier(2, 'Mature Druid', 20, 1, { naturalAv: 1 }, ['Creation Affinity: free second Cure Wound']),
-      tier(3, 'Elder Druid', 30, 2, { naturalAv: 2 }, ['Blessing of Germination: Global Cure Wound']),
-      tier(4, 'Ancient Druid', 40, 4, { naturalAv: 3 }, ['Absolution of Erdreja: petition to remove a curse']),
+      tier(1, 'Druid', 10, 1, ['Root Veins: Paralysis lasts 30 s']),
+      tier(2, 'Mature Druid', 20, 1, ['+1 Natural AV', 'Creation Affinity: free second Cure Wound']),
+      tier(3, 'Elder Druid', 30, 2, ['+2 Natural AV', 'Blessing of Germination: Global Cure Wound']),
+      tier(4, 'Ancient Druid', 40, 4, ['+3 Natural AV', 'Absolution of Erdreja: petition to remove a curse']),
     ],
     skills: [
       s('theology', 1, 10, { minType: ALL }),
@@ -303,7 +303,7 @@ export const loresheets: Loresheet[] = [
   {
     id: 'awakened-beastkin', name: 'Awakened Beastkin', kind: 'awakened', source: 'LS: Awakened Beastkin',
     summary: 'Herb Cure Wound on head or torso cures twice.',
-    restrictions: [],
+    restrictions: [{ kind: 'requiresRace', race: 'beastkin' }, { kind: 'note', text: 'Awakened creature: still counts as the base race (Bane, Affect, detection, elemental weakness). Awakening costs 10 OSP (Awakened <X>). Cannot also become an essence, summonable or other special creature.' }],
     skills: [
       s('translate-named-script', 1, 5, { param: 'Beastkin' }), s('immune-fumble', 1, 5), s('herb-lore', 1, 5), s('tracking', 1, 5),
       s('discern-race', 1, 10, { learn: os('tracking') }),
@@ -319,7 +319,7 @@ export const loresheets: Loresheet[] = [
   {
     id: 'awakened-drow', name: 'Awakened Drow', kind: 'awakened', source: 'LS: Awakened Drow',
     summary: 'Immune to Wasting. Incantation 2 grants Chant of Wasting.',
-    restrictions: [],
+    restrictions: [{ kind: 'requiresRace', race: 'drow' }, { kind: 'note', text: 'Awakened creature: still counts as the base race (Bane, Affect, detection, elemental weakness). Awakening costs 10 OSP (Awakened <X>). Cannot also become an essence, summonable or other special creature.' }],
     skills: [
       s('translate-named-script', 1, 5, { param: 'Elven' }), s('dedicated-follower', 1, 10),
       s('light-incantation', 1, 5, { learn: cs('incantation') }),
@@ -327,6 +327,155 @@ export const loresheets: Loresheet[] = [
       s('focused-through', 2, 15, { learn: os('immune-fumble') }),
       s('conceal-item', 2, 10), s('locate', 2, 15),
       s('traverse-faction-wards', 3, 20),
+      s('cast-additional-incantation', 5, 20, { learn: { any: [os('last-rites-improved'), os('master-countermagic')] } }),
+    ],
+  },
+  {
+    id: 'awakened-dwarf', name: 'Awakened Dwarf', kind: 'awakened', source: 'LS: Awakened Dwarf (PDF)',
+    summary: 'Stubborn as an Ancestor: once per 10 minutes resist a Normal Strikedown or Crush from a melee weapon (not Earth).',
+    restrictions: [{ kind: 'requiresRace', race: 'dwarf' }, { kind: 'note', text: 'Awakened creature: still counts as the base race (Bane, Affect, detection, elemental weakness). Awakening costs 10 OSP (Awakened <X>). Cannot also become an essence, summonable or other special creature.' }],
+    skills: [
+      s('translate-named-script', 1, 5, { param: 'Dwarf' }),
+      s('quick-armour-repair', 1, 10),
+      s('advanced-armour-repair', 3, 30, { learn: os('quick-armour-repair') }),
+      s('master-armour-repair', 4, 40, { learn: os('advanced-armour-repair') }),
+      s('self-repairing-armour', 3, 30, { learn: os('master-armour-repair') }),
+      s('ritual-magic-improved', 3, 25),
+      s('spell-tempering', 3, 25),
+      s('spell-tempering-master', 4, 35, { learn: os('spell-tempering') }),
+      s('ritual-crafter', 4, 55, { learn: os('spell-tempering-master') }),
+    ],
+  },
+  {
+    id: 'awakened-elf', name: 'Awakened Elf', kind: 'awakened', source: 'LS: Awakened Elf (PDF)',
+    summary: 'Quickblood: once per 10 minutes Paralysis lasts 30 s instead of 1 minute.',
+    restrictions: [{ kind: 'requiresRace', race: 'elf' }, { kind: 'note', text: 'Awakened creature: still counts as the base race (Bane, Affect, detection, elemental weakness). Awakening costs 10 OSP (Awakened <X>). Cannot also become an essence, summonable or other special creature.' }],
+    skills: [
+      s('translate-named-script', 1, 5, { param: 'Elven', note: 'No tier printed; handbook tier used (L14).' }),
+      s('immune-sleep', 4, 35, { note: 'No tier printed; handbook tier used (L14).' }),
+      s('spell-power-4', 1, 5),
+      s('spell-power-8', 2, 15, { learn: os('spell-power-4') }),
+      s('spell-power-12', 3, 35, { learn: os('spell-power-8') }),
+      s('spell-power-16', 4, 45, { learn: os('spell-power-12') }),
+      s('level-2-spell-reduction-1', 5, 55, { learn: os('spell-power-12') }),
+      s('strike-for-enchanted', 4, 45),
+    ],
+  },
+  {
+    id: 'awakened-fey', name: 'Awakened Fey', kind: 'awakened', source: 'LS: Awakened Fey (PDF)',
+    summary: 'The Song of Arcadia: once per 10 minutes Mute lasts 30 s instead of 1 minute.',
+    restrictions: [{ kind: 'requiresRace', race: 'fey' }, { kind: 'note', text: 'Awakened creature: still counts as the base race (Bane, Affect, detection, elemental weakness). Awakening costs 10 OSP (Awakened <X>). Cannot also become an essence, summonable or other special creature.' }],
+    skills: [
+      s('translate-named-script', 1, 5, { param: 'Fey' }),
+      s('detect-remove-beguile', 1, 5),
+      s('immune-charms', 2, 25, { learn: os('detect-remove-beguile') }),
+      s('magical-armour-mastery', 2, 15, { learn: { any: [cs('light-armour'), cs('medium-armour'), cs('heavy-armour')] } }),
+      s('magical-armour-1', 3, 35),
+      s('magical-armour-2', 4, 45, { learn: os('magical-armour-1') }),
+      s('magical-armour-repair', 4, 35, { learn: os('magical-armour-2') }),
+    ],
+  },
+  {
+    id: 'awakened-halfling', name: 'Awakened Halfling', kind: 'awakened', source: 'LS: Awakened Halfling (PDF)',
+    summary: 'Younger (Race) and Trickier: Traverse Faction Wards replaces Escape Bonds; Conceal Item replaces Locate.',
+    restrictions: [
+      { kind: 'requiresRace', race: 'halfling' }, { kind: 'note', text: 'Awakened creature: still counts as the base race (Bane, Affect, detection, elemental weakness). Awakening costs 10 OSP (Awakened <X>). Cannot also become an essence, summonable or other special creature.' },
+      { kind: 'replaces', skill: 'traverse-faction-wards', replaces: ['escape-bonds'] },
+      { kind: 'replaces', skill: 'conceal-item', replaces: ['locate'] },
+      { kind: 'replaces', skill: 'conceal-item-improved', replaces: ['locate'] },
+    ],
+    skills: [
+      s('translate-named-script', 1, 5, { param: 'Halfling' }),
+      s('escape-bonds', 1, 5),
+      s('traverse-faction-wards', 3, 20, { learn: os('escape-bonds') }),
+      s('immune-fear', 1, 5),
+      s('locate', 2, 15),
+      s('conceal-item', 2, 15, { learn: os('locate') }),
+      s('conceal-item-improved', 3, 25, { learn: os('conceal-item') }),
+      s('identify', 1, 5),
+      s('venom-resistance', 1, 10),
+      s('beguile-level', 3, 25, { param: '1' }),
+    ],
+  },
+  {
+    id: 'awakened-human', name: 'Awakened Human', kind: 'awakened', source: 'LS: Awakened Human (PDF)',
+    summary: 'The Innocence: immune to the Red Mist curse. Jack of All Trades is bought here (20 OSP each time).',
+    restrictions: [
+      { kind: 'requiresRace', race: 'human' }, { kind: 'note', text: 'Awakened creature: still counts as the base race (Bane, Affect, detection, elemental weakness). Awakening costs 10 OSP (Awakened <X>). Cannot also become an essence, summonable or other special creature.' },
+      { kind: 'note', text: 'Oathbreaker: Tier 5 skills learned with Jack of All Trades (and JoAT) are suspended while the guild\'s Oathbreaker Curse lasts, and lost after 1 year. Losing this loresheet removes every skill learned with Jack of All Trades.' },
+    ],
+    skills: [
+      s('improved-ritual-of-peace', 1, 10),
+      s('jack-of-all-trades', 2, 20),
+      s('bonus-pr-1', 2, 15),
+      s('bonus-pr-2', 3, 30, { learn: os('bonus-pr-1') }),
+      s('hard-worker', 1, 5),
+    ],
+  },
+  {
+    id: 'awakened-olog', name: 'Awakened Olog', kind: 'awakened', source: 'LS: Awakened Olog (PDF)',
+    summary: 'Walk It Off: once per 10 minutes resist a Normal Strikedown or Crush from a melee weapon (not Air).',
+    restrictions: [{ kind: 'requiresRace', race: 'olog' }, { kind: 'note', text: 'Awakened creature: still counts as the base race (Bane, Affect, detection, elemental weakness). Awakening costs 10 OSP (Awakened <X>). Cannot also become an essence, summonable or other special creature.' }],
+    skills: [
+      s('translate-named-script', 1, 5, { param: 'Olog' }),
+      s('natural-armour-1', 3, 30),
+      s('natural-armour-2', 4, 40, { learn: os('natural-armour-1') }),
+      s('regeneration', 4, 40, { param: '10 minutes', note: 'Does not regenerate Artefact. No tier printed; Tier 4 assumed (L14).' }),
+      s('improved-regeneration', 4, 30, { learn: os('regeneration') }),
+      s('lhv-1', 4, 35),
+      s('lhv-2', 4, 45, { learn: { all: [os('lhv-1'), cs('body-development', 1)] } }),
+      s('base-lhv-1', 4, 60, { learn: { all: [os('lhv-2'), cs('body-development', 2)] } }),
+    ],
+  },
+  {
+    id: 'awakened-uruk', name: 'Awakened Uruk', kind: 'awakened', source: 'LS: Awakened Uruk (PDF)',
+    summary: 'Hagglemaster (better Fence offers). Brutish Strike, Focused Strike and Goblin Resilience routes.',
+    restrictions: [{ kind: 'requiresRace', race: 'uruk' }, { kind: 'note', text: 'Awakened creature: still counts as the base race (Bane, Affect, detection, elemental weakness). Awakening costs 10 OSP (Awakened <X>). Cannot also become an essence, summonable or other special creature.' }],
+    skills: [
+      s('translate-named-script', 1, 5, { param: 'Uruck', note: 'No tier printed; handbook tier used (L14).' }),
+      s('lhv-1', 5, 45, { note: 'No tier printed; handbook tier (5) used (L14).' }),
+      s('master-brewer', 3, 30, { note: 'No tier printed; Tier 3 assumed (L14).' }),
+      s('herb-lore', 1, 5, { note: 'No tier printed; handbook tier used (L14).' }),
+      s('herb-lore-improved', 2, 20, { learn: os('herb-lore'), note: 'No tier printed; handbook tier used (L14).' }),
+      s('brutish-strike', 1, 10),
+      s('focused-strike', 3, 25, { learn: { any: [os('brutish-strike'), os('mighty-blow')] } }),
+      s('goblin-resilience', 2, 15),
+      s('toughen-body', 4, 35, { learn: os('goblin-resilience') }),
+      s('harden-body', 5, 50, { learn: os('toughen-body') }),
+      s('mighty-blow-brutish', 4, 20, { learn: os('brutish-strike'), note: 'Mighty Blow at 20 OSP less with Brutish Strike.' }),
+      s('crushing-blow-focused', 5, 25, { learn: os('focused-strike'), note: 'Crushing Blow at 25 OSP less with Focused Strike.' }),
+    ],
+  },
+
+  // ---- Skill loresheets from the PDF that the markdown lost ----
+  {
+    id: 'circle-warden', name: 'Circle Warden', kind: 'skill', source: 'LS: Circle Warden (PDF)',
+    summary: 'Bonded to one Ritual Circle. Network Attunement without Ritual Magic 3; Transportation in 30 s; circle rites.',
+    restrictions: [{ kind: 'grantsSkills', skills: ['immune-mute', 'immune-charms'] }],
+    skills: [
+      s('immune-mind-effects', 5, 40, { learn: os('rally') }),
+      s('cast-all-magecraft', 5, 65, { learn: os('cast-additional-magecraft') }),
+      s('cast-all-incantation', 5, 65, { learn: os('cast-additional-incantation') }),
+    ],
+  },
+  {
+    id: 'circle-watcher', name: 'Circle Watcher', kind: 'skill', source: 'LS: Circle Watcher (PDF)',
+    summary: 'Aligned to the Watchers\' circles. As Circle Warden, plus Rite of Blocking and Network Leap.',
+    restrictions: [{ kind: 'grantsSkills', skills: ['immune-mute', 'immune-charms'] }],
+    skills: [
+      s('immune-mind-effects', 5, 40, { learn: os('rally') }),
+      s('voidportal', 4, 85),
+      s('cast-all-magecraft', 5, 65, { learn: os('cast-additional-magecraft') }),
+      s('cast-all-incantation', 5, 65, { learn: os('cast-additional-incantation') }),
+    ],
+  },
+  {
+    id: 'diagnose-powers', name: 'Diagnose Powers', kind: 'skill', source: 'LS: Diagnose Powers (PDF)',
+    summary: 'Identify item powers; once per day restore an item card.',
+    restrictions: [],
+    skills: [
+      s('daemonology', 1, 5), s('elementalism', 1, 5), s('necromancy', 1, 5), s('theology', 1, 5),
+      s('level-2-spell-reduction-1', 4, 60),
     ],
   },
 
@@ -348,17 +497,19 @@ export const loresheets: Loresheet[] = [
     skills: [],
   },
   {
+    id: 'npc-dpc', name: 'NPC/DPC', kind: 'route', unpublished: true, param: 'Faction or Guild', source: 'Owner ruling, 2026-09-18',
+    summary: 'Held by NPC and DPC characters for a faction or guild. Grants Oathsworn <X> and <X> Command (Command is never on a player card).',
+    restrictions: [{ kind: 'grantsSkills', skills: ['oathsworn', 'command'], withParam: true }],
+    skills: [],
+  },
+  {
     id: 'architect', name: 'Architect', kind: 'route', unpublished: true, source: 'Owner ruling, 2026-09-17',
     summary: 'Buy any skill you have access to, up to Tier 4, without buying its prerequisites. The skill still costs OSP; one step per tree per year and use requirements still apply.',
     restrictions: [],
-    bypassPrereqsUpToTier: 4,
     skills: [],
   },
 ]
 
-function tier(
-  n: 1 | 2 | 3 | 4, name: string, cost: number, powerRating: number,
-  grants: EssenceTier['grants'], abilities: string[],
-): EssenceTier {
-  return { tier: n, name, cost, powerRating, grants, abilities }
+function tier(n: 1 | 2 | 3 | 4, name: string, cost: number, powerRating: number, abilities: string[]): EssenceTier {
+  return { tier: n, name, cost, powerRating, abilities }
 }

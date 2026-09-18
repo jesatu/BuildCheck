@@ -4,7 +4,7 @@ import { loresheets } from './loresheets'
 import { occupationalSkills } from './occupational-skills'
 import { races } from './races'
 import { spellLists } from './spells'
-import type { CharacterSkill, GuildList, Loresheet, OccupationalSkill, Race, Requirement, SpellList } from './types'
+import type { CharacterSkill, FlagId, GuildList, Loresheet, OccupationalSkill, Race, Requirement, SpellList } from './types'
 
 export * from './types'
 export { RULES, DEFAULT_SWITCHES } from './rules'
@@ -12,6 +12,14 @@ export type { RuleSwitches } from './rules'
 export { characterSkills, occupationalSkills, loresheets, races, spellLists, guildLists }
 export { MAGIC_CS as MAGIC_CS_IDS } from './character-skills'
 export { scriptFamilies, scriptFamilyOf } from './scripts'
+
+export const FLAG_LABELS: Record<FlagId, string> = {
+  bowCompetency: 'Bow Competency',
+  clawCompetency: 'Claw Competency',
+  factionPermission: 'Faction or guild permission (Oathsworn)',
+  awakenedRite: 'Awakened Rite of Creation',
+  researchRequest: 'Research request submitted (Sage)',
+}
 
 function byId<T extends { id: string }>(items: T[]): Map<string, T> {
   return new Map(items.map((i) => [i.id, i]))
@@ -23,6 +31,18 @@ export const loresheetById: Map<string, Loresheet> = byId(loresheets)
 export const raceById: Map<string, Race> = byId(races)
 export const spellListById: Map<string, SpellList> = byId(spellLists)
 export const guildListById: Map<string, GuildList> = byId(guildLists)
+
+/** Guilds whose Ω lists include this skill: the guilds Jack of All Trades can teach it for. */
+export function joatGuilds(skillId: string): string[] {
+  const lists = osById.get(skillId)?.lists ?? []
+  return [...new Set(lists.flatMap((l) => (guildListById.get(l)?.jackOfAllTrades ? guildListById.get(l)!.guilds : [])))]
+}
+
+/** Guild named by an Oathsworn <X> value ("Mages Guild" or "Mages"), if it is a guild. */
+export function guildOf(param: string | undefined): string | undefined {
+  const name = param?.replace(/ Guild$/i, '').trim().toLowerCase()
+  return guildLists.flatMap((g) => g.guilds).find((g) => g.toLowerCase() === name)
+}
 
 /** Every leaf requirement in an expression, in order. */
 export function requirementLeaves(r: Requirement | undefined): Requirement[] {

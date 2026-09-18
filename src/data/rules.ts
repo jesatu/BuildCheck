@@ -3,7 +3,6 @@
 
 export const RULES = {
   characterPoints: 16,               // CS-1
-  csChangeCostOsp: 5,                // CS-4
   maxLevel2MagicCs: 1,               // CS-6
   purchasesPerYear: 4,               // OS-1
   cardLimit: 12,                     // LIM-1
@@ -17,15 +16,8 @@ export const RULES = {
   oathswornGuildCap: 1,              // LIM-7
   retirementDoubleSteps: 2,          // RET-3 (on different trees, RET-3a)
   powerRatingLimit: 12,              // PR-1
-  magicalArmourCap: 4,               // AR-3
-  naturalArmourCap: 4,               // AR-4
   baseLhvCap: 4,                     // +1 Base LHV
-  prebookMaxTier: 3,                 // 8.3
-  tutorMaxTier: 4,                   // 8.3
   architectMaxTier: 4,               // Architect ruling
-  architectCountsTowardYearly: false, // Architect ruling: one step per tree still applies
-  allowedPatternChanges: [['living', 'magical'], ['living', 'unliving']] as ReadonlyArray<readonly [string, string]>, // A13 ruling
-  levelPowerCost: [1, 2, 4],         // 6.4
   csSpellPower: { 1: 4, 2: 12 } as Record<number, number>,
   basePowerPerLevel: 4,
   childPoints: { under5: 0, age5to9: 10, age10to15: 16 },

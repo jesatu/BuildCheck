@@ -45,24 +45,24 @@ export const occupationalSkills: OccupationalSkill[] = [
   // ---- Generic ----
   skill(5, 50, ['generic'], { id: 'lhv-1', name: '+1 LHV', restricted: true, use: any(cs('body-development', 2), ls), summary: '+1 LHV (Rule of Double).', source: 'HB p.84' }),
   skill(1, 10, ['generic'], {
-    id: 'oathsworn', name: '<X> Oathsworn', param: 'Faction or Guild', restricted: true, repeatableWithParam: true,
+    id: 'oathsworn', name: '<X> Oathsworn', param: 'Faction or Guild', restricted: true,
     learn: { flag: 'factionPermission' }, side: 'left', countsTowardLimit: false, exemptFromYearly: true, mainEventOnly: true,
     summary: 'Sworn to faction or guild X. Max 1 faction and 1 guild (LIM-7).', source: 'HB p.85',
   }),
-  skill(2, 20, ['generic'], { id: 'activate-item', name: 'Activate <X> Item', param: 'Faction or Guild', restricted: true, repeatableWithParam: true, learn: os('oathsworn'), summary: 'Activate items belonging to X. Revocable.', source: 'HB p.85' }),
+  skill(2, 20, ['generic'], { id: 'activate-item', name: 'Activate <X> Item', param: 'Faction or Guild', restricted: true, learn: os('oathsworn'), summary: 'Activate items belonging to X. Revocable.', source: 'HB p.85' }),
   skill(5, 50, ['generic'], {
     id: 'command', name: '<X> Command', param: 'Faction or Guild', restricted: true, use: ls,
     side: 'none', countsTowardLimit: false,
     includes: ['oathsworn', 'activate-item', 'immune-lethal-alchemical-venoms', 'tutor'],
     summary: 'Never on a player card: recorded on an unpublished NPC/DPC loresheet (ruling).', source: 'HB p.84',
   }),
-  skill(1, 10, ['generic'], { id: 'apprentice', name: 'Apprentice <X>', param: 'Profession', repeatableWithParam: true, side: 'left', countsTowardLimit: false, exemptFromYearly: true, summary: 'Income: +1 Gold per Gathering.', source: 'HB p.85' }),
-  skill(2, 20, ['generic'], { id: 'journeyman', name: 'Journeyman <X>', param: 'Profession', repeatableWithParam: true, learn: os('apprentice'), replaces: ['apprentice'], side: 'left', countsTowardLimit: false, exemptFromYearly: true, summary: 'Income: +2 Gold per Gathering.', source: 'HB p.93' }),
-  skill(3, 30, ['generic'], { id: 'master', name: 'Master <X>', param: 'Profession', repeatableWithParam: true, learn: os('journeyman'), replaces: ['journeyman'], side: 'left', countsTowardLimit: false, exemptFromYearly: true, summary: 'Income: +4 Gold per Gathering.', source: 'HB p.93' }),
+  skill(1, 10, ['generic'], { id: 'apprentice', name: 'Apprentice <X>', param: 'Profession', side: 'left', countsTowardLimit: false, exemptFromYearly: true, summary: 'Income: +1 Gold per Gathering.', source: 'HB p.85' }),
+  skill(2, 20, ['generic'], { id: 'journeyman', name: 'Journeyman <X>', param: 'Profession', learn: os('apprentice'), replaces: ['apprentice'], side: 'left', countsTowardLimit: false, exemptFromYearly: true, summary: 'Income: +2 Gold per Gathering.', source: 'HB p.93' }),
+  skill(3, 30, ['generic'], { id: 'master', name: 'Master <X>', param: 'Profession', learn: os('journeyman'), replaces: ['journeyman'], side: 'left', countsTowardLimit: false, exemptFromYearly: true, summary: 'Income: +4 Gold per Gathering.', source: 'HB p.93' }),
   skill(2, 20, ['armourers', 'militia', 'scouts', 'generic'], { id: 'immune-repel', name: 'Immune to Repel', summary: 'Immune to Repel.', source: 'HB p.92' }),
   skill(3, 30, ['armourers', 'militia', 'scouts', 'generic'], { id: 'immune-repel-strikedown', name: 'Immune to Repel and Strikedown', learn: os('immune-repel'), replaces: ['immune-repel'], summary: 'Immune to Repel and Strikedown.', source: 'HB p.92' }),
   skill(5, 50, ['scouts', 'generic'], { id: 'immune-immobilisation', name: 'Immune to Immobilisation', restricted: true, learn: os('immune-repel-strikedown'), summary: 'Immune to all Immobilisation (not Petrify).', source: 'HB p.92' }),
-  skill(2, 20, ['generic'], { id: 'scholar', name: 'Scholar <X>', param: 'Research topic', repeatableWithParam: true, side: 'left', countsTowardLimit: false, summary: 'Research on topic X. Up to 2 topics (LIM-6).', source: 'HB p.96' }),
+  skill(2, 20, ['generic'], { id: 'scholar', name: 'Scholar <X>', param: 'Research topic', side: 'left', countsTowardLimit: false, summary: 'Research on topic X. Up to 2 topics (LIM-6).', source: 'HB p.96' }),
   skill(4, 40, ['generic'], { id: 'sage', name: 'Sage <X>', param: 'Research topic', restricted: true, learn: all(os('scholar'), { flag: 'researchRequest' }), replaces: ['scholar'], side: 'left', countsTowardLimit: false, mainEventOnly: true, summary: 'Better research on topic X (same topic as Scholar). Buy once.', source: 'HB p.96' }),
   skill(1, 10, ['generic'], { id: 'awakened', name: 'Awakened <X>', param: 'Race', restricted: true, learn: { flag: 'awakenedRite' }, use: ls, summary: 'Special creature evolution of the base race. Blocks other special creature types.', source: 'HB p.86' }),
   skill(4, 40, ['generic'], { id: 'tutor', name: 'Tutor', restricted: true, summary: 'Teach 1 OS (up to T4) per main event.', source: 'HB p.98' }),
@@ -127,10 +127,10 @@ export const occupationalSkills: OccupationalSkill[] = [
   skill(5, 50, ['bards', 'casino', 'militia', 'bank'], { id: 'immune-mind-effects', name: 'Immune to Mind Effects', restricted: true, learn: os('rally'), summary: 'Immune to all Mind effects.', source: 'HB p.92' }),
   skill(2, 20, ['bards'], { id: 'sleepless-chanting', name: 'Sleepless Chanting', summary: 'Immune to Sleep while chanting.', source: 'HB p.96' }),
   skill(3, 30, ['bards'], { id: 'unending-voice', name: 'Unending Voice', learn: os('sleepless-chanting'), replaces: ['sleepless-chanting'], summary: 'Spell Reduction (1) on Chants; immune to Sleep while chanting.', source: 'HB p.98' }),
-  skill(1, 10, ['bards', 'scouts'], { id: 'translate-named-script', name: 'Translate Named Script <X>', param: 'Script', repeatableWithParam: true, summary: 'Translate one named script.', source: 'HB p.97' }),
+  skill(1, 10, ['bards', 'scouts'], { id: 'translate-named-script', name: 'Translate Named Script <X>', param: 'Script', summary: 'Translate one named script.', source: 'HB p.97' }),
   skill(4, 40, ['bards', 'scouts'], { id: 'written-forgery', name: 'Written Forgery', learn: all(os('translate-named-script'), cs('recognise-forgery')), summary: 'Forged training: 1 × T1–3 including restricted, once per event.', source: 'HB p.98' }),
   skill(5, 50, ['bards', 'scouts'], { id: 'forgery', name: 'Forgery', restricted: true, learn: all(os('written-forgery'), cs('recognise-forgery')), replaces: ['written-forgery'], summary: 'Forge 1 item per event; forged training 2 × T1–3 or 1 × T4.', source: 'HB p.90' }),
-  skill(3, 30, ['bards'], { id: 'script-master', name: 'Script Master <X>', param: 'Regional & Historical, People & Race or Myth & Magic', repeatableWithParam: true, learn: os('translate-named-script'), replaces: ['translate-named-script'], summary: 'All scripts in one category. Replaces the TNS skills in that family (see scripts.ts).', source: 'HB p.96' }),
+  skill(3, 30, ['bards'], { id: 'script-master', name: 'Script Master <X>', param: 'Regional & Historical, People & Race or Myth & Magic', learn: os('translate-named-script'), replaces: ['translate-named-script'], summary: 'All scripts in one category. Replaces the TNS skills in that family (see scripts.ts).', source: 'HB p.96' }),
   skill(5, 70, ['bards'], { id: 'polyglot', name: 'Polyglot', restricted: true, learn: os('script-master'), replaces: ['script-master'], summary: 'All scripts in all three categories (70 OSP as printed, E12).', source: 'HB p.95' }),
   skill(3, 30, ['bards', 'rangers'], { id: 'immune-befriend-confusion', name: 'Immune to Befriend and Confusion', summary: 'Immune to Befriend and Confusion.', source: 'HB p.92' }),
   skill(2, 20, ['casino', 'scouts', 'bank'], { id: 'conceal-item', name: 'Conceal Item', summary: 'Conceal 1 item; only Locate finds it.', source: 'HB p.87' }),
@@ -218,9 +218,9 @@ export const occupationalSkills: OccupationalSkill[] = [
   skill(4, 40, ['bank'], { id: 'bank-advisor-broker', name: 'Bank Advisor (Broker)', restricted: true, learn: all(os('bank-advisor-associate'), os('oathsworn', 'Bank')), use: os('oathsworn', 'Bank'), summary: '3 items per event.', source: 'HB p.86' }),
 
   // ---- Knowledge Guilds ----
-  skill(1, 10, ['knowledge'], { id: 'general-knowledge', name: 'General Knowledge <X>', param: 'Guildsman, Merchant, Rumour Monger, Storyteller, Wanderer or War Scout', repeatableWithParam: true, side: 'left', countsTowardLimit: false, summary: 'News sheets for topic X.', source: 'HB p.91' }),
-  // Card sides (owner assumption, to be validated): Newsmonger left, Improved Research Ability right.
-  skill(2, 20, ['knowledge'], { id: 'newsmonger', name: 'Newsmonger', learn: os('general-knowledge'), replaces: ['general-knowledge'], side: 'left', countsTowardLimit: false, summary: 'All news sheets.', source: 'HB p.94' }),
+  skill(1, 10, ['knowledge'], { id: 'general-knowledge', name: 'General Knowledge <X>', param: 'Guildsman, Merchant, Rumour Monger, Storyteller, Wanderer or War Scout', side: 'left', countsTowardLimit: false, summary: 'News sheets for topic X.', source: 'HB p.91' }),
+  // Only the skills LIM-4 exempts from the 12 go on the left; Newsmonger and Improved Research Ability are right-side.
+  skill(2, 20, ['knowledge'], { id: 'newsmonger', name: 'Newsmonger', learn: os('general-knowledge'), replaces: ['general-knowledge'], summary: 'All news sheets.', source: 'HB p.94' }),
   skill(4, 40, ['knowledge'], { id: 'improved-research-ability', name: 'Improved Research Ability', learn: os('newsmonger'), mainEventOnly: true, summary: 'Summer research; assist others as well as own research.', source: 'HB p.92' }),
 
   // ---- Arcane Guilds ----
@@ -239,7 +239,7 @@ export const occupationalSkills: OccupationalSkill[] = [
   skill(4, 40, ['arcane'], { id: 'high-magic-elementalism', name: 'High Magic (Elementalism)', restricted: true, learn: os('elementalism'), use: any(cs('healing', 2), all(cs('spellcasting', 2), os('enchanting')), all(cs('incantation', 2), os('light-incantation'))), replaces: ['elementalism'], includes: ['elementalism'], summary: 'Elementalism level 3.', source: 'HB p.91' }),
   skill(4, 40, ['arcane'], { id: 'high-magic-necromancy', name: 'High Magic (Necromancy)', restricted: true, learn: os('necromancy'), use: any(cs('corruption', 2), all(cs('incantation', 2), os('dark-incantation')), all(cs('spellcasting', 2), os('shadow-magic'))), replaces: ['necromancy'], includes: ['necromancy'], summary: 'Necromancy level 3.', source: 'HB p.91' }),
   skill(4, 40, ['arcane'], { id: 'high-magic-theology', name: 'High Magic (Theology)', restricted: true, learn: os('theology'), use: all(cs('incantation', 2), os('theology')), replaces: ['theology'], includes: ['theology'], summary: 'Theology level 3.', source: 'HB p.92' }),
-  skill(5, 50, ['arcane'], { id: 'high-magic', name: 'High Magic <X>', param: 'Magic list', restricted: true, repeatableWithParam: true, use: any(cs('spellcasting', 2), cs('incantation', 2), cs('healing', 2), cs('corruption', 2)), summary: 'Level 3 of lists castable at level 2. Not via Jack of All Trades.', source: 'HB p.92' }),
+  skill(5, 50, ['arcane'], { id: 'high-magic', name: 'High Magic <X>', param: 'Magic list', restricted: true, use: any(cs('spellcasting', 2), cs('incantation', 2), cs('healing', 2), cs('corruption', 2)), summary: 'Level 3 of lists castable at level 2. Not via Jack of All Trades.', source: 'HB p.92' }),
 
   // ---- Martial Guilds ----
   skill(1, 10, ['martial'], { id: 'quick-armour-repair', name: 'Quick Armour Repair', use: anyArmourCs, summary: 'Armour repair takes half the time.', source: 'HB p.95' }),
@@ -292,7 +292,7 @@ export const occupationalSkills: OccupationalSkill[] = [
   special({ id: 'regeneration', name: 'Regenerates', param: 'Time period', use: ls, summary: 'Regenerate 1 hit per location per time period.', source: 'HB p.95' }),
   special({ id: 'improved-regeneration', name: 'Improved Regeneration', use: ls, summary: 'Regeneration one step faster (max 10 s). Buy once.', source: 'HB p.92' }),
   special({ id: 'improved-ritual-of-peace', name: 'Improved Ritual of Peace', summary: 'Not taken below 0 by listed effects under the Ritual of Peace. Only with no Tier 5 OS.', source: 'HB p.92' }),
-  special({ id: 'jack-of-all-trades', name: 'Jack of All Trades', summary: 'Counts as a training facility for 1 Ω OS (not High Magic <X>). Used up.', source: 'HB p.93' }),
+  { ...special({ id: 'jack-of-all-trades', name: 'Jack of All Trades', summary: 'Counts as a training facility for 1 Ω OS (not High Magic <X>). Used up; re-buying always costs 20 OSP.', source: 'HB p.93; cost from the Awakened Human loresheet (not in the published file)' }), tier: 2, cost: 20 },
   special({ id: 'level-2-spell-reduction-1', name: 'Level 2 Spell Reduction (1)', use: ls, summary: 'Spell Reduction (1) on L2 spells (not Iron Will).', source: 'HB p.93' }),
   special({ id: 'magical-armour-repair', name: 'Magical Armour Repair', summary: 'MAV restored after 5 minutes out of combat.', source: 'HB p.93' }),
   special({ id: 'master-brewer', name: 'Master Brewer', summary: 'Once per event, a second copy of an L1 or L2 potion or poison.', source: 'HB p.93' }),
@@ -309,5 +309,5 @@ export const occupationalSkills: OccupationalSkill[] = [
   special({ id: 'spell-tempering-master', name: 'Spell Tempering (Master)', learn: os('spell-tempering'), replaces: ['spell-tempering'], summary: '1 master spell-tempered item per event.', source: 'HB p.96' }),
   special({ id: 'strike-for-enchanted', name: 'Strike for Enchanted', use: ls, summary: 'Strike Enchanted with a melee weapon.', source: 'HB p.96' }),
   special({ id: 'venom-resistance', name: 'Venom Resistance', use: ls, summary: 'Purge Poison cures non-magical venoms.', source: 'HB p.98' }),
-  special({ id: 'tns-runes', name: 'TNS <X> Runes', param: 'Ancestor, Daemon, Elemental or Grave', repeatableWithParam: true, summary: 'Creature-only script. Cannot be tutored.', source: 'HB p.97' }),
+  special({ id: 'tns-runes', name: 'TNS <X> Runes', param: 'Ancestor, Daemon, Elemental or Grave', summary: 'Creature-only script. Cannot be tutored.', source: 'HB p.97' }),
 ]

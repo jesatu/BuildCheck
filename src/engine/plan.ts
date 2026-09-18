@@ -1,15 +1,15 @@
 import {
-  csById, loresheetById, osById, osIdsIn, RULES, scriptFamilies, scriptFamilyOf,
+  loresheetById, osById, osIdsIn, RULES, scriptFamilies, scriptFamilyOf,
   type LoresheetSkill, type Requirement, type Tier,
 } from '../data'
 import type { Build, HeldSkill } from './build'
-import { coveredBy, skillName, validate, type ValidationResult } from './validate'
+import { coveredBy, describe, joatBlocker, skillName, validate, withGrants, type ValidationResult } from './validate'
 
 // Route planner (reference doc 8.2, 8.3, 8.8). Turns target skills into a year-by-year purchase plan.
 // With an unlimited OSP pool, plans differ only in route choice (buy / loresheet / Architect) and
 // "one of" prerequisites, so we enumerate those alternatives and schedule each one.
 
-export type Route = 'buy' | 'loresheet' | 'architect'
+export type Route = 'buy' | 'loresheet' | 'architect' | 'joat'
 
 export interface Target { id: string; param?: string }
 
@@ -78,8 +78,9 @@ export function planRoute(build: Build, targets: Target[], opts: PlanOptions = {
     want === undefined || want === ANY || want === have ||
     (want.startsWith(`${ANY}:`) && scriptFamilyOf(have) === want.slice(ANY.length + 1))
 
+  const held = withGrants(build)
   const heldNow = (id: string, param?: string) =>
-    build.os.some((h) => (h.id === id && paramMatches(param, h.param)) || ((param === undefined || param === ANY) && coveredBy(h.id).has(id)))
+    held.some((h) => (h.id === id && paramMatches(param, h.param)) || ((param === undefined || param === ANY) && coveredBy(h.id).has(id)))
 
   const leafMet = (r: Requirement): boolean => {
     if ('cs' in r) return (build.cs[r.cs] ?? 0) >= (r.level ?? 1)
@@ -88,9 +89,6 @@ export function planRoute(build: Build, targets: Target[], opts: PlanOptions = {
     if ('pattern' in r) return build.pattern === r.pattern
     return false
   }
-  const describeLeaf = (r: Requirement) =>
-    'cs' in r ? `${csById.get(r.cs)?.name}${r.level && r.level > 1 ? ` ${r.level}` : ''} (Character Skill)`
-      : 'flag' in r ? r.flag : 'loresheet' in r ? `${r.loresheet} loresheet` : 'pattern' in r ? `${r.pattern} pattern` : '?'
 
   /** Loresheet entries the character can buy this skill from. */
   const loresheetRoutes = (id: string, param?: string): Array<{ ls: string; entry: LoresheetSkill }> =>
@@ -143,7 +141,7 @@ export function planRoute(build: Build, targets: Target[], opts: PlanOptions = {
     }
     if ('any' in r) return pareto(r.any.flatMap((x) => expandReq(x, parentId, parentParam, stack)))
     if ('not' in r) return [empty()] // exclusions are the validator's job
-    return leafMet(r) ? [empty()] : [{ ...empty(), blockers: new Set([`needs ${describeLeaf(r)}`]) }]
+    return leafMet(r) ? [empty()] : [{ ...empty(), blockers: new Set([`needs ${describe(r)}`]) }]
   }
 
   const alts = pareto(targets.reduce<Alt[]>((acc, t) => pareto(product(acc, expandOs(t.id, t.param, []))), [empty()]))
@@ -196,7 +194,10 @@ function ancestors(id: string, seen = new Set<string>()): Set<string> {
  * ponytail: greedy for DAGs with shared prerequisites; exact search if real builds show longer plans than needed.
  */
 function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
-  const items = [...alt.items.values()]
+  // An "any <X>" placeholder is already met by a specific version planned elsewhere (Polyglot's "any Script Master").
+  const all = [...alt.items.values()]
+  const items = all.filter((i) => !all.some((o) => o !== i && o.id === i.id && o.param !== ANY &&
+    (i.param === ANY || (i.param?.startsWith(`${ANY}:`) && scriptFamilyOf(o.param) === i.param.slice(ANY.length + 1)))))
   const byKey = new Map(items.map((i) => [i.key, i]))
 
   // An item must come after any planned item that satisfies its learn requirement (chosen route),
@@ -206,8 +207,10 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
     const needs = new Set([...osIdsIn(i.learn), ...ancestors(i.id)])
     const set = new Set<string>()
     for (const o of items) {
-      // A replacing skill stands in for a learn prerequisite only when that prerequisite isn't itself planned (REP-2b).
-      const standsIn = [...coveredBy(o.id)].some((c) => osIdsIn(i.learn).includes(c) && !items.some((x) => x.id === c))
+      // A replacing skill stands in for a learn prerequisite only when that prerequisite isn't itself planned (REP-2b),
+      // and never when it sits above this skill in the tree (Polyglot can't stand in for Script Master's prerequisite).
+      const standsIn = o.id !== i.id && !ancestors(o.id).has(i.id) &&
+        [...coveredBy(o.id)].some((c) => osIdsIn(i.learn).includes(c) && !items.some((x) => x.id === c))
       if (o !== i && (needs.has(o.id) || standsIn)) set.add(o.key)
     }
     preds.set(i.key, set)
@@ -216,6 +219,7 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
   const height = new Map<string, number>()
   const heightOf = (k: string): number => {
     if (height.has(k)) return height.get(k)!
+    height.set(k, 1) // guard: a cycle can't recurse forever
     const h = 1 + Math.max(0, ...items.filter((o) => preds.get(o.key)!.has(k)).map((o) => heightOf(o.key)))
     height.set(k, h)
     return h
@@ -259,10 +263,38 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
     if (y === 1) for (const c of [...doubled.keys()]) if (!year.has(c)) doubled.delete(c)
   }
 
-  const purchases: PlannedPurchase[] = items.map((i) => {
+  // Jack of All Trades stands in for the training facility a restricted skill needs: one use per season,
+  // because using it removes it from the card. The first use can spend a JoAT already held; every other
+  // use buys it from the Awakened Human loresheet (20 OSP, one of that year's purchases), so only use it
+  // where a slot is free.
+  const held = withGrants(build)
+  const heldJoat = held.some((h) => h.id === 'jack-of-all-trades')
+  const joatSheet = build.loresheets.some((l) => l.id === 'awakened-human')
+  const joatEntry = loresheetById.get('awakened-human')!.skills.find((e) => e.os === 'jack-of-all-trades')!
+  const joatYears = new Set<number>()
+  const rebuyYears = new Set<number>()
+  const viaJoat = new Set<string>()
+  const slotsUsed = (y: number) => items.filter((i) => year.get(i.key) === y && countsYearly(i) && !doubled.has(i.key)).length + (rebuyYears.has(y) ? 1 : 0)
+  for (const i of [...items].sort((a, b) => (year.get(a.key) ?? 0) - (year.get(b.key) ?? 0) || b.cost - a.cost)) {
+    const y = year.get(i.key) ?? 0
+    if (i.route !== 'buy' || !osById.get(i.id)?.restricted || joatYears.has(y) || joatBlocker(held, i.id, joatSheet)) continue
+    const usesHeld = heldJoat && joatYears.size === 0
+    if (!usesHeld) {
+      if (!joatSheet || slotsUsed(y) >= RULES.purchasesPerYear) continue
+      rebuyYears.add(y)
+    }
+    viaJoat.add(i.key)
+    joatYears.add(y)
+  }
+  const joat = osById.get('jack-of-all-trades')!
+
+  const purchases: PlannedPurchase[] = items.map((acq) => {
+    const i: Acq = viaJoat.has(acq.key) ? { ...acq, route: 'joat' } : acq
     const s = osById.get(i.id)!
     const notes: string[] = []
     if (i.route === 'buy' && s.restricted) notes.push('Restricted: needs a training facility, tutor or forgery')
+    if (i.route === 'joat') notes.push('Uses Jack of All Trades (removed from the card afterwards)')
+    if (i.route === 'loresheet') notes.push('Main event only (not prebook); no training voucher needed')
     if (s.mainEventOnly) notes.push('Main event only')
     if (i.param === ANY || i.param?.startsWith(`${ANY}:`)) notes.push('Choose any value for <X>')
     return {
@@ -270,11 +302,18 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
       loresheet: i.loresheet, cost: i.cost, tier: i.tier, countsTowardYearly: countsYearly(i) && !doubled.has(i.key),
       doubleStep: doubled.has(i.key) || undefined, notes,
     }
-  }).sort((a, b) => a.year - b.year || a.name.localeCompare(b.name))
+  })
+  for (const y of rebuyYears) {
+    purchases.push({
+      year: y, id: joat.id, name: joat.name, route: 'loresheet', loresheet: 'awakened-human', cost: joatEntry.cost, tier: joatEntry.tier,
+      countsTowardYearly: true, notes: ['Bought to use this season (each use removes it from the card)', 'Main event only (not prebook)'],
+    })
+  }
+  purchases.sort((a, b) => a.year - b.year || a.name.localeCompare(b.name))
 
   const finalBuild: Build = {
     ...build,
-    os: [...build.os, ...purchases.map((p): HeldSkill => ({ id: p.id, param: concreteParam(p.id, p.param), source: p.route, loresheet: p.loresheet }))],
+    os: [...build.os, ...purchases.filter((p) => !rebuyYears.has(p.year) || p.id !== joat.id).map((p): HeldSkill => ({ id: p.id, param: concreteParam(p.id, p.param), source: p.route, loresheet: p.loresheet }))],
   }
   return {
     purchases,
@@ -286,8 +325,8 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
 }
 
 function displayName(id: string, param?: string) {
-  if (param === ANY) return skillName(id, 'any')
-  if (param?.startsWith(`${ANY}:`)) return skillName(id, `any ${param.slice(ANY.length + 1)} script`)
+  if (param === ANY) return skillName(id, '(your choice)')
+  if (param?.startsWith(`${ANY}:`)) return skillName(id, `(any ${param.slice(ANY.length + 1)} script)`)
   return skillName(id, param)
 }
 

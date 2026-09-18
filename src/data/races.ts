@@ -14,7 +14,7 @@ export const races: Race[] = [
   { id: 'beastkin', name: 'Beastkin', category: 'youngerRaces', startingRace: true, elementalWeakness: 'air' },
   { id: 'drow', name: 'Drow', category: 'youngerRaces', startingRace: true, elementalWeakness: 'flame' },
   { id: 'halfling', name: 'Halfling', category: 'youngerRaces', startingRace: true, elementalWeakness: 'water' },
-  { id: 'uruk', name: 'Uruk', category: 'youngerRaces', startingRace: true, elementalWeakness: 'earth', aliases: ['Uruck'] },
+  { id: 'uruk', name: 'Uruk', category: 'youngerRaces', startingRace: true, elementalWeakness: 'earth' },
   { id: 'ancestral', name: 'Ancestral', category: 'planar', startingRace: false, elementalWeakness: 'water', loresheet: 'ancestral' },
   { id: 'daemon', name: 'Daemon', category: 'planar', startingRace: false, elementalWeakness: 'air', loresheet: 'daemon' },
   { id: 'elemental', name: 'Elemental', category: 'planar', startingRace: false, elementalWeakness: 'earth', loresheet: 'elemental' },
