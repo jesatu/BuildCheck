@@ -4,6 +4,8 @@ import { missingLoresheets, validate } from './validate'
 
 const buy = (id: string, param?: string): HeldSkill => ({ id, param, source: 'buy' })
 const build = (b: Partial<Build>): Build => ({ ...newBuild(), ...b })
+/** An Awakened Human: the loresheet comes with the Awakened (Human) skill. */
+const awake = (b: Partial<Build>): Build => build({ ...b, flags: [...(b.flags ?? []), 'awakenedRite'], os: [...(b.os ?? []), buy('awakened', 'Human')] })
 const rules = (b: Build) => validate(b).issues.filter((i) => i.severity === 'error').map((i) => i.rule)
 const state = (b: Build, id: string) => validate(b).skills.find((s) => s.id === id)
 
@@ -119,19 +121,19 @@ describe('buying routes', () => {
     const human = [{ id: 'awakened-human' }]
     const oath: HeldSkill = { id: 'oathsworn', param: 'Mages Guild', source: 'buy' }
     const skill: HeldSkill = { id: 'thaulmonic-alignment', source: 'joat' }
-    expect(rules(build({ flags: ['factionPermission'], loresheets: human, os: [joat, oath, skill] }))).toEqual([])
-    const npc = build({ os: [joat, skill], loresheets: [...human, { id: 'npc-dpc', param: 'Mages Guild' }] })
+    expect(rules(awake({ flags: ['factionPermission'], loresheets: human, os: [joat, oath, skill] }))).toEqual([])
+    const npc = awake({ os: [joat, skill], loresheets: [...human, { id: 'npc-dpc', param: 'Mages Guild' }] })
     expect(rules(npc)).toEqual([])
     expect(state(npc, 'oathsworn')).toMatchObject({ card: 'loresheet', param: 'Mages Guild' })
-    expect(rules(build({ os: [joat, skill], loresheets: [...human, { id: 'npc-dpc' }] }))).toContain('12')
-    expect(rules(build({ flags: ['factionPermission'], loresheets: human, os: [joat, { ...oath, param: 'Bards Guild' }, skill] }))).toEqual(['JoAT'])
+    expect(rules(awake({ os: [joat, skill], loresheets: [...human, { id: 'npc-dpc' }] }))).toContain('12')
+    expect(rules(awake({ flags: ['factionPermission'], loresheets: human, os: [joat, { ...oath, param: 'Bards Guild' }, skill] }))).toEqual(['JoAT'])
     // No Awakened Human sheet: no JoAT, even with one on a card.
     expect(rules(build({ flags: ['factionPermission'], os: [{ id: 'jack-of-all-trades', source: 'granted', card: 'power' }, oath, skill] }))).toEqual(['JoAT'])
     // Group lists count: Oathsworn Mages opens the Arcane Guilds list, except High Magic <X>.
-    expect(rules(build({ cs: { spellcasting: 2 }, loresheets: [...human, { id: 'npc-dpc', param: 'Mages Guild' }], os: [joat, { id: 'spell-power-4', source: 'joat' }] }))).toEqual([])
-    expect(rules(build({ cs: { spellcasting: 2 }, loresheets: [...human, { id: 'npc-dpc', param: 'Mages Guild' }], os: [joat, { id: 'high-magic', param: 'Spellcasting', source: 'joat' }] }))).toEqual(['JoAT'])
+    expect(rules(awake({ cs: { spellcasting: 2 }, loresheets: [...human, { id: 'npc-dpc', param: 'Mages Guild' }], os: [joat, { id: 'spell-power-4', source: 'joat' }] }))).toEqual([])
+    expect(rules(awake({ cs: { spellcasting: 2 }, loresheets: [...human, { id: 'npc-dpc', param: 'Mages Guild' }], os: [joat, { id: 'high-magic', param: 'Spellcasting', source: 'joat' }] }))).toEqual(['JoAT'])
     // Prerequisites still apply.
-    expect(rules(build({ loresheets: [...human, { id: 'npc-dpc', param: 'Mages Guild' }], os: [joat, { id: 'ritualist-master', source: 'joat' }] }))).toEqual(['OS-4'])
+    expect(rules(awake({ loresheets: [...human, { id: 'npc-dpc', param: 'Mages Guild' }], os: [joat, { id: 'ritualist-master', source: 'joat' }] }))).toEqual(['OS-4'])
   })
 
   it('keeps granted skills off the character card', () => {
@@ -284,8 +286,11 @@ describe('race, pattern and loresheets', () => {
 
 describe('awakened loresheets', () => {
   it('only fit their base race', () => {
-    expect(rules(build({ race: 'human', loresheets: [{ id: 'awakened-human' }] }))).toEqual([])
-    expect(rules(build({ race: 'elf', loresheets: [{ id: 'awakened-human' }] }))).toEqual(['12.3'])
+    expect(rules(awake({ race: 'human', loresheets: [{ id: 'awakened-human' }] }))).toEqual([])
+    expect(rules(awake({ race: 'elf', loresheets: [{ id: 'awakened-human' }] }))).toEqual(['C21', '12.3'])
+    // The loresheet and the skill come together.
+    expect(rules(build({ loresheets: [{ id: 'awakened-human' }] }))).toEqual(['12.3'])
+    expect(addLoresheets(newBuild(), ['awakened-human'])).toMatchObject({ flags: ['awakenedRite'], os: [{ id: 'awakened', param: 'Human' }] })
   })
 
   it('apply loresheet-specific replacement (Awakened Halfling: Traverse Faction Wards replaces Escape Bonds)', () => {

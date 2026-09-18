@@ -249,6 +249,7 @@ export function validate(input: Build): ValidationResult {
     const ls = loresheetById.get(l.id)
     if (!ls) { err('12', `Unknown loresheet "${l.id}".`); continue }
     if (ls.kind === 'essence' && !essenceTier(b, ls.id)) err('12.4', `${ls.name}: add the ${ls.tiers![0]!.name} skill to the card.`)
+    if (ls.kind === 'awakened' && !b.os.some((h) => h.id === 'awakened' && `Awakened ${h.param}` === ls.name)) err('12.3', `${ls.name}: add the ${ls.name.replace(/^Awakened (.*)/, 'Awakened ($1)')} skill to the card.`)
     if (ls.param && !l.param) err('12', `${ls.name} needs a value for <X> (${ls.param}).`)
     for (const r of ls.restrictions) {
       if (r.kind === 'requiresLoresheet' && !heldLs.has(r.loresheet)) err('12.4', `${ls.name} needs the ${loresheetById.get(r.loresheet)?.name} loresheet.`)
