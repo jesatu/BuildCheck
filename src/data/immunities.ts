@@ -19,7 +19,7 @@ export const immunitiesBySkill: Record<string, string[]> = {
   'immune-repel-strikedown': ['Repel', 'Strikedown'],
   'mighty-blow-brutish': ['Repel', 'Strikedown'],
   'immune-fumble': ['Fumble'],
-  'immune-fumble-shatter': ['Fumble|also items held', 'Shatter|also items held'],
+  'immune-fumble-shatter': ['Fumble', 'Shatter'],
   'immune-through': ['Through'],
   'damage-reduction-all': ['Through'],
   'armour-mastery-expert': ['Crush'],
