@@ -452,5 +452,6 @@ describe('derived values', () => {
     expect(not({ pattern: 'unliving' })).toEqual(['Decay: Unliving pattern', 'Disease: Unliving pattern', 'Fatal: Unliving pattern', 'Paralysis: Unliving pattern'])
     expect(not({ pattern: 'magical' })).toHaveLength(7)
     expect(not({ loresheets: [{ id: 'npc-dpc', param: 'Lions' }] })).toContain('Beguile: NPC/DPC')
+    expect(not({ loresheets: [{ id: 'paladin' }] })).toContain('Chant of Healing: Paladin')
   })
 })
