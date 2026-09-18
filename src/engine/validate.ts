@@ -53,9 +53,10 @@ export interface ValidationResult {
   derived: Derived
 }
 
+/** Skill name with its <X> value in parentheses: "High Magic (Spellcasting)", "Oathsworn (Unicorns)". */
 export const skillName = (id: string, param?: string) => {
   const name = osById.get(id)?.name ?? id
-  return param ? name.replace('<X>', param) : name
+  return param ? `${name.replace(/\s*<X>\s*/, ' ').trim()} (${param})` : name
 }
 
 /** Plain-English description of a requirement, e.g. "Spellcasting 2 CS". */
@@ -83,7 +84,11 @@ export function missingLoresheets(b: Build, targets: Array<{ id: string }> = [])
   if (race && !race.startingRace && race.loresheet) need.add(race.loresheet)
   if (b.pattern === 'magical') need.add('magical-pattern')
   if (b.pattern === 'unliving') need.add('unliving')
-  for (const h of b.os) if (h.source === 'loresheet' && h.loresheet) need.add(h.loresheet)
+  for (const h of b.os) {
+    if (h.source !== 'loresheet' || !h.loresheet) continue
+    const offeredByHeld = b.loresheets.some((l) => loresheetById.get(l.id)?.skills.some((e) => e.os === h.id))
+    if (!offeredByHeld) need.add(h.loresheet)
+  }
   for (const t of targets) {
     const s = osById.get(t.id)
     const sheets = loresheets.filter((l) => l.skills.some((e) => e.os === t.id))
@@ -103,7 +108,7 @@ export function withGrants(b: Build): HeldSkill[] {
       if (r.kind !== 'grantsSkills') continue
       const param = r.withParam ? l.param : undefined
       for (const id of r.skills) {
-        if (!os.some((h) => h.id === id && h.param === param)) os.push({ id, param, source: 'granted', card: 'loresheet', loresheet: l.id })
+        if (!os.some((h) => h.id === id && h.param === param && h.card === 'loresheet')) os.push({ id, param, source: 'granted', card: 'loresheet', loresheet: l.id })
       }
     }
   }
@@ -122,6 +127,8 @@ export function joatBlocker(os: HeldSkill[], skillId: string, canBuyJoat = false
   const sworn = new Set(os.filter((h) => h.id === 'oathsworn').map((h) => guildOf(h.param)))
   return guilds.some((g) => sworn.has(g)) ? undefined : `needs Oathsworn to one of: ${guilds.map((g) => `${g} Guild`).join(', ')}`
 }
+
+const CARD_NAMES = { character: 'the character card', creature: 'the special creature card', power: 'the special power card', loresheet: 'a loresheet' } as const
 
 /** OS ids each skill counts as, through replaces and includes, transitively (REP-2b). */
 const covers = new Map<string, Set<string>>()
@@ -249,10 +256,14 @@ export function validate(input: Build): ValidationResult {
         }
       }
     } else if (h.source === 'loresheet') {
-      const ls = loresheetById.get(h.loresheet ?? '')
+      // The recorded sheet if held, otherwise any held sheet that offers the skill (Cast All Magecraft: Warlock or Circle Warden).
+      const offering = loresheets.filter((l) => lsEntry(l, h))
+      const ls = [loresheetById.get(h.loresheet ?? ''), ...offering].find((l) => l && heldLs.has(l.id) && lsEntry(l, h))
       const entry = ls && lsEntry(ls, h)
-      if (!ls || !heldLs.has(ls.id)) err('LS-3', `${name} is bought from the ${ls?.name ?? h.loresheet ?? '?'} loresheet, which the character doesn't hold.`, i)
-      else if (!entry) err('LS-3', `${name} is not on the ${ls.name} loresheet.`, i)
+      if (!ls || !entry) {
+        const names = offering.map((l) => l.name).join(', ')
+        err('LS-3', `${name} needs a loresheet that offers it${names ? ` (${names})` : ''}.`, i)
+      }
       else {
         tierOf[i] = entry.tier
         const gap = missing(entry.learn, true, i)
@@ -272,9 +283,10 @@ export function validate(input: Build): ValidationResult {
       const onHeldSheet = b.loresheets.some((l) => { const ls = loresheetById.get(l.id); return ls && lsEntry(ls, h) })
       if (!onList && !onHeldSheet) err('LS-4a', `${name} is not available to this character, so Architect can't bypass to it.`, i)
       if ((s.tier ?? 5) > RULES.architectMaxTier) err('LS-4a', `${name} is Tier ${s.tier}; Architect only reaches Tier ${RULES.architectMaxTier}.`, i)
-    } else if (!h.card || h.card === 'character') {
+    } else if (h.source === 'granted' && (!h.card || h.card === 'character')) {
       err('OS-6', `${name} is granted, so it belongs on a special creature or special power card.`, i)
     }
+    // 'ritual': put on the character card by a ritual, so no route or prerequisite checks.
   })
 
   // ---------- Status: replaced, inactive or active ----------
@@ -305,10 +317,20 @@ export function validate(input: Build): ValidationResult {
     const inactive = gap ? `Needs ${gap}` : disabled.get(h.id)
     // Polyglot covers every family script; TNS left over from a family without Script Master is redundant.
     // A Druid gets standard AV only, so Armour Mastery adds nothing (L10). The Expert level keeps its Crush immunity.
+    const onCharacterCard = !h.card || h.card === 'character'
+    // Scripts use the Polyglot rule below; other skills are covered only by a skill with the same <X> (or none).
+    const coverer = onCharacterCard && h.id !== 'translate-named-script'
+      ? os.find((o, j) => j !== i && !o.dropped && !replacedBy.has(j) && coveredBy(o.id).has(h.id)
+        && (o.param === undefined || h.param === undefined || o.param === h.param))
+      : undefined
+    const alsoGranted = onCharacterCard ? os.find((o) => o !== h && o.id === h.id && o.param === h.param && o.card && o.card !== 'character') : undefined
     const redundant = h.id === 'translate-named-script' && scriptFamilyOf(h.param) && os.some((o) => o.id === 'polyglot' && !o.dropped)
       ? 'Covered by Polyglot'
       : standardArmourOnly && (h.id === 'armour-mastery' || h.id === 'armour-mastery-advanced')
-        ? 'Druid: standard AV only, so no extra AV' : undefined
+        ? 'Druid: standard AV only, so no extra AV'
+        : coverer ? `Covered by ${skillName(coverer.id, coverer.param)}`
+          : alsoGranted ? `Also granted by ${alsoGranted.loresheet ? `the ${loresheetById.get(alsoGranted.loresheet)?.name} loresheet` : CARD_NAMES[alsoGranted.card!]}`
+            : undefined
     const reason = h.dropped ? 'Off the card; still counts for prerequisites' : inactive ?? redundant
     const replaced = replacedBy.get(i)
     return {

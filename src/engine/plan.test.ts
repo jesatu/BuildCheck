@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { loresheetById, occupationalSkills } from '../data'
 import { newBuild, type Build } from './build'
-import { planRoute, type Target } from './plan'
+import { addHeldSkill, addLoresheetsAndSkills, planRoute, spentSoFar, type Target } from './plan'
+import { validate } from './validate'
 
 const build = (b: Partial<Build>): Build => ({ ...newBuild(), ...b })
 const t = (id: string, param?: string): Target => ({ id, param })
@@ -34,7 +35,7 @@ describe('planner', () => {
   })
 
   it('carries <X> down income chains', () => {
-    expect(summary(newBuild(), [t('master', 'Smith')]).steps).toEqual(['1:Apprentice Smith:buy', '2:Journeyman Smith:buy', '3:Master Smith:buy'])
+    expect(summary(newBuild(), [t('master', 'Smith')]).steps).toEqual(['1:Apprentice (Smith):buy', '2:Journeyman (Smith):buy', '3:Master (Smith):buy'])
   })
 
   it('uses Architect to skip prerequisites, without using a yearly slot', () => {
@@ -132,7 +133,7 @@ describe('planner', () => {
   it('uses a planned Script Master to satisfy Polyglot instead of adding another', () => {
     const b = build({ cs: { 'recognise-forgery': 1 }, os: [{ id: 'translate-named-script', param: 'Elven', source: 'buy' }] })
     expect(summary(b, [t('polyglot'), t('script-master', 'People & Race')])).toEqual({
-      years: 2, osp: 100, steps: ['1:Script Master People & Race:buy', '2:Polyglot:buy'],
+      years: 2, osp: 100, steps: ['1:Script Master (People & Race):buy', '2:Polyglot:buy'],
     })
   })
 
@@ -157,6 +158,46 @@ describe('planner', () => {
     const p = planRoute(build({ cs: { 'poison-lore': 1 } }), [t('create-poison-master')]).cheapest!
     expect(p.validation.valid).toBe(true)
     expect(p.validation.skills.filter((s) => s.state === 'replaced').map((s) => s.id)).toEqual(['create-poison-novice', 'create-poison-artisan'])
+  })
+})
+
+describe('adding held skills', () => {
+  const fighter = build({ cs: { 'large-weapon': 1 } })
+
+  it('adds the prerequisites of a held skill along the normal route (Crushing Blow)', () => {
+    const b = addHeldSkill(fighter, 'crushing-blow')
+    expect(b.os.map((h) => `${h.id}:${h.source}`)).toEqual([
+      'immune-repel:buy', 'immune-repel-strikedown:buy', 'mighty-blow:buy', 'crushing-blow:buy',
+    ])
+    const r = validate(b)
+    expect(r.valid).toBe(true)
+    // Mighty Blow replaces Immune to Repel and Strikedown (ruling C13), so only Crushing Blow stays on the card.
+    expect(r.skills.map((s) => s.state)).toEqual(['replaced', 'replaced', 'replaced', 'active'])
+  })
+
+  it('uses the normal route even when the character holds Architect', () => {
+    const b = addHeldSkill({ ...fighter, loresheets: [{ id: 'architect' }] }, 'mighty-blow')
+    expect(b.os.map((h) => h.source)).toEqual(['buy', 'buy', 'buy'])
+  })
+
+  it('accepts a skill a ritual put straight on the card, with no prerequisites', () => {
+    const r = validate({ ...fighter, os: [{ id: 'crushing-blow', source: 'ritual' }] })
+    expect(r.valid).toBe(true)
+    expect(r.skills[0]).toMatchObject({ card: 'character', state: 'active' })
+  })
+
+  it('adding a skill loresheet adds its skill (Circle Warden)', () => {
+    const b = addLoresheetsAndSkills(newBuild(), ['circle-warden'])
+    expect(b.os).toEqual([{ id: 'circle-warden', source: 'loresheet', loresheet: 'circle-warden' }])
+    expect(validate(b).valid).toBe(true)
+  })
+
+  it('reports what has been spent so far and the fewest years it took', () => {
+    const b = addHeldSkill(fighter, 'crushing-blow')
+    expect(spentSoFar(b)).toMatchObject({ totalOsp: 140, years: 4 })
+    expect(spentSoFar(b, { retired: true }).years).toBe(3)
+    const ritual = { ...fighter, os: [{ id: 'crushing-blow', source: 'ritual' as const }] }
+    expect(spentSoFar(ritual)).toMatchObject({ totalOsp: 0, years: 0 })
   })
 })
 

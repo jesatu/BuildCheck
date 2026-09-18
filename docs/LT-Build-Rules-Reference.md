@@ -1345,6 +1345,10 @@ These items were settled by the project owner on 2026-09-17. They are now rules 
 | C10 | Master Brewer (Awakened Uruk) is Tier 3 and Regeneration (Awakened Olog) is Tier 4. What matters is that neither is Tier 5. Both can only be bought from their loresheets. | L14 |
 | C11 | Essence creature tiers are Occupational Skills (Druid, Paladin, Vampire, Warlock and Werecreature <X>, HB p.90–98): Vampire → Mature → Elder → Ancient Vampire at 10/20/30/40 OSP, each replacing the one below, on the right side of the card. The creature's tier is the tier skill on the card. Each tier also needs an essence rite. Taking the skill needs its loresheet (and Vampire also needs Unliving); the tool offers to add required loresheets. | 12.4 |
 | C12 | A skill can be taken off the card (switched off or sacrificed, LIM-8) and still count as held for prerequisites. Example: buy Immune to Mute and Rally to reach Immune to Mind Effects, then drop Immune to Mute and Rally. Dropped skills don't count toward the 12 or the Tier 5 cap, give no abilities, and don't clash with other skills. | 8.4 |
+| C13 | **Rules exception:** Mighty Blow replaces Immune to Repel and Strikedown. The handbook doesn't say so explicitly. | Section 10 |
+| C14 | A skill can be put straight on the character card by a ritual, with no prerequisites and no OSP cost. | 8.3 |
+| C15 | A skill bought from a loresheet is valid while any held loresheet offers it (Cast All Magecraft: Warlock, Circle Warden or Circle Watcher). | LS-3 |
+| C16 | A skill is redundant when another held skill already includes it (Mind Healing includes Immune to Sleep; Cast All Magecraft includes Shadow Magic and Enchanting; Cast All Incantation includes Light and Dark Incantation), or when a loresheet or special card also grants it. | Section 10 |
 | L7 | Dropped: loresheet purchases never go through Jack of All Trades or retirement vouchers. | 13 |
 | A12 | +Base Power is allowed without a magic CS. The tool warns when Fearsome Aspect is held with no Spell Power. | 13 |
 | A11 | The only skills that don't count toward the 12 are the ones LIM-4 lists. There are no other 'functional' exemptions. | 13 |

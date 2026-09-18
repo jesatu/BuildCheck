@@ -126,3 +126,22 @@ h2 .bad { font-size: .8rem; }
 .route.buy { color: var(--muted); }
 .route.loresheet { color: var(--loresheet); }
 .route.architect, .route.joat { color: var(--architect); }
+
+/* Build map */
+.map-panel { margin-bottom: 16px; }
+.map-scroll { overflow-x: auto; }
+.build-map { display: block; font: 12px system-ui, -apple-system, 'Segoe UI', sans-serif; }
+.map-node rect { fill: var(--panel); stroke: var(--accent); stroke-width: 1.5; }
+.map-node .map-name { fill: var(--text); font-weight: 600; }
+.map-sub { fill: var(--muted); font-size: 11px; }
+.map-node.planned rect { fill: var(--bg); stroke-dasharray: 5 3; }
+.map-node.inactive rect { fill: var(--inactive-bg); stroke: var(--inactive); }
+.map-node.redundant rect { fill: var(--redundant-bg); stroke: var(--redundant); stroke-dasharray: 2 2; }
+.map-node.replaced rect, .map-node.dropped rect { stroke: var(--line); }
+.map-node.replaced .map-name, .map-node.dropped .map-name { fill: var(--muted); }
+.map-node.replaced .map-name { text-decoration: line-through; }
+.map-node.dropped rect { stroke-dasharray: 3 3; }
+.map-edge { fill: none; stroke: var(--muted); stroke-width: 1.5; }
+.map-edge.skipped { stroke-dasharray: 2 4; }
+.map-arrow { fill: var(--muted); }
+.map-divider { stroke: var(--line); }

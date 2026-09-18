@@ -4,7 +4,7 @@ Plan and validate Lorien Trust character builds.
 
 Choose the skills you want. BuildCheck checks the build is legal, works out the OSPs needed, and shows the route to get there: prerequisites, one step per tree per year, 4 purchases per year, retirement double steps, special creature and special power cards, and alternative routes such as loresheets and the Architect.
 
-**Status:** phase 4 (build editor). Early version: expect rough edges.
+**Status:** in use at <https://jesatu.github.io/BuildCheck/>. Build editor, validator, route planner and build map.
 
 ## Rules source
 

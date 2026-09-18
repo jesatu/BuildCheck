@@ -58,7 +58,7 @@ describe('skill status', () => {
     const b = build({ os: [buy('translate-named-script', 'Elven'), buy('translate-named-script', 'Nihon'), buy('script-master', 'People & Race')] })
     const r = validate(b)
     expect(r.skills.map((s) => s.state)).toEqual(['replaced', 'active', 'active'])
-    expect(r.skills[0]!.replacedBy).toBe('Script Master People & Race')
+    expect(r.skills[0]!.replacedBy).toBe('Script Master (People & Race)')
     expect(r.valid).toBe(true)
     expect(rules(build({ os: [buy('translate-named-script', 'Nihon'), buy('script-master', 'Myth & Magic')] }))).toEqual(['OS-4'])
   })
@@ -135,6 +135,34 @@ describe('buying routes', () => {
   it('keeps granted skills off the character card', () => {
     expect(rules(build({ os: [{ id: 'immune-fatal', source: 'granted', card: 'power' }] }))).toEqual([])
     expect(rules(build({ os: [{ id: 'immune-fatal', source: 'granted' }] }))).toEqual(['OS-6'])
+  })
+})
+
+describe('redundant skills', () => {
+  it('marks a skill included by another as redundant (Mind Healing includes Immune to Sleep)', () => {
+    const b = build({ os: [buy('revive'), buy('advanced-healing'), buy('mind-healing'), buy('immune-befriend-confusion'), buy('immune-sleep')], cs: { healing: 1 } })
+    expect(state(b, 'immune-sleep')).toMatchObject({ state: 'redundant', reason: 'Covered by Mind Healing' })
+  })
+
+  it('marks Shadow Magic redundant under Cast All Magecraft', () => {
+    const b = build({ cs: { spellcasting: 2 }, loresheets: [{ id: 'warlock', tier: 4 }],
+      os: [buy('shadow-magic'), { id: 'cast-all-magecraft', source: 'granted', card: 'power' }] })
+    expect(state(b, 'shadow-magic')).toMatchObject({ state: 'redundant', reason: 'Covered by Cast All Magecraft' })
+  })
+
+  it('marks a bought skill redundant when a loresheet also grants it (Circle Warden grants Immune to Mute)', () => {
+    const b = build({ loresheets: [{ id: 'circle-warden' }], os: [buy('immune-fear'), buy('immune-mute')] })
+    expect(validate(b).skills.find((s) => s.id === 'immune-mute' && s.card === 'character'))
+      .toMatchObject({ state: 'redundant', reason: 'Also granted by the Circle Warden loresheet' })
+  })
+})
+
+describe('loresheet purchases', () => {
+  it('accept any held loresheet that offers the skill (Cast All Magecraft: Warlock or Circle Warden)', () => {
+    const b = build({ cs: { spellcasting: 2 }, loresheets: [{ id: 'circle-warden' }],
+      os: [{ id: 'cast-additional-magecraft', source: 'ritual' }, { id: 'cast-all-magecraft', source: 'loresheet', loresheet: 'warlock' }] })
+    expect(rules(b)).toEqual([])
+    expect(rules({ ...b, loresheets: [] })).toEqual(['LS-3'])
   })
 })
 

@@ -2,7 +2,7 @@ import {
   loresheetById, osById, osIdsIn, RULES, scriptFamilies, scriptFamilyOf,
   type LoresheetSkill, type Requirement, type Tier,
 } from '../data'
-import { skillKey, type Build, type HeldSkill } from './build'
+import { addLoresheets, skillKey, type Build, type HeldSkill } from './build'
 import { coveredBy, describe, essenceTier, joatBlocker, skillName, validate, withGrants, type ValidationResult } from './validate'
 
 // Route planner (reference doc 8.2, 8.3, 8.8). Turns target skills into a year-by-year purchase plan.
@@ -197,7 +197,8 @@ function ancestors(id: string, seen = new Set<string>()): Set<string> {
  * prerequisites with unit-length purchases).
  * ponytail: greedy for DAGs with shared prerequisites; exact search if real builds show longer plans than needed.
  */
-function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
+/** `history`: scheduling skills already bought, so their routes are fixed and Jack of All Trades isn't added. */
+function schedule(alt: Alt, build: Build, opts: PlanOptions, history = false): Plan {
   // An "any <X>" placeholder is already met by a specific version planned elsewhere (Polyglot's "any Script Master").
   const all = [...alt.items.values()]
   const items = all.filter((i) => !all.some((o) => o !== i && o.id === i.id && o.param !== ANY &&
@@ -279,7 +280,7 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
   const rebuyYears = new Set<number>()
   const viaJoat = new Set<string>()
   const slotsUsed = (y: number) => items.filter((i) => year.get(i.key) === y && countsYearly(i) && !doubled.has(i.key)).length + (rebuyYears.has(y) ? 1 : 0)
-  for (const i of [...items].sort((a, b) => (year.get(a.key) ?? 0) - (year.get(b.key) ?? 0) || b.cost - a.cost)) {
+  for (const i of history ? [] : [...items].sort((a, b) => (year.get(a.key) ?? 0) - (year.get(b.key) ?? 0) || b.cost - a.cost)) {
     const y = year.get(i.key) ?? 0
     if (i.route !== 'buy' || !osById.get(i.id)?.restricted || joatYears.has(y) || joatBlocker(held, i.id, joatSheet)) continue
     const usesHeld = heldJoat && joatYears.size === 0
@@ -332,9 +333,63 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
   }
 }
 
+/**
+ * Add a skill to the card as already held, assuming its prerequisites were bought along the normal route
+ * (the cheapest route without Architect). Prerequisites already held are kept; the rest are added.
+ * Mark the skill as Architect or Ritual afterwards if it skipped its prerequisites.
+ */
+export function addHeldSkill(build: Build, id: string, param?: string): Build {
+  const normal = { ...build, loresheets: build.loresheets.filter((l) => l.id !== 'architect') }
+  const plan = planRoute(normal, [{ id, param }]).cheapest
+  const bought = (plan?.purchases ?? [])
+    .filter((p) => p.id !== 'jack-of-all-trades' || id === 'jack-of-all-trades')
+    .map((p): HeldSkill => ({ id: p.id, param: concreteParam(p.id, p.param), source: p.route, loresheet: p.loresheet }))
+  if (!bought.some((h) => h.id === id) && !build.os.some((h) => h.id === id && h.param === param)) {
+    const sheet = loresheetById.get(build.loresheets.find((l) => loresheetById.get(l.id)?.skills.some((e) => e.os === id))?.id ?? '')
+    bought.push(sheet ? { id, param, source: 'loresheet', loresheet: sheet.id } : { id, param, source: 'buy' })
+  }
+  return { ...build, os: [...build.os, ...bought] }
+}
+
+/** Add loresheets (see addLoresheets), plus the skill a skill loresheet belongs to (Circle Warden, Treewalker…). */
+export function addLoresheetsAndSkills(build: Build, ids: string[]): Build {
+  let next = addLoresheets(build, ids)
+  for (const id of ids) {
+    const skill = loresheetById.get(id)?.skill
+    if (skill && !next.os.some((h) => h.id === skill)) next = addHeldSkill(next, skill)
+  }
+  return next
+}
+
+/**
+ * What the skills already bought cost, and the fewest years it could have taken to buy them in their
+ * recorded routes (4 per year, one step per tree per year). Granted and ritual skills cost nothing.
+ */
+export function spentSoFar(build: Build, opts: PlanOptions = {}): Plan {
+  const free = (h: HeldSkill) => h.source === 'granted' || h.source === 'ritual'
+  const items = new Map<string, Acq>()
+  for (const h of build.os.filter((x) => !free(x))) {
+    const s = osById.get(h.id)
+    if (!s) continue
+    const sheet = [h.loresheet, ...build.loresheets.map((l) => l.id)]
+      .map((l) => loresheetById.get(l ?? '')).find((l) => l?.skills.some((e) => e.os === h.id && (e.param === undefined || e.param === h.param)))
+    const entry = sheet?.skills.find((e) => e.os === h.id && (e.param === undefined || e.param === h.param))
+    const route: Route = h.source === 'loresheet' || h.source === 'architect' || h.source === 'joat' ? h.source : 'buy'
+    const key = keyOf(h.id, h.param)
+    items.set(key, {
+      key, id: h.id, param: h.param, route, loresheet: route === 'loresheet' ? sheet?.id : undefined,
+      cost: (route === 'loresheet' ? entry?.cost : undefined) ?? s.cost ?? entry?.cost ?? 0,
+      tier: (route === 'loresheet' ? entry?.tier : undefined) ?? s.tier ?? entry?.tier,
+      learn: route === 'architect' ? undefined : route === 'loresheet' ? entry?.learn : s.learn,
+    })
+  }
+  const base = { ...build, os: build.os.filter(free) }
+  return schedule({ items, blockers: new Set(), depth: 0 }, base, opts, true)
+}
+
 function displayName(id: string, param?: string) {
-  if (param === ANY) return skillName(id, '(your choice)')
-  if (param?.startsWith(`${ANY}:`)) return skillName(id, `(any ${param.slice(ANY.length + 1)} script)`)
+  if (param === ANY) return skillName(id, 'your choice')
+  if (param?.startsWith(`${ANY}:`)) return skillName(id, `any ${param.slice(ANY.length + 1)} script`)
   return skillName(id, param)
 }
 

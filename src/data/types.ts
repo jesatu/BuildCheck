@@ -164,6 +164,8 @@ export interface Loresheet {
   unpublished?: boolean
   /** Label for a loresheet held for a specific <X>, e.g. "Faction or Guild". */
   param?: string
+  /** The skill this loresheet belongs to (Circle Warden, Treewalker…): adding the loresheet adds the skill. */
+  skill?: string
   skills: LoresheetSkill[]
   tiers?: EssenceTier[]
   restrictions: Restriction[]
