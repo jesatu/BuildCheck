@@ -39,9 +39,6 @@ export interface CharacterSkill {
   /** Total cost at each level. Unlevelled skills have one entry. (CS-3) */
   levelCosts: number[]
   requires?: Requirement
-  /** CS that cannot be held alongside this one. */
-  excludes?: string[]
-  aliases?: string[]
   summary: string
   source: string
 }
@@ -102,8 +99,6 @@ export interface OccupationalSkill {
   exemptFromYearly: boolean
   /** Can only be bought at a main event (8.3). */
   mainEventOnly?: boolean
-  /** Can be bought for several different <X> values (OS-3). */
-  repeatableWithParam?: boolean
   paragon?: boolean
   summary: string
   source: string
@@ -138,18 +133,8 @@ export interface EssenceTier {
   name: string
   cost: number
   powerRating: number
-  /** Build-relevant numbers granted at this tier. */
-  grants: {
-    baseLhv?: number
-    lhv?: number
-    baseAv?: number
-    av?: number
-    naturalAv?: number
-    extraSpellPower?: number
-    dismissRank?: number
-    beastFormOnly?: boolean
-    nightOnly?: boolean
-  }
+  /** Warlock Focus of the Void: daily power added on top of the Rule of Double cap. */
+  extraSpellPower?: number
   abilities: string[]
 }
 
@@ -176,8 +161,6 @@ export interface Loresheet {
   skills: LoresheetSkill[]
   tiers?: EssenceTier[]
   restrictions: Restriction[]
-  /** Route loresheets (Architect): bypass learn prerequisites up to this tier. */
-  bypassPrereqsUpToTier?: Tier
   summary: string
   source: string
 }
@@ -213,5 +196,4 @@ export interface Race {
   elementalWeakness: Element
   /** Loresheet that a character of this race holds. */
   loresheet?: string
-  aliases?: string[]
 }

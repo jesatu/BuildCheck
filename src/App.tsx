@@ -1,17 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { csById, loresheetById, loresheets, osById, races, raceById, type FlagId, type Pattern } from './data'
+import { csById, FLAG_LABELS, loresheetById, loresheets, osById, races, raceById, type FlagId, type Pattern } from './data'
 import type { Build, CardId, HeldSkill } from './engine/build'
 import { planRoute } from './engine/plan'
 import { validate } from './engine/validate'
 import { decodeState, emptyState, encodeState, type EditorState } from './state'
 import { CardView, CsPanel, Issues, PlanView, SkillPicker, SkillRows } from './ui'
-
-const FLAGS: Array<[FlagId, string]> = [
-  ['bowCompetency', 'Bow Competency'],
-  ['clawCompetency', 'Claw Competency'],
-  ['factionPermission', 'Faction or guild permission (Oathsworn)'],
-  ['researchRequest', 'Research request submitted (Sage)'],
-]
 
 export function App() {
   const [state, setState] = useState<EditorState>(() => decodeState(location.hash) ?? emptyState())
@@ -83,7 +76,7 @@ export function App() {
             </label>
             <fieldset>
               <legend>Competencies and permissions</legend>
-              {FLAGS.map(([id, label]) => (
+              {(Object.entries(FLAG_LABELS) as Array<[FlagId, string]>).map(([id, label]) => (
                 <label key={id} className="check">
                   <input type="checkbox" checked={build.flags.includes(id)}
                     onChange={(e) => setBuild((b) => ({ ...b, flags: e.target.checked ? [...b.flags, id] : b.flags.filter((f) => f !== id) }))} />
@@ -130,7 +123,7 @@ export function App() {
             </select>
           </div>
 
-          <CsPanel build={build} setBuild={setBuild} />
+          <CsPanel build={build} setBuild={setBuild} points={result.derived.csPoints} />
         </section>
 
         <section className="col">

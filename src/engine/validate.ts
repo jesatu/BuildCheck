@@ -1,6 +1,6 @@
 import {
-  csById, DEFAULT_SWITCHES, loresheetById, MAGIC_CS_IDS, osById, raceById, RULES, scriptFamilies, scriptFamilyOf,
-  type FlagId, type Loresheet, type LoresheetSkill, type OccupationalSkill, type Requirement, type RuleSwitches, type Tier,
+  csById, DEFAULT_SWITCHES, FLAG_LABELS, loresheetById, MAGIC_CS_IDS, osById, raceById, RULES, scriptFamilies, scriptFamilyOf,
+  type Loresheet, type LoresheetSkill, type OccupationalSkill, type Requirement, type RuleSwitches, type Tier,
 } from '../data'
 import { factions } from '../data/races'
 import type { Build, CardId, HeldSkill } from './build'
@@ -50,17 +50,21 @@ export interface ValidationResult {
   derived: Derived
 }
 
-const FLAG_NAMES: Record<FlagId, string> = {
-  bowCompetency: 'Bow Competency',
-  clawCompetency: 'Claw Competency',
-  factionPermission: 'faction or guild permission',
-  awakenedRite: 'an Awakened Rite of Creation',
-  researchRequest: 'a research request',
-}
-
 export const skillName = (id: string, param?: string) => {
   const name = osById.get(id)?.name ?? id
   return param ? name.replace('<X>', param) : name
+}
+
+/** Plain-English description of a requirement, e.g. "Spellcasting 2 CS". */
+export function describe(r: Requirement): string {
+  if ('os' in r) return skillName(r.os, r.param)
+  if ('cs' in r) return `${csById.get(r.cs)?.name ?? r.cs}${r.level && r.level > 1 ? ` ${r.level}` : ''} CS`
+  if ('flag' in r) return FLAG_LABELS[r.flag]
+  if ('loresheet' in r) return r.loresheet === '*' ? 'a lammie or loresheet' : `${loresheetById.get(r.loresheet)?.name} loresheet`
+  if ('pattern' in r) return `a ${r.pattern} pattern`
+  if ('all' in r) return r.all.map(describe).join(' and ')
+  if ('any' in r) return `one of: ${r.any.map(describe).join(', ')}`
+  return `not ${describe(r.not)}`
 }
 
 /** OS ids each skill counts as, through replaces and includes, transitively (REP-2b). */
@@ -102,17 +106,6 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
   const holds = (id: string, param?: string, except?: number) =>
     os.some((h, i) => i !== except &&
       ((h.id === id && (param === undefined || h.param === param)) || (param === undefined && coveredBy(h.id).has(id))))
-
-  const describe = (r: Requirement): string => {
-    if ('os' in r) return skillName(r.os, r.param)
-    if ('cs' in r) return `${csById.get(r.cs)?.name ?? r.cs}${r.level && r.level > 1 ? ` ${r.level}` : ''} CS`
-    if ('flag' in r) return FLAG_NAMES[r.flag]
-    if ('loresheet' in r) return r.loresheet === '*' ? 'a lammie or loresheet' : `${loresheetById.get(r.loresheet)?.name} loresheet`
-    if ('pattern' in r) return `a ${r.pattern} pattern`
-    if ('all' in r) return r.all.map(describe).join(' and ')
-    if ('any' in r) return `one of: ${r.any.map(describe).join(', ')}`
-    return `not ${describe(r.not)}`
-  }
 
   /** Returns undefined if met, otherwise a description of what is missing. */
   const missing = (r: Requirement | undefined, viaLoresheet = false, except?: number): string | undefined => {
@@ -313,7 +306,7 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
     + csLevel('base-power') * RULES.basePowerPerLevel
   const osPower = [16, 12, 8, 4].find((n) => isActive(`spell-power-${n}`)) ?? 0
   const warlockTier = heldLs.get('warlock')?.tier
-  const warlockPower = warlockTier ? loresheetById.get('warlock')!.tiers![warlockTier - 1]!.grants.extraSpellPower ?? 0 : 0
+  const warlockPower = warlockTier ? loresheetById.get('warlock')!.tiers![warlockTier - 1]!.extraSpellPower ?? 0 : 0
   // ponytail: Warlock power is added outside the Rule of Double cap ("stacks with other sources"); unconfirmed.
   const spellPower = { base: basePower, total: Math.min(basePower * 2, basePower + osPower) + warlockPower, cap: basePower * 2 }
 

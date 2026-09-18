@@ -144,10 +144,10 @@ export const loresheets: Loresheet[] = [
     summary: 'Transforms into beast form; mandatory after 8pm. Silver weakness.',
     restrictions: [{ kind: 'note', text: essenceNote }, { kind: 'note', text: 'Needs removable mask, natural claws and Claw Competency.' }],
     tiers: [
-      tier(1, 'Werecreature', 10, 1, { beastFormOnly: true }, ['Regeneration 1 per 10 min (beast form)', '2 voluntary changes per day']),
-      tier(2, 'Mature Werecreature', 20, 2, { baseLhv: 1, beastFormOnly: true }, ['Regeneration 1 per 5 min', '3 changes per day']),
-      tier(3, 'Elder Werecreature', 30, 3, { baseLhv: 1, lhv: 1, beastFormOnly: true }, ['DR Crush', 'Regeneration 1 per 1 min', '4 changes per day']),
-      tier(4, 'Alpha Werecreature', 40, 4, { baseLhv: 1, lhv: 2, beastFormOnly: true }, ['DR Crush', 'Regeneration 1 per 1 min', '6 changes per day']),
+      tier(1, 'Werecreature', 10, 1, ['Regeneration 1 per 10 min (beast form)', '2 voluntary changes per day']),
+      tier(2, 'Mature Werecreature', 20, 2, ['+1 Base LHV (beast form)', 'Regeneration 1 per 5 min', '3 changes per day']),
+      tier(3, 'Elder Werecreature', 30, 3, ['+1 Base LHV, +1 LHV (beast form)', 'DR Crush', 'Regeneration 1 per 1 min', '4 changes per day']),
+      tier(4, 'Alpha Werecreature', 40, 4, ['+1 Base LHV, +2 LHV (beast form)', 'DR Crush', 'Regeneration 1 per 1 min', '6 changes per day']),
     ],
     skills: [
       s('tracking', 1, 5, { minType: ALL, ...B }),
@@ -179,10 +179,10 @@ export const loresheets: Loresheet[] = [
       { kind: 'note', text: 'Blind Faith: cannot be targeted by Heal Wound or derived effects.' },
     ],
     tiers: [
-      tier(1, 'Paladin', 10, 1, { av: 1 }, ['Voice Above Them All: Speak with Ancestor for 4 power, once per day']),
-      tier(2, 'Questing Paladin', 20, 2, { baseAv: 1, av: 1 }, ['Shield/Dagger of Pantheon: Sanctuary or Wasting chant for 0 power, once per hour']),
-      tier(3, 'Knight Paladin', 30, 3, { baseAv: 1, av: 2 }, ['Dagger of Suns Dawning: small weapon strikes Lay to Rest for 10 minutes (4 power)']),
-      tier(4, 'Lord Paladin', 40, 4, { baseAv: 2, av: 2 }, []),
+      tier(1, 'Paladin', 10, 1, ['Focus of Piety: +1 AV', 'Voice Above Them All: Speak with Ancestor for 4 power, once per day']),
+      tier(2, 'Questing Paladin', 20, 2, ['Focus of Piety: +1 Base AV, +1 AV', 'Shield/Dagger of Pantheon: Sanctuary or Wasting chant for 0 power, once per hour']),
+      tier(3, 'Knight Paladin', 30, 3, ['Focus of Piety: +1 Base AV, +2 AV', 'Dagger of Suns Dawning: small weapon strikes Lay to Rest for 10 minutes (4 power)']),
+      tier(4, 'Lord Paladin', 40, 4, ['Focus of Piety: +2 Base AV, +2 AV']),
     ],
     skills: [
       s('champion', 1, 10, { minType: ALL }),
@@ -210,10 +210,10 @@ export const loresheets: Loresheet[] = [
       { kind: 'noBenefitFrom', items: ['body-development', 'base-lhv-1', 'toughen-body', 'harden-body', 'Titans Endurance', 'Paladins Armour'] },
     ],
     tiers: [
-      tier(1, 'Warlock', 10, 1, {}, ['Circle Affinity', 'Max wedge contribution 1']),
-      tier(2, 'Adept Warlock', 20, 2, { extraSpellPower: 4 }, ['Familiar Spell', 'Max wedge contribution 2']),
-      tier(3, 'Master Warlock', 30, 3, { extraSpellPower: 8 }, ['Leech Power', 'Max wedge contribution 3']),
-      tier(4, 'Master Adept Warlock', 40, 4, { extraSpellPower: 12 }, ['Magic Weaver', 'Max wedge contribution 4']),
+      tier(1, 'Warlock', 10, 1, ['Circle Affinity', 'Max wedge contribution 1']),
+      { ...tier(2, 'Adept Warlock', 20, 2, ['+4 Warlock Power', 'Familiar Spell', 'Max wedge contribution 2']), extraSpellPower: 4 },
+      { ...tier(3, 'Master Warlock', 30, 3, ['+8 Warlock Power', 'Leech Power', 'Max wedge contribution 3']), extraSpellPower: 8 },
+      { ...tier(4, 'Master Adept Warlock', 40, 4, ['+12 Warlock Power', 'Magic Weaver', 'Max wedge contribution 4']), extraSpellPower: 12 },
     ],
     skills: [
       s('cast-high-countermagic', 1, 10, { minType: ALL, learn: cs('spellcasting', 2) }),
@@ -242,10 +242,10 @@ export const loresheets: Loresheet[] = [
       { kind: 'setsPattern', pattern: 'unliving' },
     ],
     tiers: [
-      tier(1, 'Vampire', 10, 1, { dismissRank: 10 }, ['Mist Form (night)']),
-      tier(2, 'Mature Vampire', 20, 2, { dismissRank: 20, nightOnly: true }, ['Waste Not Want Not']),
-      tier(3, 'Elder Vampire', 30, 3, { dismissRank: 45, nightOnly: true }, ['Crypt Blade']),
-      tier(4, 'Ancient Vampire', 40, 4, { dismissRank: 60, nightOnly: true }, ['Death Incarnate (night)']),
+      tier(1, 'Vampire', 10, 1, ['Base dismiss rank 10', 'Mist Form (night)']),
+      tier(2, 'Mature Vampire', 20, 2, ['Base dismiss rank 20 (night)', 'Waste Not Want Not']),
+      tier(3, 'Elder Vampire', 30, 3, ['Base dismiss rank 45 (night)', 'Crypt Blade']),
+      tier(4, 'Ancient Vampire', 40, 4, ['Base dismiss rank 60 (night)', 'Death Incarnate (night)']),
     ],
     skills: [
       s('beguile-level', 1, 10, { param: '1', minType: ALL, ...V }),
@@ -271,10 +271,10 @@ export const loresheets: Loresheet[] = [
       { kind: 'noMageArmour' },
     ],
     tiers: [
-      tier(1, 'Druid', 10, 1, {}, ['Root Veins: Paralysis lasts 30 s']),
-      tier(2, 'Mature Druid', 20, 1, { naturalAv: 1 }, ['Creation Affinity: free second Cure Wound']),
-      tier(3, 'Elder Druid', 30, 2, { naturalAv: 2 }, ['Blessing of Germination: Global Cure Wound']),
-      tier(4, 'Ancient Druid', 40, 4, { naturalAv: 3 }, ['Absolution of Erdreja: petition to remove a curse']),
+      tier(1, 'Druid', 10, 1, ['Root Veins: Paralysis lasts 30 s']),
+      tier(2, 'Mature Druid', 20, 1, ['+1 Natural AV', 'Creation Affinity: free second Cure Wound']),
+      tier(3, 'Elder Druid', 30, 2, ['+2 Natural AV', 'Blessing of Germination: Global Cure Wound']),
+      tier(4, 'Ancient Druid', 40, 4, ['+3 Natural AV', 'Absolution of Erdreja: petition to remove a curse']),
     ],
     skills: [
       s('theology', 1, 10, { minType: ALL }),
@@ -351,14 +351,10 @@ export const loresheets: Loresheet[] = [
     id: 'architect', name: 'Architect', kind: 'route', unpublished: true, source: 'Owner ruling, 2026-09-17',
     summary: 'Buy any skill you have access to, up to Tier 4, without buying its prerequisites. The skill still costs OSP; one step per tree per year and use requirements still apply.',
     restrictions: [],
-    bypassPrereqsUpToTier: 4,
     skills: [],
   },
 ]
 
-function tier(
-  n: 1 | 2 | 3 | 4, name: string, cost: number, powerRating: number,
-  grants: EssenceTier['grants'], abilities: string[],
-): EssenceTier {
-  return { tier: n, name, cost, powerRating, grants, abilities }
+function tier(n: 1 | 2 | 3 | 4, name: string, cost: number, powerRating: number, abilities: string[]): EssenceTier {
+  return { tier: n, name, cost, powerRating, abilities }
 }

@@ -17,7 +17,6 @@ export const characterSkills: CharacterSkill[] = [
   },
   {
     id: 'large-weapon', name: 'Large Weapon Use', group: 'weapon', levelCosts: [2],
-    aliases: ['Large Melee Weapon Use'],
     summary: 'Two-handed weapons 43"–72", pole-arms 43"–84".',
     source: 'HB p.53',
   },
@@ -34,7 +33,6 @@ export const characterSkills: CharacterSkill[] = [
   },
   {
     id: 'missile-weapon', name: 'Missile Weapon Use', group: 'weapon', levelCosts: [1],
-    aliases: ['Thrown Weapon', 'Thrown Weapon Use'],
     summary: 'Throw one missile with the primary hand.',
     source: 'HB p.53',
   },
@@ -69,7 +67,6 @@ export const characterSkills: CharacterSkill[] = [
   },
   {
     id: 'poison-lore', name: 'Poison Lore', group: 'knowledge', levelCosts: [3],
-    aliases: ['Poison Use'],
     summary: 'Recognise poisons; Discern Poison; use venoms and weapon oils; set vapours. Loresheet.',
     source: 'HB p.56',
   },
@@ -85,7 +82,6 @@ export const characterSkills: CharacterSkill[] = [
   },
   {
     id: 'evaluate', name: 'Evaluate', group: 'knowledge', levelCosts: [1],
-    aliases: ['Evaluation'],
     summary: 'Estimate an item\'s value. Loresheet.',
     source: 'HB p.56',
   },
@@ -135,7 +131,6 @@ export const characterSkills: CharacterSkill[] = [
   },
   {
     id: 'contribute', name: 'Contribute', group: 'power', levelCosts: [1],
-    aliases: ['Contribute to Ritualist', 'Contribute to Ritual'],
     summary: 'Contribute 1 ritual power to one ritual per day.',
     source: 'HB p.55',
   },
@@ -149,13 +144,4 @@ export const characterSkills: CharacterSkill[] = [
     summary: 'Activate invocable items, glyphs and scrolls. Not restricted by armour.',
     source: 'HB p.55',
   },
-]
-
-/** Free skills every character has (HB p.51). Not printed on the card. */
-export const freeSkills = [
-  'Numeracy',
-  'Literacy',
-  'Read Maps',
-  'Small Melee Weapon Use',
-  'Medium Melee Weapon Use',
 ]

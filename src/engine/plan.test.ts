@@ -19,7 +19,7 @@ describe('planner', () => {
   })
 
   it('reports Character Skills it cannot buy as blockers', () => {
-    expect(planRoute(newBuild(), [t('create-poison-novice')]).cheapest!.blockers).toEqual(['needs Poison Lore (Character Skill)'])
+    expect(planRoute(newBuild(), [t('create-poison-novice')]).cheapest!.blockers).toEqual(['needs Poison Lore CS'])
   })
 
   it('skips skills already held, including ones covered by a replacing skill', () => {

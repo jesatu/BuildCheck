@@ -1,9 +1,9 @@
 import {
-  csById, loresheetById, osById, osIdsIn, RULES, scriptFamilies, scriptFamilyOf,
+  loresheetById, osById, osIdsIn, RULES, scriptFamilies, scriptFamilyOf,
   type LoresheetSkill, type Requirement, type Tier,
 } from '../data'
 import type { Build, HeldSkill } from './build'
-import { coveredBy, skillName, validate, type ValidationResult } from './validate'
+import { coveredBy, describe, skillName, validate, type ValidationResult } from './validate'
 
 // Route planner (reference doc 8.2, 8.3, 8.8). Turns target skills into a year-by-year purchase plan.
 // With an unlimited OSP pool, plans differ only in route choice (buy / loresheet / Architect) and
@@ -88,9 +88,6 @@ export function planRoute(build: Build, targets: Target[], opts: PlanOptions = {
     if ('pattern' in r) return build.pattern === r.pattern
     return false
   }
-  const describeLeaf = (r: Requirement) =>
-    'cs' in r ? `${csById.get(r.cs)?.name}${r.level && r.level > 1 ? ` ${r.level}` : ''} (Character Skill)`
-      : 'flag' in r ? r.flag : 'loresheet' in r ? `${r.loresheet} loresheet` : 'pattern' in r ? `${r.pattern} pattern` : '?'
 
   /** Loresheet entries the character can buy this skill from. */
   const loresheetRoutes = (id: string, param?: string): Array<{ ls: string; entry: LoresheetSkill }> =>
@@ -143,7 +140,7 @@ export function planRoute(build: Build, targets: Target[], opts: PlanOptions = {
     }
     if ('any' in r) return pareto(r.any.flatMap((x) => expandReq(x, parentId, parentParam, stack)))
     if ('not' in r) return [empty()] // exclusions are the validator's job
-    return leafMet(r) ? [empty()] : [{ ...empty(), blockers: new Set([`needs ${describeLeaf(r)}`]) }]
+    return leafMet(r) ? [empty()] : [{ ...empty(), blockers: new Set([`needs ${describe(r)}`]) }]
   }
 
   const alts = pareto(targets.reduce<Alt[]>((acc, t) => pareto(product(acc, expandOs(t.id, t.param, []))), [empty()]))

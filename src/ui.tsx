@@ -15,9 +15,11 @@ const STATE_LABEL = { active: 'Active', inactive: 'Inactive', redundant: 'Redund
 
 // ---------- Character Skills ----------
 
-export function CsPanel({ build, setBuild }: { build: Build; setBuild: (f: (b: Build) => Build) => void }) {
-  const spent = characterSkills.reduce((n, s) => n + (s.levelCosts[(build.cs[s.id] ?? 0) - 1] ?? 0), 0)
-  const available = build.age === undefined || build.age >= 10 ? 16 : build.age >= 5 ? 10 : 0
+export function CsPanel({ build, setBuild, points: { spent, available } }: {
+  build: Build
+  setBuild: (f: (b: Build) => Build) => void
+  points: { spent: number; available: number }
+}) {
   const setLevel = (id: string, level: number) => setBuild((b) => {
     const cs = { ...b.cs }
     if (level) cs[id] = level
