@@ -61,7 +61,7 @@ This is a summary for building a tool. It does not replace the source files. Bot
 A character card holds:
 
 - Identity: character name, race, faction, player name, player ID (PID), and the year and version the card was printed.
-- **Left side:** Character Skills (bought with 16 points), **plus** these OS: income skills (Apprentice, Journeyman and Master <X>), research skills (Scholar and Sage <X>), knowledge skills (General Knowledge <X>) and <X> Oathsworn. *(Ruling, 2026-09-17.)*
+- **Left side:** Character Skills (bought with 16 points), **plus** these OS: income skills (Apprentice, Journeyman and Master <X>), research skills (Scholar and Sage <X>), knowledge skills (General Knowledge <X> and Newsmonger) and <X> Oathsworn. Improved Research Ability goes on the right. *(Rulings, 2026-09-17/18. Newsmonger and Improved Research Ability are working assumptions still to be validated.)*
 - **Right side:** all other Occupational Skills, up to a limit of 12 (see [8.4](#84-card-limits)).
 - **Never on the card:** <X> Command. It is recorded on an unpublished NPC/DPC loresheet, not on a player character card. *(Ruling.)*
 - Optionally: at most one special creature lammie, at most one special power lammie, and loresheets.
@@ -943,6 +943,7 @@ Source: `Lorien_Trust_Loresheets_v4.06.md`. The tables below give costs, tiers a
 - **LS-2** The cap of **4 Tier 5 OS** per character still applies.
 - **LS-3 (ruling)** Buying a skill from a loresheet you hold is an **alternative route**. It uses the loresheet's own prerequisites and cost, and skips the handbook's learn prerequisites. Example: a Paladin can buy *Champion* for 10 OSP without *Transcend Armour*. Only a character who holds that loresheet can use the route. Use requirements still apply.
 - **LS-4** A skill on your own loresheet counts as **unrestricted** for you (HB p.74).
+- **LS-4a (ruling)** The unpublished **Architect** loresheet lets a character buy any skill they have access to, up to Tier 4, without buying its learn prerequisites. The skill still costs its OSP. One step per tree per year and all use requirements still apply. An Architect purchase does **not** count toward the 4 buys per year.
 - **LS-5** In essence creature tables, **Min. Type** is the lowest creature tier that can buy the skill. For example, "Mature" means Werecreature tier 2 or higher.
 - **LS-6** Availability flags:
   - **(B):** the skill only works in beast form.
@@ -1285,6 +1286,9 @@ These items were settled by the project owner on 2026-09-17. They are now rules 
 | R1 | An OS tree is defined by learn prerequisites. You cannot buy an OS in the same year as its prerequisite. The teaching guild doesn't matter. | OS-2 |
 | R5 | The two retirement double steps must be on different trees. | RET-3a |
 | C1 | Income, research and knowledge skills and Oathsworn go on the left side of the card. Command is never on a player card. | Section 2 |
+| A13 | Pattern changes: Living → Magical or Living → Unliving only. | 3.1 |
+| R6 | Architect purchases follow one step per tree per year but do **not** count toward the 4 buys per year. | 12.1 |
+| C2 | Newsmonger goes on the left side; Improved Research Ability on the right (working assumption, to be validated). | Section 2 |
 
 ### Ambiguous rules
 
@@ -1302,7 +1306,7 @@ These items were settled by the project owner on 2026-09-17. They are now rules 
 | A10 | **Revitalise Unliving and Repair Unliving (Advanced)** need the ability to cast "Repair Unliving". That spell is on the Corruption and Dark Incantation lists (and Cast All Incantation). | HB p.94–95 | Use requires Corruption CS, **or** Incantation CS + Dark Incantation (or Cast All Incantation). |
 | A11 | **Functional OS** "may not always count towards your limit of 12". No list is given. | HB p.74 | Add a per-skill `countsTowardLimit` flag. |
 | A12 | **Fearsome Aspect** uses "their own Spell Power", so it needs a power pool but no magic CS. | HB p.90 | Allow it with any Spell Power source, and warn when the power pool is 0. |
-| A13 | **Pattern change direction.** Ruling given as "not normally possible to change from Living or Magical". This probably means a character cannot change **back from Unliving or Magical**. | Owner ruling, 2026-09-17 | Allow Living → Magical and Living → Unliving only. **Confirm the wording.** |
+| A13 | **Resolved (see Confirmed rulings).** Pattern changes go one way: Living → Magical or Living → Unliving only. | Owner ruling | — |
 
 ### Errata and naming inconsistencies
 

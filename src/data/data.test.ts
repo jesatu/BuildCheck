@@ -116,7 +116,7 @@ describe('occupational skills', () => {
 
   it('left-side skills match the card-side ruling', () => {
     const left = occupationalSkills.filter((s) => s.side === 'left').map((s) => s.id).sort()
-    expect(left).toEqual(['apprentice', 'general-knowledge', 'journeyman', 'master', 'oathsworn', 'sage', 'scholar'])
+    expect(left).toEqual(['apprentice', 'general-knowledge', 'journeyman', 'master', 'newsmonger', 'oathsworn', 'sage', 'scholar'])
   })
 
   it('mutual exclusions are symmetric', () => {

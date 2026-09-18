@@ -23,6 +23,8 @@ export const RULES = {
   prebookMaxTier: 3,                 // 8.3
   tutorMaxTier: 4,                   // 8.3
   architectMaxTier: 4,               // Architect ruling
+  architectCountsTowardYearly: false, // Architect ruling: one step per tree still applies
+  allowedPatternChanges: [['living', 'magical'], ['living', 'unliving']] as ReadonlyArray<readonly [string, string]>, // A13 ruling
   levelPowerCost: [1, 2, 4],         // 6.4
   csSpellPower: { 1: 4, 2: 12 } as Record<number, number>,
   basePowerPerLevel: 4,
@@ -30,8 +32,6 @@ export const RULES = {
 } as const
 
 export interface RuleSwitches {
-  /** R6: does an Architect purchase count toward the 4 per year? (Owner is checking.) */
-  architectCountsTowardYearly: boolean
   /** A1: add Spell Power from several magic CS together ('sum') or take the highest ('highest'). */
   csPowerStacking: 'sum' | 'highest'
   /** A3: Ritual Magic needs a magic CS (true) or any Spell Power source (false). */
@@ -44,20 +44,16 @@ export interface RuleSwitches {
   druidArmourMasteryApplies: boolean
   /** A12: warn when Fearsome Aspect is held with no Spell Power. */
   warnFearsomeAspectWithoutPower: boolean
-  /** A13: allowed pattern changes (from -> to). */
-  allowedPatternChanges: Array<[string, string]>
   /** E11: Diagnose Powers also needs a lammie or loresheet to use. */
   diagnosePowersNeedsLoresheet: boolean
 }
 
 export const DEFAULT_SWITCHES: RuleSwitches = {
-  architectCountsTowardYearly: true,
   csPowerStacking: 'sum',
   ritualMagicNeedsMagicCs: true,
   allowBothTriage: true,
   loresheetHighMagicBlocksJoat: true,
   druidArmourMasteryApplies: false,
   warnFearsomeAspectWithoutPower: true,
-  allowedPatternChanges: [['living', 'magical'], ['living', 'unliving']],
   diagnosePowersNeedsLoresheet: false,
 }
