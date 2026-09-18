@@ -52,6 +52,7 @@ b { font-weight: 600; }
 .app { max-width: 1400px; margin: 0 auto; padding: 16px; }
 .top { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-bottom: 16px; }
 .top-actions { display: flex; gap: .5rem; }
+.prompt { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; background: var(--warn-bg); border: 1px solid var(--line); border-radius: 10px; padding: .6rem 1rem; margin-bottom: 16px; }
 .layout { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(300px, 1.2fr) minmax(320px, 1.3fr); gap: 16px; align-items: start; }
 @media (max-width: 1100px) { .layout { grid-template-columns: 1fr 1fr; } .layout > .col:last-child { grid-column: 1 / -1; } }
 @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }

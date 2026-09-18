@@ -1,5 +1,5 @@
 import {
-  csById, CS_LADDERS, FLAG_LABELS, guildOf, joatGuilds, loresheetById, MAGIC_CS_IDS, osById, raceById, RULES, scriptFamilies, scriptFamilyOf,
+  csById, CS_LADDERS, FLAG_LABELS, loresheets, guildOf, joatGuilds, loresheetById, MAGIC_CS_IDS, osById, raceById, RULES, scriptFamilies, scriptFamilyOf,
   type Loresheet, type LoresheetSkill, type OccupationalSkill, type Requirement, type Tier,
 } from '../data'
 import { factions } from '../data/races'
@@ -65,6 +65,31 @@ export function describe(r: Requirement): string {
   if ('all' in r) return r.all.map(describe).join(' and ')
   if ('any' in r) return `one of: ${r.any.map(describe).join(', ')}`
   return `not ${describe(r.not)}`
+}
+
+/** An essence creature's tier: the highest tier skill on the card (e.g. vampire-2), else the loresheet's recorded tier. */
+export function essenceTier(b: Build, loresheetId: string): number {
+  const fromCard = b.os.map((h) => h.id.match(new RegExp(`^${loresheetId}-([1-4])$`))).filter(Boolean).map((m) => Number(m![1]))
+  return Math.max(0, ...fromCard) || (b.loresheets.find((l) => l.id === loresheetId)?.tier ?? 0)
+}
+
+/** Loresheets the build needs but doesn't hold: race, pattern, loresheet-only skills, and their own requirements. */
+export function missingLoresheets(b: Build, targets: Array<{ id: string }> = []): string[] {
+  const need = new Set<string>()
+  const race = raceById.get(b.race)
+  if (race && !race.startingRace && race.loresheet) need.add(race.loresheet)
+  if (b.pattern === 'magical') need.add('magical-pattern')
+  if (b.pattern === 'unliving') need.add('unliving')
+  for (const h of b.os) if (h.source === 'loresheet' && h.loresheet) need.add(h.loresheet)
+  for (const t of targets) {
+    const s = osById.get(t.id)
+    const sheets = loresheets.filter((l) => l.skills.some((e) => e.os === t.id))
+    if (s?.loresheetOnly && sheets.length === 1) need.add(sheets[0]!.id)
+  }
+  for (const id of [...need, ...b.loresheets.map((l) => l.id)]) {
+    for (const r of loresheetById.get(id)?.restrictions ?? []) if (r.kind === 'requiresLoresheet') need.add(r.loresheet)
+  }
+  return [...need].filter((id) => !b.loresheets.some((l) => l.id === id))
 }
 
 /** The build's skills plus those granted by held loresheets (Paladin → Dedicated Follower, NPC/DPC → Oathsworn <X>). */
@@ -187,7 +212,7 @@ export function validate(input: Build): ValidationResult {
   for (const l of b.loresheets) {
     const ls = loresheetById.get(l.id)
     if (!ls) { err('12', `Unknown loresheet "${l.id}".`); continue }
-    if (ls.kind === 'essence' && !l.tier) err('12.4', `${ls.name} needs a tier (1–4).`)
+    if (ls.kind === 'essence' && !essenceTier(b, ls.id)) err('12.4', `${ls.name}: add the ${ls.tiers![0]!.name} skill to the card.`)
     if (ls.param && !l.param) err('12', `${ls.name} needs a value for <X> (${ls.param}).`)
     for (const r of ls.restrictions) {
       if (r.kind === 'requiresLoresheet' && !heldLs.has(r.loresheet)) err('12.4', `${ls.name} needs the ${loresheetById.get(r.loresheet)?.name} loresheet.`)
@@ -229,8 +254,8 @@ export function validate(input: Build): ValidationResult {
         tierOf[i] = entry.tier
         const gap = missing(entry.learn, true, i)
         if (gap) err('LS-3', `${name} (${ls.name}) needs ${gap} before it can be bought.`, i)
-        const creatureTier = heldLs.get(ls.id)?.tier ?? 0
-        if (entry.minType && creatureTier < entry.minType) err('LS-5', `${name} needs ${ls.name} tier ${entry.minType} or higher.`, i)
+        const creatureTier = essenceTier(b, ls.id)
+        if (entry.minType && creatureTier < entry.minType) err('LS-5', `${name} needs ${ls.tiers?.[entry.minType - 1]?.name ?? ls.name} or higher (Min. type).`, i)
       }
     } else if (h.source === 'joat') {
       // JoAT is used up, so a skill learned with it only needs a JoAT source: held, or the Awakened Human sheet.
@@ -343,12 +368,12 @@ export function validate(input: Build): ValidationResult {
   // A1 ruling: only the highest magic CS grant counts as base; +Base Power adds on top.
   const basePower = Math.max(...csPower) + csLevel('base-power') * RULES.basePowerPerLevel
   const osPower = [16, 12, 8, 4].find((n) => isActive(`spell-power-${n}`)) ?? 0
-  const warlockTier = heldLs.get('warlock')?.tier
+  const warlockTier = heldLs.has('warlock') ? essenceTier(b, 'warlock') : 0
   const warlockPower = warlockTier ? loresheetById.get('warlock')!.tiers![warlockTier - 1]!.extraSpellPower ?? 0 : 0
   // ponytail: Warlock power is added outside the Rule of Double cap ("stacks with other sources"); unconfirmed.
   const spellPower = { base: basePower, total: Math.min(basePower * 2, basePower + osPower) + warlockPower, cap: basePower * 2 }
 
-  const essencePr = b.loresheets.reduce((n, l) => n + (l.tier ? loresheetById.get(l.id)?.tiers?.[l.tier - 1]?.powerRating ?? 0 : 0), 0)
+  const essencePr = b.loresheets.reduce((n, l) => n + (loresheetById.get(l.id)?.tiers?.[essenceTier(b, l.id) - 1]?.powerRating ?? 0), 0)
   const prLimit = RULES.powerRatingLimit + (isActive('bonus-pr-2') ? 2 : isActive('bonus-pr-1') ? 1 : 0)
   if (essencePr > prLimit) err('PR-1', `Essence creature Power Rating ${essencePr} is over the limit of ${prLimit}.`)
 

@@ -510,6 +510,16 @@ export const loresheets: Loresheet[] = [
   },
 ]
 
+// Essence creature tiers are skills on the character card (Vampire → Mature Vampire → …), bought from the loresheet.
+// Each tier also needs an essence rite (12.5); the OSP cost is the tier's cost.
+for (const l of loresheets) {
+  for (const t of l.tiers ?? []) {
+    l.skills.unshift(s(`${l.id}-${t.tier}`, t.tier, t.cost, t.tier === 1
+      ? { note: 'Also needs the essence Rite of Creation.' }
+      : { learn: os(`${l.id}-${t.tier - 1}`), note: 'Also needs an essence rite (Tier Advancement, Peer Advancement or Assimilation).' }))
+  }
+}
+
 function tier(n: 1 | 2 | 3 | 4, name: string, cost: number, powerRating: number, abilities: string[]): EssenceTier {
   return { tier: n, name, cost, powerRating, abilities }
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { newBuild, type Build, type HeldSkill } from './build'
-import { validate } from './validate'
+import { addLoresheets, newBuild, type Build, type HeldSkill } from './build'
+import { missingLoresheets, validate } from './validate'
 
 const buy = (id: string, param?: string): HeldSkill => ({ id, param, source: 'buy' })
 const build = (b: Partial<Build>): Build => ({ ...newBuild(), ...b })
@@ -210,6 +210,37 @@ describe('notes', () => {
   it('notes the Treewalker rules mismatch (L11)', () => {
     const r = validate(build({ cs: { spellcasting: 1 }, loresheets: [{ id: 'treewalker' }] }))
     expect(r.issues.filter((i) => i.rule === 'L11').map((i) => i.severity)).toEqual(['warning'])
+  })
+})
+
+describe('essence creatures and required loresheets', () => {
+  it('lists the loresheets a build needs: pattern, race, and a loresheet-only skill with its own requirements', () => {
+    expect(missingLoresheets(build({ pattern: 'magical' }))).toEqual(['magical-pattern'])
+    expect(missingLoresheets(build({ race: 'elemental' }))).toEqual(['elemental'])
+    expect(missingLoresheets(build({ os: [{ id: 'vampire-1', source: 'loresheet', loresheet: 'vampire' }] }))).toEqual(['vampire', 'unliving'])
+    expect(missingLoresheets(newBuild(), [{ id: 'vampire-1' }])).toEqual(['vampire', 'unliving'])
+    expect(missingLoresheets(newBuild())).toEqual([])
+  })
+
+  it('adding the Vampire and Unliving loresheets sets the pattern and puts Vampire on the card', () => {
+    const b = addLoresheets(newBuild(), ['vampire', 'unliving'])
+    expect(b.pattern).toBe('unliving')
+    expect(b.os).toEqual([{ id: 'vampire-1', source: 'loresheet', loresheet: 'vampire' }])
+    const r = validate(b)
+    expect(r.valid).toBe(true)
+    expect(r.skills[0]).toMatchObject({ name: 'Vampire', side: 'right', state: 'active' })
+    expect(missingLoresheets(b)).toEqual([])
+  })
+
+  it('takes the creature tier from the card: Mature Vampire replaces Vampire and unlocks Mature skills', () => {
+    const b = addLoresheets(newBuild(), ['vampire', 'unliving'])
+    const mature = { ...b, os: [...b.os, { id: 'vampire-2', source: 'loresheet', loresheet: 'vampire' } as HeldSkill,
+      { id: 'toughen-body', source: 'loresheet', loresheet: 'vampire' } as HeldSkill] }
+    const r = validate(mature)
+    expect(r.valid).toBe(true)
+    expect(r.skills.map((s) => s.state)).toEqual(['replaced', 'active', 'active'])
+    expect(r.derived.powerRating.carried).toBe(2)
+    expect(rules(b.os.length ? { ...b, os: [...b.os, { id: 'toughen-body', source: 'loresheet', loresheet: 'vampire' }] } : b)).toEqual(['LS-5'])
   })
 })
 

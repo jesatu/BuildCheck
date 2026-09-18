@@ -121,7 +121,7 @@ export interface LoresheetSkill {
   cost: number
   /** Loresheet learn prerequisite. Replaces the handbook learn prerequisite for this route. */
   learn?: Requirement
-  /** Essence creature tier needed to buy (LS-5). */
+  /** Min. type: the essence creature level needed to buy (LS-5). Not the same thing as the skill's Tier. */
   minType?: 1 | 2 | 3 | 4
   /** (B) beast form only, (V) night only (LS-6). */
   availability?: 'beastForm' | 'night'
