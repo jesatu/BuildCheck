@@ -53,7 +53,7 @@ export const loresheets: Loresheet[] = [
     skills: [
       s('shield-dismiss-level', 1, 10), s('theology', 1, 10), s('tns-runes', 1, 10, { param: 'Ancestor', note: 'Ancestrals only; cannot be tutored.' }),
       s('dismiss-rank-5', 1, 10),
-      s('dismiss-rank-10', 1, 30, { learn: os('dismiss-rank-5'), note: 'Printed as Tier 1; other sheets say Tier 3 (L3).' }),
+      s('dismiss-rank-10', 1, 30, { learn: os('dismiss-rank-5'), note: 'Printed as Tier 1 (other sheets say Tier 3): probably a loresheet error.' }),
       s('discern-ancestral-being', 1, 10),
       s('toughen-body', 3, 30), s('strike-for-enchanted', 3, 30), s('champion', 3, 30),
       s('high-magic-theology', 4, 40, { learn: os('theology') }),

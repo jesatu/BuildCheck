@@ -206,8 +206,18 @@ describe('derived values', () => {
     expect(d.spellPower).toEqual({ base: 4, total: 8, cap: 8 })
   })
 
-  it('adds power from several magic skills by default (A1)', () => {
-    expect(validate(build({ cs: { healing: 1, spellcasting: 2, 'base-power': 1 } })).derived.spellPower.base).toBe(20)
+  it('takes the highest magic CS grant as base, plus +Base Power (A1)', () => {
+    expect(validate(build({ cs: { healing: 1, spellcasting: 2 } })).derived.spellPower).toMatchObject({ base: 12, cap: 24 })
+    expect(validate(build({ cs: { spellcasting: 2, 'base-power': 1 } })).derived.spellPower).toMatchObject({ base: 16, cap: 32 })
+  })
+
+  it('shows Armour Mastery as redundant for a Druid, but keeps Armour Mastery (Expert) active for its Crush immunity (L10)', () => {
+    const b = build({
+      cs: { 'light-armour': 1 },
+      loresheets: [{ id: 'druid', tier: 1 }],
+      os: [{ id: 'armour-mastery', source: 'buy' }, { id: 'armour-mastery-advanced', source: 'buy' }, { id: 'armour-mastery-expert', source: 'buy' }],
+    })
+    expect(validate(b).skills.map((s) => s.state)).toEqual(['replaced', 'redundant', 'active'])
   })
 
   it('gives a Warlock no LHV from Body Development', () => {

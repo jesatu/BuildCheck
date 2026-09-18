@@ -60,6 +60,8 @@ interface Acq {
   tier?: Tier
   /** Learn requirement for the chosen route (Architect: none). */
   learn?: Requirement
+  /** Note printed on the loresheet for this skill. */
+  note?: string
 }
 
 interface Alt { items: Map<string, Acq>; blockers: Set<string>; depth: number }
@@ -117,7 +119,7 @@ export function planRoute(build: Build, targets: Target[], opts: PlanOptions = {
     const options: Acq[] = []
     if (!s.loresheetOnly && s.lists.length > 0) options.push({ key, id, param, route: 'buy', cost: s.cost!, tier: s.tier, learn: s.learn })
     for (const { ls, entry } of loresheetRoutes(id, param)) {
-      options.push({ key, id, param, route: 'loresheet', loresheet: ls, cost: entry.cost, tier: entry.tier, learn: entry.learn })
+      options.push({ key, id, param, route: 'loresheet', loresheet: ls, cost: entry.cost, tier: entry.tier, learn: entry.learn, note: entry.note })
     }
     const lsEntry = loresheetRoutes(id, param)[0]?.entry
     if (hasArchitect && (options.length > 0) && (s.tier ?? lsEntry?.tier ?? 5) <= RULES.architectMaxTier) {
@@ -295,6 +297,7 @@ function schedule(alt: Alt, build: Build, opts: PlanOptions): Plan {
     if (i.route === 'buy' && s.restricted) notes.push('Restricted: needs a training facility, tutor or forgery')
     if (i.route === 'joat') notes.push('Uses Jack of All Trades (removed from the card afterwards)')
     if (i.route === 'loresheet') notes.push('Main event only (not prebook); no training voucher needed')
+    if (i.route === 'loresheet' && i.note) notes.push(i.note)
     if (s.mainEventOnly) notes.push('Main event only')
     if (i.param === ANY || i.param?.startsWith(`${ANY}:`)) notes.push('Choose any value for <X>')
     return {

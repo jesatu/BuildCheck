@@ -77,8 +77,8 @@ export const spellLists: SpellList[] = [
   incantation, lightIncantation, darkIncantation,
   union('cast-all-incantation', 'Cast All Incantation', 'incantation', [incantation, lightIncantation, darkIncantation], 'HB p.32'),
   spellcasting, enchanting, shadowMagic,
-  // E6: the printed Cast All Spellcasting list omits Control Unliving at L1. Kept as printed until confirmed.
-  union('cast-all-magecraft', 'Cast All Spellcasting', 'magecraft', [spellcasting, enchanting, shadowMagic], 'HB p.33', ['Control Unliving']),
+  // E6 ruling: the printed list's missing Control Unliving (L1) is an omission, so the list is the full union.
+  union('cast-all-magecraft', 'Cast All Spellcasting', 'magecraft', [spellcasting, enchanting, shadowMagic], 'HB p.33'),
   healing, corruption,
   list('necromancy', 'Necromancy', 'summoning', 'summoning',
     ['Corrupt Body:Rit'], ['Full Repair Unliving:Prox', 'Strike for Flame:Slf'], ['Greater Corrupt Body:Rit', 'Speak with Unliving:Rit'], 'HB p.35'),

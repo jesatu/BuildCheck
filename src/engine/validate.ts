@@ -153,13 +153,12 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
     const cost = cs.levelCosts[level - 1]
     if (cost === undefined || level < 1) { err('CS-3', `${cs.name} has no level ${level}.`); continue }
     spent += cost
-    const gap = id === 'ritual-magic' && !switches.ritualMagicNeedsMagicCs ? undefined : missing(cs.requires)
+    const gap = missing(cs.requires) // A3 ruling: Ritual Magic needs a magic CS
     if (gap) err('CS-7', `${cs.name} needs ${gap}.`)
   }
   if (spent > available) err('CS-1', `Character Skills cost ${spent} points; only ${available} are available.`)
   if (MAGIC_CS_IDS.filter((id) => csLevel(id) >= 2).length > RULES.maxLevel2MagicCs) err('CS-6', 'Only one magic Character Skill can be at level 2.')
-  if (!switches.allowBothTriage && csLevel('triage') && csLevel('triage-advanced')) err('A4', 'Triage and Triage (Advanced) cannot both be held.')
-  else if (csLevel('triage') && csLevel('triage-advanced')) warn('A4', 'Triage (Advanced) already covers everything Triage does.')
+  if (csLevel('triage') && csLevel('triage-advanced')) warn('A4', 'Triage (Advanced) already covers everything Triage does.')
 
   // Children (section 5)
   if (age < 10) {
@@ -262,6 +261,7 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
     }
   })
 
+  const standardArmourOnly = lsRestrictions.some((r) => r.kind === 'standardArmourOnly')
   const disabled = new Map<string, string>()
   for (const r of lsRestrictions) {
     if (r.kind === 'csDisablesSkills' && csLevel(r.cs)) for (const x of r.skills) disabled.set(x, `${csById.get(r.cs)?.name} CS turns it off`)
@@ -270,12 +270,14 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
   const skills: SkillStatus[] = os.map((h, i) => {
     const s = osById.get(h.id)
     const via = h.source === 'loresheet' || h.source === 'granted'
-    let gap = missing(s?.use, via)
-    if (h.id === 'diagnose-powers' && switches.diagnosePowersNeedsLoresheet && !via) gap = 'a lammie or loresheet'
+    const gap = missing(s?.use, via)
     const inactive = gap ? `Needs ${gap}` : disabled.get(h.id)
     // Polyglot covers every family script; TNS left over from a family without Script Master is redundant.
+    // A Druid gets standard AV only, so Armour Mastery adds nothing (L10). The Expert level keeps its Crush immunity.
     const redundant = h.id === 'translate-named-script' && scriptFamilyOf(h.param) && holds('polyglot', undefined, i)
-      ? 'Covered by Polyglot' : undefined
+      ? 'Covered by Polyglot'
+      : standardArmourOnly && (h.id === 'armour-mastery' || h.id === 'armour-mastery-advanced')
+        ? 'Druid: standard AV only, so no extra AV' : undefined
     const reason = inactive ?? redundant
     const replaced = replacedBy.get(i)
     return {
@@ -332,8 +334,8 @@ export function validate(input: Build, switches: RuleSwitches = DEFAULT_SWITCHES
   const lhv = Math.min(baseLhv * 2, baseLhv + lhvBonus)
 
   const csPower = MAGIC_CS_IDS.map((id) => RULES.csSpellPower[csLevel(id)] ?? 0)
-  const basePower = (switches.csPowerStacking === 'sum' ? csPower.reduce((a, c) => a + c, 0) : Math.max(...csPower))
-    + csLevel('base-power') * RULES.basePowerPerLevel
+  // A1 ruling: only the highest magic CS grant counts as base; +Base Power adds on top.
+  const basePower = Math.max(...csPower) + csLevel('base-power') * RULES.basePowerPerLevel
   const osPower = [16, 12, 8, 4].find((n) => isActive(`spell-power-${n}`)) ?? 0
   const warlockTier = heldLs.get('warlock')?.tier
   const warlockPower = warlockTier ? loresheetById.get('warlock')!.tiers![warlockTier - 1]!.extraSpellPower ?? 0 : 0

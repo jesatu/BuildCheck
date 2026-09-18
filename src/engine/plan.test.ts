@@ -89,6 +89,13 @@ describe('planner', () => {
     expect(noSheet.purchases.map((x) => x.route)).toEqual(['buy'])
   })
 
+  it('shows the loresheet\'s own note on a loresheet purchase (L3)', () => {
+    const b = build({ race: 'ancestral', loresheets: [{ id: 'ancestral' }], os: [{ id: 'dismiss-rank-5', source: 'loresheet', loresheet: 'ancestral' }] })
+    const p = planRoute(b, [t('dismiss-rank-10')]).cheapest!
+    expect(p.purchases[0]).toMatchObject({ tier: 1, route: 'loresheet' })
+    expect(p.purchases[0]!.notes).toContain('Printed as Tier 1 (other sheets say Tier 3): probably a loresheet error.')
+  })
+
   it('uses retirement double steps on two different trees in year 1', () => {
     const b = build({ cs: { 'poison-lore': 1, 'potion-lore': 1 } })
     const targets = [t('create-poison-master'), t('create-potion-master'), t('shield-mastery-expert')]

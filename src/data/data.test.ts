@@ -199,9 +199,9 @@ describe('spell lists', () => {
     expect(l.levels.map((lv) => lv.length)).toEqual([12, 11, 12])
   })
 
-  it('Cast All Spellcasting matches the printed list (E6: no Control Unliving at L1)', () => {
+  it('Cast All Spellcasting is the full union of the Magecraft lists (E6 ruling)', () => {
     const l = spellLists.find((x) => x.id === 'cast-all-magecraft')!
-    expect(l.levels.map((lv) => lv.length)).toEqual([11, 12, 12])
-    expect(l.levels[0].map((s) => s.name)).not.toContain('Control Unliving')
+    expect(l.levels.map((lv) => lv.length)).toEqual([12, 12, 12])
+    expect(l.levels[0].map((s) => s.name)).toContain('Control Unliving')
   })
 })
